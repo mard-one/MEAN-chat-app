@@ -13,8 +13,8 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
     class="alert alert-primary"
     #mBar *ngFor = "let message of messages"
 
-    (mousedown)="selected(message, mBar)"
-    (mouseup)="unselected()">
+    (mousedown)="mousedown(message, mBar)"
+    (mouseup)="mouseup()">
       <div style=' padding-left: 20px; font-size: 20px; line-height: 38px'>{{ message }}</div>
 
     </div>
@@ -23,6 +23,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 export class MessageComponent implements OnInit {
   @Input() messages;
   @Output() select = new EventEmitter();
+  @Output() unselect = new EventEmitter();
   private pause;
   constructor() { }
 
@@ -30,11 +31,21 @@ export class MessageComponent implements OnInit {
   }
 
 
-  selected(message, mBar){
+  mousedown(message, mBar){
     this.pause = setTimeout(() => {
-      mBar.classList.toggle('alert-danger');
-      console.log(message)
-      this.select.emit(message)
+      if(mBar.classList.contains("alert-primary")){
+        // console.log(message + "primary")
+        mBar.classList.remove('alert-primary');
+        mBar.classList.add('alert-danger')
+        this.select.emit(message)
+      }else{
+        // console.log(message + "danger")
+        mBar.classList.remove('alert-danger');
+        mBar.classList.add('alert-primary')
+        this.unselect.emit(message)
+      }
+      // mBar.classList.toggle('alert-danger');
+
 
         // if (mButton.style.display === 'none') {
         //     mButton.style.display = 'block';
@@ -43,7 +54,7 @@ export class MessageComponent implements OnInit {
         // }
     }, 500);
   }
-  unselected(){
+  mouseup(){
      clearTimeout(this.pause)
   }
 

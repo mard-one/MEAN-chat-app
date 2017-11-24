@@ -13,16 +13,19 @@ interface AppStore {
 })
 export class AppComponent {
   messages: Observable<Array<Object>>;
-  selectedMessages: string[]
+  selectedMessages: string[] = [];
+
 
   constructor(private store: Store<AppStore>){
     this.messages = store.select('messages')
+
   }
 
   sendMessage(text){
       this.store.dispatch(MessageActions.addMessage(text.value))
       text.value = null
   }
+
 
   onKeypress(key, text){
     if (key.key == "Enter"){
@@ -32,8 +35,16 @@ export class AppComponent {
   }
 
   select(message){
-    // console.log(message)
-    this.selectedMessages.push(message)
+    this.selectedMessages.push(message);
+    console.log(this.selectedMessages)
+  }
+  unselect(message){
+    this.selectedMessages = this.selectedMessages.filter(function(x) {
+      return x.toString() !== message.toString()
+    }).map(function (x) {
+        return x;
+    });
+    console.log(this.selectedMessages)
   }
 
 }

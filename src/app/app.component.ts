@@ -18,12 +18,20 @@ export class AppComponent {
 
   constructor(private store: Store<AppStore>){
     this.messages = store.select('messages')
-
+    this.messages.subscribe((state) => {
+      this.selectedMessages = this.selectedMessages.filter((selectedMessageToDelete) => {
+        return state.includes(selectedMessageToDelete)
+      })
+    })
   }
 
   sendMessage(text){
-      this.store.dispatch(MessageActions.addMessage(text.value))
-      text.value = null
+    this.store.dispatch(MessageActions.addMessage(text.value))
+    text.value = null
+  }
+
+  deleteMessage(listMessages){
+    this.store.dispatch(MessageActions.deleteMessage(listMessages))
   }
 
 
@@ -36,7 +44,7 @@ export class AppComponent {
 
   select(message){
     this.selectedMessages.push(message);
-    console.log(this.selectedMessages)
+    console.log("selected "+this.selectedMessages)
   }
   unselect(message){
     this.selectedMessages = this.selectedMessages.filter(function(x) {
@@ -44,7 +52,7 @@ export class AppComponent {
     }).map(function (x) {
         return x;
     });
-    console.log(this.selectedMessages)
+    console.log("unselected "+this.selectedMessages)
   }
 
 }

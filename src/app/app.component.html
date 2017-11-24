@@ -3,8 +3,8 @@
   <div class="col-lg-12" style="margin: 10px 0;">
       <div class="input-group">
 
-        <span class="input-group-btn" *ngIf="selectedMessages">
-          <button class="btn btn-secondary" type="button">Delete</button>
+        <span class="input-group-btn" *ngIf="selectedMessages.length">
+          <button class="btn btn-secondary" type="button" (click)="deleteMessage(selectedMessages)">Delete</button>
         </span>
 
         <input type="text" class="form-control" placeholder="Message..." #newMessage (keypress)="onKeypress($event, newMessage)">

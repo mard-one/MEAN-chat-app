@@ -8,10 +8,10 @@ export class MessageActions {
       payload: {message: message}
     };
   }
-  // static deleteMessage(message: string) {
-  //   return {
-  //     type: 'DELETE_MESSAGE',
-  //     payload: {message: message}
-  //   };
-  // }
+  static deleteMessage(message: string) {
+    return {
+      type: 'DELETE_MESSAGE',
+      payload: {message: message}
+    };
+  }
 }

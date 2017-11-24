@@ -23,6 +23,37 @@ export class AppComponent {
         return state.includes(selectedMessageToDelete)
       })
     })
+    setTimeout(() => {
+      this.sendMessage(
+        { value:"Hey, I'm Chat App."}
+        )
+    }, 2000)
+    setTimeout(() => {
+      this.sendMessage(
+        { value:"You can text me if you want."}
+        )
+    }, 4000)
+    setTimeout(() => {
+      this.sendMessage(
+        { value:"But I think I can't reply. ))"}
+        )
+    }, 6000)
+    setTimeout(() => {
+      this.sendMessage(
+        { value:"In order to send a message hit 'Enter' or push the button 'Send Message'"}
+        )
+    }, 8000)
+
+    setTimeout(() => {
+      this.sendMessage(
+        { value:"In case you want to delete message just hold on a message you want to delete. And click on 'Delete' button"}
+        )
+    }, 12000)
+    setTimeout(() => {
+      this.sendMessage(
+        { value:"It pops up once you selected"}
+        )
+    }, 14000)
   }
 
   sendMessage(text){
@@ -34,25 +65,25 @@ export class AppComponent {
     this.store.dispatch(MessageActions.deleteMessage(listMessages))
   }
 
-
-  onKeypress(key, text){
+  onKeypress(key, input){
     if (key.key == "Enter"){
-      this.sendMessage(text)
-      return false
+      if (input.value){
+        this.sendMessage(input)
+        return false
+      }
     }
   }
 
   select(message){
     this.selectedMessages.push(message);
-    console.log("selected "+this.selectedMessages)
   }
+
   unselect(message){
     this.selectedMessages = this.selectedMessages.filter(function(x) {
       return x.toString() !== message.toString()
     }).map(function (x) {
         return x;
     });
-    console.log("unselected "+this.selectedMessages)
   }
 
 }

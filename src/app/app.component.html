@@ -1,16 +1,19 @@
-<div class="container">
-  <app-message [messages]="(messages | async)" (select)="select($event)" (unselect)="unselect($event)"></app-message>
-  <div class="col-lg-12" style="margin: 10px 0;">
+<div class="header" style="margin: 0 auto; text-align: center; background-color: #054950; color: #fff; width: 30%; padding: 5px 20px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; ">
+  <h1>Welcome to Chat App</h1>
+</div>
+<div class="container" style="margin-top: 20px; margin-bottom: 60px;">
+  <app-message [messages]="(messages | async)" (select)="select($event)" (unselect)="unselect($event)" ></app-message>
+  <div class="col-lg-12" style="margin: 10px 0; position: fixed; bottom: 0; left: 0;">
       <div class="input-group">
 
         <span class="input-group-btn" *ngIf="selectedMessages.length">
-          <button class="btn btn-secondary" type="button" (click)="deleteMessage(selectedMessages)">Delete</button>
+          <button class="btn btn-secondary" type="button" (click)="deleteMessage(selectedMessages)" style="background-color: #054950">Delete</button>
         </span>
 
-        <input type="text" class="form-control" placeholder="Message..." #newMessage (keypress)="onKeypress($event, newMessage)">
+        <input type="text" class="form-control" placeholder="Message..." #newMessage (keypress)="onKeypress($event, newMessage)" autofocus>
 
         <span class="input-group-btn">
-          <button class="btn btn-secondary" type="button" (click)="sendMessage(newMessage)">Send Message</button>
+          <button class="btn btn-secondary" type="button" (click)="sendMessage(newMessage)" style="background-color: #054950">Send Message</button>
         </span>
 
       </div>

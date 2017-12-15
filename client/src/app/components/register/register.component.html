@@ -1,0 +1,18 @@
+<form [formGroup]="formRegister" id='register-form' (submit)="onRegisterSubmit()">
+  <div class="form-header">
+    <h1>Register new Account</h1>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputUsername1">Username</label>
+    <input type="username" name="username" class="form-control" id="exampleInputUsername1" placeholder="Enter username" formControlName="username" >
+    <small id="usernameHelp" class="form-text text-muted">We'll never share your username with anyone else.</small>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">Password</label>
+    <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" formControlName='password'>
+  </div>
+  <div class="form-footer">
+    <button type="submit" class="btn btn-primary" [disabled]="blocked">Submit</button>
+    <a routerLink="/login" routerLinkActive="active">login</a>
+  </div>
+</form>

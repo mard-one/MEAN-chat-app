@@ -1,0 +1,119 @@
+<div id="chatroom">
+  <div class="row align-items-start no-gutters">
+    <div id="left-column">
+
+      <nav id="navbar-left" class="navbar navbar-dark bg-dark">
+        <input class="form-control form-control-sm" type="text" placeholder="Search...">
+      </nav>
+      <div id="thread-body">
+        <ng-container >
+          <div id="user-in-thread" >
+            <div id="thread-main" >
+              <div id="user-image">
+                <img src="assets/images/Asset 3.svg" >
+
+              </div>
+              <div class="wrapper">
+                <div id="username"></div>
+                <div id="last-message"></div>
+              </div>
+            </div>
+            <ng-container>
+              <div id="unread-messages" >
+                <span class="badge badge-info"></span>
+              </div>
+            </ng-container>
+           </div>
+        </ng-container>
+
+
+      </div>
+    </div>
+    <div id="central-column">
+
+      <nav id="navbar-center" class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="">
+        </a>
+      </nav>
+      <div id="chat-box">
+        <ng-container >
+          <div id="message-by-friend" >
+            <div id="text"></div>
+            <div id="recieved-time"></div>
+          </div>
+          <div id="message-by-me" >
+            <div id="text"></div>
+            <div id="sent-time"></div>
+          </div>
+        </ng-container>
+        <div id="message-by-me">
+          <div id="text"></div>
+          <div id="sent-time"></div>
+        </div>
+      </div>
+      <div id="message-bar">
+        <form [formGroup]="formMessage" (submit)="sendMessage()">
+          <div class="input-group">
+            <input type="text"  class="form-control" placeholder="Message..." aria-label="Search for..." autofocus name="message" formControlName="message" >
+            <span class="input-group-btn">
+              <button class="btn btn-secondary" type="button" (click)="sendMessage()">Send</button>
+            </span>
+          </div>
+        </form>
+      </div>
+      <div id="hint">
+        <h4>Please, select user to begin chatting</h4>
+      </div>
+
+    </div>
+    <div id="right-column">
+
+      <nav id="navbar-right" class="navbar navbar-dark bg-dark">
+        <button type="button" name="button"  data-toggle="modal" data-target="#contactModal">Add contacts</button>
+      </nav>
+      <div class="modal" id="contactModal" tabindex="-1" role="dialog" aria-labelledby="contactModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="contactModalLabel">Adding a person to contact list</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div [ngClass]='messageClass' role="alert">
+                {{message}}
+              </div>
+              <form [formGroup]="formContact" (submit)="addContact()">
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput">Enter username</label>
+                  <input name="username" formControlName="username" aria-describedby="usernameHelp" type="text" class="form-control" id="formGroupExampleInput" placeholder="Username...">
+                  <small id="usernameHelp" class="form-text text-muted">Please, enter a user that registered</small>
+                </div>
+                <hr>
+                <div id="actions">
+                  <button type="submit" class="btn btn-primary">Save changes</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="goBack()">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="contact-body">
+        <ng-container *ngIf="profile.userData.contactThread">
+          <div id="user-in-contact" *ngFor="let contact of profile.userData.contactThread.usersInContactThread" (click)="chooseUser(contact)">
+            <div id="user-contact-image">
+              <img *ngIf="contact.avatar.length == 0" src='./assets/images/Asset 5.svg'>
+              <img *ngIf="contact.avatar.length" src='{{contact.avatar}}'>
+            </div>
+            <div class="wrapper">
+              <div id="username-contact">{{contact.username}}</div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+    </div>
+  </div>
+</div>

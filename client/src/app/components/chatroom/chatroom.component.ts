@@ -1,23 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, FormControl } from "@angular/forms";
-import { Router } from '@angular/router';
-import * as io from "socket.io-client"
+import { Router } from "@angular/router";
+import * as io from "socket.io-client";
 
-import { ContactService } from '../../services/contact.service';
-import { AuthService } from '../../services/auth.service';
-import { ThreadService } from '../../services/thread.service';
-import { MessageService } from '../../services/message.service';
-import { ApiService } from '../../services/api.service';
+import { ContactService } from "../../services/contact.service";
+import { AuthService } from "../../services/auth.service";
+import { ThreadService } from "../../services/thread.service";
+import { MessageService } from "../../services/message.service";
+import { ApiService } from "../../services/api.service";
 
 @Component({
-  selector: 'app-chatroom',
-  templateUrl: './chatroom.component.html',
-  styleUrls: ['./chatroom.component.css']
+  selector: "app-chatroom",
+  templateUrl: "./chatroom.component.html",
+  styleUrls: ["./chatroom.component.css"]
 })
 export class ChatroomComponent implements OnInit {
-
-  profile = {userData: { contactThread: null}}
-  currentUser: object
+  profile = { userData: { contactThread: null } };
+  currentUser: object;
 
   formMessage: FormGroup;
   formContact: FormGroup;
@@ -29,9 +28,8 @@ export class ChatroomComponent implements OnInit {
   // currentUser
   // tempMessage
 
-  private socket
+  private socket;
   // private messagesUnread
-
 
   constructor(
     private apiService: ApiService,
@@ -42,66 +40,63 @@ export class ChatroomComponent implements OnInit {
     private messageService: MessageService,
     private router: Router
   ) {
-    (()=>{
+    (() => {
       this.formMessage = this.formBuilder.group({
-        message: ''
-      })
+        message: ""
+      });
       this.formContact = this.formBuilder.group({
-        username: ''
-      })
-    })()
+        username: ""
+      });
+    })();
   }
 
   ngOnInit() {
-    this.apiService.pageInit().subscribe((userData)=>{
-      this.profile = userData
-      console.log(this.profile.userData)
-    })
-    this.socket = io.connect('http://localhost:8080')
-    this.socket.on('exception', (data)=>{
-      console.log(data)
-      // this.tempMessage = null
-    })
-    //
-    this.socket.on('success', (data)=>{
-      console.log(data)
-    //   this.threadService.getAllMessageThread().subscribe((data)=>{
-    //     // console.log("success")
-    //     this.usersInMessageThread = data.users
-    //     console.log("this.usersInMessageThread", this.usersInMessageThread)
-    //   })
-    //   if(this.currentUser){
-    //     this.currentUser.messages = data.updatedMessageThread.messages
-    //     console.log("this.currentUser", this.currentUser)
-    //   }
-    //   this.tempMessage = null
-    //   this.countUnreadMessages(this.usersInMessageThread)
-    // })
-    //
-    // this.contactService.getAllContacts().subscribe((data)=>{
-    //   this.usersInContactThread = data.users
-    // })
-    // this.threadService.getAllMessageThread().subscribe((data)=>{
-    //   this.usersInMessageThread = data.users
-    //
-    //   this.countUnreadMessages(this.usersInMessageThread)
-    })
-    // console.log(this.messagesUnread)
+    this.apiService.pageInit().subscribe(userData => {
+      this.profile = userData;
+      console.log(this.profile.userData);
+    });
+    // this.socket = io.connect("http://localhost:8080");
+    // this.socket.on("exception", data => {
+    //   console.log(data);
+    //   // this.tempMessage = null
+    // });
+    // this.socket.on("success", data => {
+    //   console.log(data);
+    //   //   this.threadService.getAllMessageThread().subscribe((data)=>{
+    //   //     // console.log("success")
+    //   //     this.usersInMessageThread = data.users
+    //   //     console.log("this.usersInMessageThread", this.usersInMessageThread)
+    //   //   })
+    //   //   if(this.currentUser){
+    //   //     this.currentUser.messages = data.updatedMessageThread.messages
+    //   //     console.log("this.currentUser", this.currentUser)
+    //   //   }
+    //   //   this.tempMessage = null
+    //   //   this.countUnreadMessages(this.usersInMessageThread)
+    //   // })
+    //   //
+    //   // this.contactService.getAllContacts().subscribe((data)=>{
+    //   //   this.usersInContactThread = data.users
+    //   // })
+    //   // this.threadService.getAllMessageThread().subscribe((data)=>{
+    //   //   this.usersInMessageThread = data.users
+    //   //
+    //   //   this.countUnreadMessages(this.usersInMessageThread)
+    // });
+  }
+  
+  chooseUser(user) {
+    this.currentUser = user;
+    console.log(this.currentUser);
   }
 
-
-  chooseUser(user){
-    this.currentUser = user
-    console.log(this.currentUser)
-  }
-
-  sendMessage(){
-    this.socket.emit("sendMessage", {
-        token: localStorage.getItem('token'),
-        reciever: this.currentUser,
-        message: this.formMessage.get('message').value
-      })
-  }
+  // sendMessage() {
+  //   this.socket.emit("sendMessage", {
+  //     token: localStorage.getItem("token"),
+  //     reciever: this.currentUser,
+  //     message: this.formMessage.get("message").value
+  //   });
+  // }
 
   // sendMessage(){
   //   this.tempMessage = { message: this.formChat.get('message').value, sentAt: new Date()}
@@ -113,35 +108,34 @@ export class ChatroomComponent implements OnInit {
   //   this.formChat.reset()
   // }
   //
-  addContact(){
-    this.disableForm()
+  addContact() {
+    this.disableForm();
     var user = {
-      username: this.formContact.get('username').value
-    }
-    this.contactService.addContact(user).subscribe((data)=>{
-      if(!data.success){
-        this.enableForm()
+      username: this.formContact.get("username").value
+    };
+    this.contactService.addContact(user).subscribe(data => {
+      if (!data.success) {
+        this.enableForm();
       } else {
-        setTimeout(()=>{
-          $('#contactModal').modal('hide')
-          this.enableForm()
-          this.formContact.reset()
-        }, 2000)
+        setTimeout(() => {
+          $("#contactModal").modal("hide");
+          this.enableForm();
+          this.formContact.reset();
+        }, 2000);
       }
-    })
+    });
   }
 
-  disableForm(){
+  disableForm() {
     // console.log("disable working")
-    this.formContact.controls['username'].disable()
+    this.formContact.controls["username"].disable();
   }
-  enableForm(){
+  enableForm() {
     // console.log("enable working")
-    this.formContact.controls['username'].enable()
+    this.formContact.controls["username"].enable();
   }
-
-  goBack(){
-    this.formContact.reset()
+  goBack() {
+    this.formContact.reset();
   }
   //
   // countUnreadMessages(usersInMessageThread){
@@ -158,5 +152,4 @@ export class ChatroomComponent implements OnInit {
   //   return false
   // }
   //
-
 }

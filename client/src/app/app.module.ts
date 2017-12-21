@@ -3,6 +3,10 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
+import { StoreModule } from "@ngrx/store";
+
+import { reducers } from "./store"
+
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
@@ -30,9 +34,16 @@ import { MessageService } from './services/message.service';
     BrowserModule,
     HttpModule,
     AppRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    StoreModule.forRoot({ chat: reducers })
   ],
-  providers: [ApiService, AuthService, ContactService, ThreadService, MessageService],
+  providers: [
+    ApiService,
+    AuthService,
+    ContactService,
+    ThreadService,
+    MessageService
+  ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

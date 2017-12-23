@@ -7,7 +7,12 @@ export interface UserState {
   loading: boolean;
 }
 export const initialState: UserState = {
-  data: [],
+  data: [{
+    _id:"5a301aec2b60ab3ff0363c72",
+    username:"mara",
+    avatar:["image1", "image2"],
+    messageThread:[{}]
+  }],
   loaded: false,
   loading: false
 };
@@ -16,6 +21,7 @@ export function userReducer(
   state = initialState,
   action: fromUser.ChosenUserAction
 ): UserState {
+
   switch (action.type) {
     case fromUser.LOAD_CHOSEN_USER: {
       return {
@@ -38,6 +44,9 @@ export function userReducer(
       };
     }
   }
-
   return state;
 }
+
+export const getUserLoading = (state:UserState) => state.loading;
+export const getUserLoaded = (state: UserState) => state.loaded;
+export const getUser = (state: UserState) => state.data;

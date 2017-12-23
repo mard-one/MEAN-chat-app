@@ -35,7 +35,7 @@ import { MessageService } from './services/message.service';
     HttpModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    StoreModule.forRoot({ chat: reducers })
+    StoreModule.forRoot(reducers)
   ],
   providers: [
     ApiService,

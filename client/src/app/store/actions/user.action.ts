@@ -17,6 +17,6 @@ export class LoadChosenUserSuccess implements Action {
 }
 
 export type ChosenUserAction =
-  | LoadChosenUser
+    LoadChosenUser
   | LoadChosenUserFail
   | LoadChosenUserSuccess;

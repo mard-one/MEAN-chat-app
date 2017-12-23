@@ -3,6 +3,10 @@ import { FormBuilder, FormGroup, FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
 import * as io from "socket.io-client";
 
+import { Store } from "@ngrx/store";
+import { Observable } from "rxjs/Observable";
+import * as fromStore from "../../store"
+
 import { ContactService } from "../../services/contact.service";
 import { AuthService } from "../../services/auth.service";
 import { ThreadService } from "../../services/thread.service";
@@ -38,19 +42,19 @@ export class ChatroomComponent implements OnInit {
     private authService: AuthService,
     private threadService: ThreadService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private store: Store<fromStore.ChatState>
   ) {
     (() => {
-      this.formMessage = this.formBuilder.group({
-        message: ""
-      });
-      this.formContact = this.formBuilder.group({
-        username: ""
-      });
+      this.formMessage = this.formBuilder.group({ message: "" });
+      this.formContact = this.formBuilder.group({ username: "" });
     })();
   }
 
   ngOnInit() {
+    this.store.select('chosenUser').subscribe((state)=>{
+      console.log(state)
+    })
     this.apiService.pageInit().subscribe(userData => {
       this.profile = userData;
       console.log(this.profile.userData);

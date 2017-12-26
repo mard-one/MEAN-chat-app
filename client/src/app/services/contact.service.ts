@@ -16,9 +16,9 @@ export class ContactService {
     console.log("username", username)
     return this.http.post(this.domain + "/contact/addContact", username, this.authService.options ).map(res=>res.json())
   }
-  // getAllContacts(){
-  //   this.authService.createAuthenticationHeader()
-  //   return this.http.get(this.domain + "/contact/getAllContacts", this.authService.options ).map(res=>res.json())
-  // }
+  getAllContacts(){
+    this.authService.createAuthenticationHeader()
+    return this.http.get(this.domain + "/contact/getAllContacts", this.authService.options ).map(res=>res.json())
+  }
 
 }

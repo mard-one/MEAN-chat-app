@@ -71,8 +71,7 @@ var userSchema = new Schema({
   password: {type: String},
   avatar: [String],
   messageThread: [{ type: Schema.Types.ObjectId, ref: 'MessageThread' }],
-  contactThread: { type: Schema.Types.ObjectId, ref: 'ContactThread'},
-  currentThread: { type: Schema.Types.ObjectId, ref: 'MessageThread' },
+  contactThread: { type: Schema.Types.ObjectId, ref: 'ContactThread'}
 })
 
 userSchema.pre('save', function(next){

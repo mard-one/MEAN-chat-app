@@ -5,7 +5,16 @@ import * as io from "socket.io-client";
 
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
+
 import * as fromStore from "../../store"
+import {
+  getMessageThread,
+  LoadMessageThread,
+  getContactThread,
+  LoadContactThread
+} from "../../store";
+
+import { User } from "../../models/user.model"
 
 import { ContactService } from "../../services/contact.service";
 import { AuthService } from "../../services/auth.service";
@@ -19,8 +28,10 @@ import { ApiService } from "../../services/api.service";
   styleUrls: ["./chatroom.component.css"]
 })
 export class ChatroomComponent implements OnInit {
-  profile = { userData: { contactThread: null } };
-  currentUser: object;
+  // profile = { userData: { contactThread: null } };
+  chosenUser: {user: any, messageThread: {any}};
+  messageThread$: Observable<any>;
+  contactThread$: Observable<any>;
 
   formMessage: FormGroup;
   formContact: FormGroup;
@@ -29,7 +40,7 @@ export class ChatroomComponent implements OnInit {
   // processing = false
   // usersInContactThread
   // usersInMessageThread
-  // currentUser
+  // chosenUser
   // tempMessage
 
   private socket;
@@ -52,66 +63,89 @@ export class ChatroomComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.store.select('chosenUser').subscribe((state)=>{
-      console.log(state)
-    })
-    this.apiService.pageInit().subscribe(userData => {
-      this.profile = userData;
-      console.log(this.profile.userData);
+    this.store.dispatch(new LoadMessageThread());
+    this.store.dispatch(new LoadContactThread());
+    this.messageThread$ = this.store.select(getMessageThread);
+    this.contactThread$ = this.store.select(getContactThread);
+    this.store.select(getMessageThread).subscribe(messageThread => {
+      console.log("message thread", messageThread);
     });
-    // this.socket = io.connect("http://localhost:8080");
-    // this.socket.on("exception", data => {
-    //   console.log(data);
-    //   // this.tempMessage = null
+    this.store.select(getContactThread).subscribe(contactThread => {
+      console.log("contact thread", contactThread);
+    });
+    // console.log("message thread", this.messageThread$)
+    // this.store.dispatch(new fromStore.LoadChosenUser());
+    // this.apiService.pageInit().subscribe(userData => {
+    //   this.profile = userData;
+    //   console.log(this.profile);
     // });
-    // this.socket.on("success", data => {
-    //   console.log(data);
-    //   //   this.threadService.getAllMessageThread().subscribe((data)=>{
-    //   //     // console.log("success")
-    //   //     this.usersInMessageThread = data.users
-    //   //     console.log("this.usersInMessageThread", this.usersInMessageThread)
-    //   //   })
-    //   //   if(this.currentUser){
-    //   //     this.currentUser.messages = data.updatedMessageThread.messages
-    //   //     console.log("this.currentUser", this.currentUser)
-    //   //   }
-    //   //   this.tempMessage = null
-    //   //   this.countUnreadMessages(this.usersInMessageThread)
-    //   // })
-    //   //
-    //   // this.contactService.getAllContacts().subscribe((data)=>{
-    //   //   this.usersInContactThread = data.users
-    //   // })
-    //   // this.threadService.getAllMessageThread().subscribe((data)=>{
-    //   //   this.usersInMessageThread = data.users
-    //   //
-    //   //   this.countUnreadMessages(this.usersInMessageThread)
-    // });
+    this.socket = io.connect("http://localhost:8080");
+    this.socket.on("exception", data => {
+      console.log(data);
+      // this.tempMessage = null
+    });
+    this.socket.on("success", data => {
+      console.log(data);
+      //   this.threadService.getAllMessageThread().subscribe((data)=>{
+      //     // console.log("success")
+      //     this.usersInMessageThread = data.users
+      //     console.log("this.usersInMessageThread", this.usersInMessageThread)
+      //   })
+      //   if(this.chosenUser){
+      //     this.chosenUser.messages = data.updatedMessageThread.messages
+      //     console.log("this.chosenUser", this.chosenUser)
+      //   }
+      //   this.tempMessage = null
+      //   this.countUnreadMessages(this.usersInMessageThread)
+      // })
+      //
+      // this.contactService.getAllContacts().subscribe((data)=>{
+      //   this.usersInContactThread = data.users
+      // })
+      // this.threadService.getAllMessageThread().subscribe((data)=>{
+      //   this.usersInMessageThread = data.users
+      //
+      //   this.countUnreadMessages(this.usersInMessageThread)
+    });
   }
-  
-  chooseUser(user) {
-    this.currentUser = user;
-    console.log(this.currentUser);
+
+  chooseUserFromMessageThread(user) {
+    console.log("message user", user)
+    this.chosenUser = { user: user.chatBetween[0], messageThread: user };
+    console.log("message chosen user", this.chosenUser);
+    // console.log(user);
+    // this.chosenUser$ = this.store
+    //   .select(fromStore.getChosenUser)
+    // this.store.select(fromStore.getChosenUser).subscribe(state=>{
+    //   // this.chosenUser$ = state;
+    //   console.log(state);
+    // })
+    // console.log(this.chosenUser$);
+  }
+  chooseUserFromContactThread(user) {
+    console.log("contact user", user)
+    this.chosenUser = { user: user, messageThread: user.messageThread[0] };
+    console.log("contact chosen user", this.chosenUser);
   }
 
   // sendMessage() {
   //   this.socket.emit("sendMessage", {
   //     token: localStorage.getItem("token"),
-  //     reciever: this.currentUser,
+  //     reciever: this.chosenUser,
   //     message: this.formMessage.get("message").value
   //   });
   // }
 
-  // sendMessage(){
-  //   this.tempMessage = { message: this.formChat.get('message').value, sentAt: new Date()}
-  //   this.socket.emit("sendMessage", {
-  //     token: localStorage.getItem('token'),
-  //     reciever: this.currentUser,
-  //     message: this.formChat.get('message').value
-  //   })
-  //   this.formChat.reset()
-  // }
-  //
+  sendMessage() {
+    // this.tempMessage = { message: this.formChat.get('message').value, sentAt: new Date()}
+    this.socket.emit("sendMessage", {
+      token: localStorage.getItem("token"),
+      reciever: this.chosenUser.user,
+      message: this.formMessage.get("message").value
+    });
+    this.formMessage.reset();
+  }
+
   addContact() {
     this.disableForm();
     var user = {
@@ -121,6 +155,7 @@ export class ChatroomComponent implements OnInit {
       if (!data.success) {
         this.enableForm();
       } else {
+        // console.log("data", data);
         setTimeout(() => {
           $("#contactModal").modal("hide");
           this.enableForm();
@@ -141,7 +176,7 @@ export class ChatroomComponent implements OnInit {
   goBack() {
     this.formContact.reset();
   }
-  //
+
   // countUnreadMessages(usersInMessageThread){
   //   let unread = 0
   //   usersInMessageThread.messageThread.forEach((userMessage)=>{
@@ -155,5 +190,4 @@ export class ChatroomComponent implements OnInit {
   //   // console.log(this.messagesUnread)
   //   return false
   // }
-  //
 }

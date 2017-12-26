@@ -18,7 +18,7 @@ export class ThreadService {
   }
 
   setCurrentThread(user){
-    console.log("user", user)
+    // console.log("user", user)
     this.authService.createAuthenticationHeader()
     return this.http.post(this.domain + "/thread/setCurrentThread", user, this.authService.options).map(res=>res.json())
   }

@@ -7,8 +7,8 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
 const authentication = require('./server/routes/authentication');
-const contact = require('./server/routes/contact');
-const thread = require('./server/routes/thread');
+const contact = require('./server/routes/contactThread');
+const thread = require('./server/routes/messageThread');
 const message = require('./server/routes/message');
 const api = require('./server/routes/api');
 

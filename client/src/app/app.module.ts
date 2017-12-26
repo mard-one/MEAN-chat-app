@@ -4,8 +4,10 @@ import { HttpModule } from '@angular/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { StoreModule } from "@ngrx/store";
+import { EffectsModule } from "@ngrx/effects";
+import { StoreDevtoolsModule } from "@ngrx/store-devtools"
 
-import { reducers } from "./store"
+import { reducers, effects } from "./store"
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
@@ -35,7 +37,11 @@ import { MessageService } from './services/message.service';
     HttpModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    StoreModule.forRoot(reducers)
+    StoreModule.forRoot(reducers),
+    EffectsModule.forRoot(effects),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25 //  Retains last 25 states
+    })
   ],
   providers: [
     ApiService,

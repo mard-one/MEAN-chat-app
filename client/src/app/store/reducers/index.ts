@@ -1,21 +1,16 @@
-import { ActionReducerMap, createSelector } from "@ngrx/store";
+import { ActionReducerMap } from "@ngrx/store";
 
-import * as formUser from "./user.reducer";
+import * as fromMessageThread from "./messageThread.reducer";
+import * as fromContactThread from "./contactThread.reducer";
 
 export interface ChatState {
-  chosenUser: formUser.UserState;
+  messageThread: fromMessageThread.MessageThreadState;
+  contactThread: fromContactThread.ContactThreadState;
 }
 
 export const reducers: ActionReducerMap<ChatState> = {
-  chosenUser: formUser.userReducer
+  messageThread: fromMessageThread.messageThreadReducer,
+  contactThread: fromContactThread.contactThreadReducer
 };
 
-export const chooseUser = (state: ChatState) => state.chosenUser;
 
-export const getUserState = createSelector(chooseUser, (chosenUser: formUser.UserState)=>{
-  console.log(chosenUser)
-})
-
-export const getUser = createSelector(chooseUser, formUser.getUser);
-export const getUserLoaded = createSelector(chooseUser, formUser.getUserLoaded);
-export const getUserLoading = createSelector(chooseUser, formUser.getUserLoading);

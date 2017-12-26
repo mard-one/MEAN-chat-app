@@ -39,6 +39,7 @@ module.exports = Connection = (socket, io) => {
                   if(err){
                     socket.emit('exception', {message: "error occured", err: err})
                   } else {
+                    // console.log("message", message)
                     if(!foundMessageThread){
                       // console.log("foundMessageThread")
                       let messageThread = new MessageThread({

@@ -6,6 +6,7 @@ import { of } from "rxjs/observable/of";
 
 import * as contactThreadActions from "../actions/contactThread.action";
 import * as fromService from "../../services";
+import { AddContactToContactThread } from "../index";
 
 @Injectable()
 export class ContactThreadEffects {
@@ -35,7 +36,17 @@ export class ContactThreadEffects {
         return this.contactService
           .addContact(action.payload)
           .pipe(
-            map(user => new contactThreadActions.AddContactToContactThread(user))
+            map(
+              user => {
+                if(user.success){
+                  console.log("success");
+                  return new contactThreadActions.AddContactToContactThreadSuccess(user);
+                }else{
+                  console.log("fail");
+                  return new contactThreadActions.AddContactToContactThreadFail(user)
+                }
+              }
+            )
           );
       })
     );

@@ -6,7 +6,7 @@
         <input class="form-control form-control-sm" type="text" placeholder="Search...">
       </nav>
       <div id="thread-body">
-        <ng-container *ngIf="(messageThread$ | async)" >
+        <ng-container *ngIf="(messageThread$ | async)">
           <div id="user-in-thread" *ngFor="let thread of (messageThread$ | async).messageThread" (click)="chooseUserFromMessageThread(thread)">
             <div id="thread-main">
               <div id="user-image">
@@ -100,7 +100,7 @@
       </div>
       <div id="contact-body">
         <ng-container *ngIf="(contactThread$ | async)">
-          <div id="user-in-contact" *ngFor="let contact of (contactThread$ | async).contactThread" (click)="chooseUserFromContactThread(contact)">
+          <div id="user-in-contact" *ngFor='let contact of (contactThread$ | async).contacts | orderBy:order' (click)="chooseUserFromContactThread(contact)">
             <div id="user-contact-image">
               <img *ngIf="contact.avatar.length == 0" src='./assets/images/Asset 5.svg'>
               <img *ngIf="contact.avatar.length" src='{{contact.avatar}}'>

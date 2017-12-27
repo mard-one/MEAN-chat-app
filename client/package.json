@@ -28,6 +28,7 @@
     "bootstrap": "^4.0.0-beta.2",
     "core-js": "^2.4.1",
     "jquery": "^3.2.1",
+    "ngx-order-pipe": "^1.1.1",
     "popper.js": "^1.12.9",
     "rxjs": "^5.5.2",
     "socket.io": "^2.0.4",

@@ -1,78 +1,137 @@
-const config = require('../config');
-const mongoose = require('mongoose');
+const config = require("../config");
+const mongoose = require("mongoose");
 
-const Verify = require('./authentication');
+const Verify = require("./authentication");
 
-const User = require('../models/user');
-const Message = require('../models/message');
-const MessageThread = require('../models/messageThread');
-const ContactThread = require('../models/contactThread');
+const User = require("../models/user");
+const Message = require("../models/message");
+const MessageThread = require("../models/messageThread");
+const ContactThread = require("../models/contactThread");
 
 module.exports = Connection = (socket, io) => {
-      socket.on('sendMessage', function(data){
-        if(!data.reciever){
-          // console.log("Hi buddy")
-          socket.emit("exception", {message: "Please choose a user to send message"})
-        } else {
-          var result = Verify(data.token, config.secret)
-            if(result.type == "exception"){
-              socket.emit('exception', result.data)
-            } else {
-                let senderId = result.data.user_id
-                let recieverId = data.reciever._id
-                let messageSend = data.message
-                // console.log("senderId", senderId)
-                // console.log("recieverId", recieverId)
-                // console.log("messageSend", messageSend)
-                var message = new Message({
-                  _id: new mongoose.Types.ObjectId(),
-                  sender: senderId,
-                  reciever: recieverId,
-                  text: messageSend
+  socket.on("sendMessage", function(data) {
+    if (!data.reciever) {
+      // console.log("Hi buddy")
+      socket.emit("exception", {
+        message: "Please choose a user to send message"
+      });
+    } else {
+      var result = Verify(data.token, config.secret);
+      if (result.type == "exception") {
+        socket.emit("exception", result.data);
+      } else {
+        let senderId = result.data.user_id;
+        let recieverId = data.reciever._id;
+        let messageSend = data.message;
+        // console.log("senderId", senderId)
+        // console.log("recieverId", recieverId)
+        // console.log("messageSend", messageSend)
+        var message = new Message({
+          _id: new mongoose.Types.ObjectId(),
+          sender: senderId,
+          reciever: recieverId,
+          text: messageSend
+        });
+        message.save(function(err, newMessage) {
+          if (err) throw err;
+          Message.findById(newMessage._id)
+            // .populate({path: "sender reciever", select:"-password -contactThread"})
+            .exec((err, foundMessage) => {
+              console.log("foundMEssage", foundMessage);
+              MessageThread.findOneAndUpdate(
+                { chatBetween: { $all: [senderId, recieverId] } },
+                {
+                  $addToSet: { messages: message._id },
+                  $set: { lastMessage: message.text }
+                },
+                { new: true }
+              )
+                .populate({
+                  path: "messages",
+                  populate: { path: "reciever sender", select: "username" }
                 })
-                message.save(function(err, newMessage){
-                  if (err) throw err
-                })
-                MessageThread.findOneAndUpdate({chatBetween: {$all: [senderId, recieverId]}}, {$addToSet: {messages: message._id}, $set:{lastMessage: message.text}}, {new:true})
-                .populate({path: "messages", populate: {path: "reciever sender", select:"username"}})
-                .exec(function(err, foundMessageThread){
-                  if(err){
-                    socket.emit('exception', {message: "error occured", err: err})
+                .exec(function(err, foundMessageThread) {
+                  if (err) {
+                    socket.emit("exception", {
+                      message: "error occured",
+                      err: err
+                    });
                   } else {
                     // console.log("message", message)
-                    if(!foundMessageThread){
+                    if (!foundMessageThread) {
                       // console.log("foundMessageThread")
                       let messageThread = new MessageThread({
                         _id: new mongoose.Types.ObjectId(),
-                        chatBetween: [mongoose.Types.ObjectId(senderId), mongoose.Types.ObjectId(recieverId)],
-                        messages: [message._id],
-                      })
-                      messageThread.save(function(err, newMessageThread){
-                        MessageThread.findByIdAndUpdate(newMessageThread._id, {lastMessage: message.text}, {new: true})
-                        .populate({path: "messages", populate: {path: "reciever sender", select:"username"}})
-                        .exec(function(err, updatedMessageThread){
-                          if(err){
-                            socket.emit('exception', {message: "error occured", err: err})
-                          } else {
-                            // console.log("User find senderId", senderId)
-                            // console.log("User find recieverId", recieverId)
-                            User.update({_id: {$in: [senderId, recieverId]}}, {$addToSet: {messageThread: updatedMessageThread._id}}, {select: "username messageThread", multi: true})
-                            // .populate({path: "_id"})
-                            .exec(function(err,updatedUser){
-                              // console.log("updatedUser", updatedUser)
-                              io.emit('success', {message: "Message thread was created and message was sent", messageSent: message})
-                            })
-                          }
-                        })
-                      })
+                        chatBetween: [
+                          mongoose.Types.ObjectId(senderId),
+                          mongoose.Types.ObjectId(recieverId)
+                        ],
+                        messages: [message._id]
+                      });
+                      messageThread.save(function(err, newMessageThread) {
+                        MessageThread.findByIdAndUpdate(
+                          newMessageThread._id,
+                          { lastMessage: message.text },
+                          { new: true }
+                        )
+                          .populate({
+                            path: "messages",
+                            populate: {
+                              path: "reciever sender",
+                              select: "username"
+                            }
+                          })
+                          .exec(function(err, updatedMessageThread) {
+                            if (err) {
+                              socket.emit("exception", {
+                                message: "error occured",
+                                err: err
+                              });
+                            } else {
+                              // console.log("User find senderId", senderId)
+                              // console.log("User find recieverId", recieverId)
+                              User.update(
+                                { _id: { $in: [senderId, recieverId] } },
+                                {
+                                  $addToSet: {
+                                    messageThread: updatedMessageThread._id
+                                  }
+                                },
+                                {
+                                  select: "username messageThread",
+                                  multi: true
+                                }
+                              )
+                                // .populate({path: "_id"})
+                                .exec(function(err, updatedUser) {
+                                  console.log(
+                                    "updatedMessageThread",
+                                    updatedMessageThread
+                                  );
+                                  io.emit("success", {
+                                    message:
+                                      "Message thread was created and message was sent",
+                                    messageSent: message,
+                                    messageThread: updatedMessageThread
+                                  });
+                                });
+                            }
+                          });
+                      });
                     } else {
-                      // console.log("foundMessageThread2")
-                      io.emit('success', {message: "Message was sent", messageSent: message})
+                      console.log("foundMessageThread", foundMessageThread);
+                      io.emit("success", {
+                        message: "Message was sent",
+                        messageSent: message,
+                        messageThread: foundMessageThread
+                      });
                     }
                   }
-                })
-            }
-          }
-      })
-      console.log('client connect to socket')
-  }
+                });
+            });
+        });
+      }
+    }
+  });
+  console.log("client connect to socket");
+};

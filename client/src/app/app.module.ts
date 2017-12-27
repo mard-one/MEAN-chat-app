@@ -23,6 +23,7 @@ import { ContactService } from './services/contact.service';
 import { ThreadService } from './services/thread.service';
 import { MessageService } from './services/message.service';
 
+import { OrderModule } from "ngx-order-pipe";
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { MessageService } from './services/message.service';
     EffectsModule.forRoot(effects),
     StoreDevtoolsModule.instrument({
       maxAge: 25 //  Retains last 25 states
-    })
+    }),
+    OrderModule
   ],
   providers: [
     ApiService,

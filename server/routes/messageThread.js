@@ -84,7 +84,6 @@ router.get("/getAllMessageThread", Verify, function(req, res) {
     })
     .exec(function(err, data) {
       res.json({
-        message: "Users in message thread",
         messageThread: data.messageThread
       });
     });

@@ -24,8 +24,6 @@ export function messageThreadReducer(
       }
       case fromMessageThread.LOAD_MESSAGE_THREAD_SUCCESS: {
         const data = action.payload
-        console.log("reducer state", state)
-        console.log("reducer data", data);
         return { ...state, loading: false, loaded: true, data };
       }
       case fromMessageThread.LOAD_MESSAGE_THREAD_FAIL: {

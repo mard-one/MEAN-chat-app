@@ -11,32 +11,34 @@ const ContactThread = require("../models/contactThread");
 const Verify = require("./middleware/authentication");
 
 router.post("/addContact", Verify, function(req, res) {
-  console.log("req.body.username", req.body.username);
-  // res.json({success: false, body: req.body})
-  User.findOne({ username: req.body.username }, function(err, newUser) {
+  User.findOne({ username: req.body.username }, "username messageThread avatar")
+  .exec((err, newUser)=>{
     if (err) {
-      res.json({ success: false, message: "Error occured" + err });
-    } else {
-      if (!newUser) {
-        res.json({ success: false, message: "User not found" });
-      } else {
-        if (newUser._id == req.decoded.user_id) {
-          res.json({ success: false, message: "You cannot add yourself" });
+          res.json({ success: false, message: "Error occured" + err });
         } else {
-          ContactThread.findOneAndUpdate(
-            { threadOwner: req.decoded.user_id },
-            { $addToSet: { contacts: newUser._id } },
-            { sort: "contacts", new: true }
-          )
-            .populate({ path: "contacts", select: "-password -contactThread" })
-            .exec(function(err, data) {
-              if (err) return handleError(err);
-              res.json({ success: true, message: "User was added" });
-            });
+          if (!newUser) {
+            res.json({ success: false, message: "User not found" });
+          } else {
+            if (newUser._id == req.decoded.user_id) {
+              res.json({ success: false, message: "You cannot add yourself" });
+            } else {
+              ContactThread.findOneAndUpdate(
+                { threadOwner: req.decoded.user_id },
+                { $addToSet: { contacts: newUser._id } },
+                { sort: "contacts", new: true }
+              )
+                .populate({ path: "contacts", select: "-password -contactThread" })
+                .exec(function(err, data) {
+                  if (err) return handleError(err);
+                  res.json({
+                    success: true,
+                    user: newUser
+                  });
+                });
+            }
+          }
         }
-      }
-    }
-  });
+  })
 });
 
 router.get("/getAllContacts", Verify, function(req, res) {

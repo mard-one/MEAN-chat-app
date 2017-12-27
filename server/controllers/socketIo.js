@@ -38,18 +38,21 @@ module.exports = Connection = (socket, io) => {
             // .populate({path: "sender reciever", select:"-password -contactThread"})
             .exec((err, foundMessage) => {
               console.log("foundMEssage", foundMessage);
-              MessageThread.findOneAndUpdate(
-                { chatBetween: { $all: [senderId, recieverId] } },
-                {
-                  $addToSet: { messages: message._id },
-                  $set: { lastMessage: message.text }
-                },
-                { new: true }
-              )
-                .populate({
-                  path: "messages",
-                  populate: { path: "reciever sender", select: "username" }
-                })
+              MessageThread.findOneAndUpdate({ chatBetween: { $all: [senderId, recieverId] } }, { $addToSet: { messages: message._id }, $set: { lastMessage: message.text } }, { new: true })
+                .populate([
+                  {
+                    path: "chatBetween",
+                    match: { _id: { $ne: senderId } },
+                    select: "username avatar"
+                  },
+                  {
+                    path: "messages",
+                    populate: {
+                      path: "reciever sender",
+                      select: "username"
+                    }
+                  }
+                ])
                 .exec(function(err, foundMessageThread) {
                   if (err) {
                     socket.emit("exception", {
@@ -68,20 +71,35 @@ module.exports = Connection = (socket, io) => {
                         ],
                         messages: [message._id]
                       });
-                      messageThread.save(function(err, newMessageThread) {
+                      messageThread.save(function(
+                        err,
+                        newMessageThread
+                      ) {
                         MessageThread.findByIdAndUpdate(
                           newMessageThread._id,
                           { lastMessage: message.text },
                           { new: true }
                         )
-                          .populate({
-                            path: "messages",
-                            populate: {
-                              path: "reciever sender",
-                              select: "username"
+                          .populate([
+                            {
+                              path: "chatBetween",
+                              match: {
+                                _id: { $ne: senderId }
+                              },
+                              select: "username avatar"
+                            },
+                            {
+                              path: "messages",
+                              populate: {
+                                path: "reciever sender",
+                                select: "username"
+                              }
                             }
-                          })
-                          .exec(function(err, updatedMessageThread) {
+                          ])
+                          .exec(function(
+                            err,
+                            updatedMessageThread
+                          ) {
                             if (err) {
                               socket.emit("exception", {
                                 message: "error occured",
@@ -91,14 +109,20 @@ module.exports = Connection = (socket, io) => {
                               // console.log("User find senderId", senderId)
                               // console.log("User find recieverId", recieverId)
                               User.update(
-                                { _id: { $in: [senderId, recieverId] } },
                                 {
-                                  $addToSet: {
-                                    messageThread: updatedMessageThread._id
+                                  _id: {
+                                    $in: [senderId, recieverId]
                                   }
                                 },
                                 {
-                                  select: "username messageThread",
+                                  $addToSet: {
+                                    messageThread:
+                                      updatedMessageThread._id
+                                  }
+                                },
+                                {
+                                  select:
+                                    "username messageThread",
                                   multi: true
                                 }
                               )

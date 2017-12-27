@@ -7,7 +7,7 @@
       </nav>
       <div id="thread-body">
         <ng-container *ngIf="(messageThread$ | async)">
-          <div id="user-in-thread" *ngFor="let thread of (messageThread$ | async).messageThread" (click)="chooseUserFromMessageThread(thread)">
+          <div id="user-in-thread" *ngFor="let thread of (messageThread$ | async).messageThread.reverse()" (click)="chooseUserFromMessageThread(thread)">
             <div id="thread-main">
               <div id="user-image">
                 <img *ngIf="thread.chatBetween[0].avatar.length == 0" src='./assets/images/Asset 3.svg'>
@@ -33,11 +33,11 @@
 
       <nav id="navbar-center" class="navbar navbar-dark bg-dark">
         <a class="navbar-brand">
-          {{ currentUser?.username }}
+          {{ currentUser?.user.username }}
         </a>
       </nav>
-      <div id="chat-box" *ngIf="chosenUser?.messageThread">
-        <ng-container *ngFor="let message of chosenUser.messageThread.messages">
+      <div id="chat-box" *ngIf="(messages$ | async)">
+        <ng-container *ngFor="let message of (messages$ | async)">
           <div id="message-by-friend" *ngIf="message.sender == chosenUser.user._id">
             <div id="text">{{message.text}}</div>
             <div id="recieved-time">{{message.sentAt | date : "H:mm"}}</div>

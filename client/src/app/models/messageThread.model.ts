@@ -1,8 +1,9 @@
 import { Message } from "./message.model"
 
 export interface MessageThread {
-  chatBetween: [string];
-  messages: [Message];
-  lastMessage: string;
+  _id?: string,
+  chatBetween?: [string];
+  messages?: [Message];
+  lastMessage?: string;
 }
 

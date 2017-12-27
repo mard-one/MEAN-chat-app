@@ -25,7 +25,7 @@ export function contactThreadReducer(
     }
     case fromContactThread.LOAD_CONTACT_THREAD_SUCCESS: {
       const contacts = action.payload.contactThread;
-      console.log("action.payload", action.payload);
+      // console.log("action.payload", action.payload);
       return {
         ...state,
         loading: false,
@@ -52,11 +52,18 @@ export function contactThreadReducer(
       return { ...state, loading: false, loaded: false };
     }
     case fromContactThread.ADD_NEW_MESSAGE_TO_CONTACT_THREAD: {
-      console.log("new message payload", action.payload);
-      console.log("new message state", state);
+      console.log("contact thread payload", action.payload);
+      console.log("contact thread state", state);
       const foundUser: any = state.data.contacts.filter(contact => {
-        return action.payload.messageThread.chatBetween.includes(contact._id);
+        // console.log("contact._id", contact._id);
+        // console.log("action.payload.messageThread.chatBetween", contact._id);
+        // console.log(
+        //   "action.payload.messageThread.chatBetween != contact._id",
+        //   action.payload.messageThread.chatBetween[0]._id == contact._id
+        // );
+        return action.payload.messageThread.chatBetween[0]._id == contact._id;
       });
+      // console.log("found user", foundUser);
       const filteredStateWithoutFoundUser = [
         ...state.data.contacts.filter(contact => {
           return contact._id != foundUser[0]._id;

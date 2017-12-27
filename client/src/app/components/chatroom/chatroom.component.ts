@@ -8,13 +8,16 @@ import { Observable } from "rxjs/Observable";
 
 import * as fromStore from "../../store";
 import {
-  getMessageThread,
-  LoadMessageThread,
-  getContactThread,
   LoadContactThread,
-  AddContactToContactThread,
+  LoadMessageThread,
+  getMessage,
+  getMessageState,
+  getMessageThread,
+  getContactThread,
   getContactThreadState,
-  AddNewMessageSuccess
+  AddNewMessageSuccess,
+  AddContactToContactThread,
+  ChooseMessageFromMessageThread
 } from "../../store";
 
 import { User } from "../../models/user.model";
@@ -34,6 +37,7 @@ import { ApiService } from "../../services/api.service";
 export class ChatroomComponent implements OnInit {
   // profile = { userData: { contactThread: null } };
   chosenUser: { user: any; messageThread: { any } };
+  messages$: Observable<any>;
   messageThread$: Observable<any>;
   contactThread$: Observable<any>;
   order: string = "username";
@@ -72,15 +76,19 @@ export class ChatroomComponent implements OnInit {
     this.store.dispatch(new LoadContactThread());
     this.messageThread$ = this.store.select(getMessageThread);
     this.contactThread$ = this.store.select(getContactThread);
+    this.messages$ = this.store.select(getMessage);
     this.store.select(getMessageThread).subscribe(messageThread => {
-      console.log("message thread", messageThread);
-    });
+        console.log("message thread", messageThread);
+      });
     this.store.select(getContactThread).subscribe(contactThread => {
       console.log("contact thread", contactThread);
     });
-    this.store.select(getContactThreadState).subscribe(contactThread => {
-      console.log("contact thread state", contactThread);
+    this.store.select(getMessageState).subscribe(messages => {
+      console.log("message state", messages);
     });
+    // this.store.select(getContactThreadState).subscribe(contactThread => {
+    //   console.log("contact thread state", contactThread);
+    // });
     // console.log("message thread", this.messageThread$)
     // this.store.dispatch(new fromStore.LoadChosenUser());
     // this.apiService.pageInit().subscribe(userData => {
@@ -127,6 +135,7 @@ export class ChatroomComponent implements OnInit {
     console.log("message user", user);
     this.chosenUser = { user: user.chatBetween[0], messageThread: user };
     console.log("message chosen user", this.chosenUser);
+    this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
     // console.log(user);
     // this.chosenUser$ = this.store
     //   .select(fromStore.getChosenUser)
@@ -140,6 +149,7 @@ export class ChatroomComponent implements OnInit {
     console.log("contact user", user);
     this.chosenUser = { user: user, messageThread: user.messageThread[0] };
     console.log("contact chosen user", this.chosenUser);
+    this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
   }
 
   // sendMessage() {

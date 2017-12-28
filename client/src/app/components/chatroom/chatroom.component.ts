@@ -35,7 +35,6 @@ import { ApiService } from "../../services/api.service";
   // pipes: [OrderByPipe]
 })
 export class ChatroomComponent implements OnInit {
-  // profile = { userData: { contactThread: null } };
   chosenUser: { user: any; messageThread: { any } };
   messages$: Observable<any>;
   messageThread$: Observable<any>;
@@ -83,8 +82,8 @@ export class ChatroomComponent implements OnInit {
     this.store.select(getContactThread).subscribe(contactThread => {
       console.log("contact thread", contactThread);
     });
-    this.store.select(getMessageState).subscribe(messages => {
-      console.log("message state", messages);
+    this.store.select(getMessage).subscribe(messages => {
+      console.log("messages", messages);
     });
     // this.store.select(getContactThreadState).subscribe(contactThread => {
     //   console.log("contact thread state", contactThread);
@@ -100,6 +99,7 @@ export class ChatroomComponent implements OnInit {
       console.log("socket message", data);
       this.store.dispatch(
         new AddNewMessageSuccess({
+          // thisUser:
           message: data.messageSent,
           messageThread: data.messageThread
         })

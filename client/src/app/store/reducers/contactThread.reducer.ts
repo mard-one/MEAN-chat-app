@@ -52,35 +52,49 @@ export function contactThreadReducer(
       return { ...state, loading: false, loaded: false };
     }
     case fromContactThread.ADD_NEW_MESSAGE_TO_CONTACT_THREAD: {
-      console.log("contact thread payload", action.payload);
-      console.log("contact thread state", state);
-      const foundUser: any = state.data.contacts.filter(contact => {
-        // console.log("contact._id", contact._id);
-        // console.log("action.payload.messageThread.chatBetween", contact._id);
-        // console.log(
-        //   "action.payload.messageThread.chatBetween != contact._id",
-        //   action.payload.messageThread.chatBetween[0]._id == contact._id
-        // );
-        return action.payload.messageThread.chatBetween[0]._id == contact._id;
+      // console.log("contact thread payload", action.payload);
+      // console.log("contact thread state", state);
+      const foundContact = state.data.contacts.filter(thread => {
+        // console.log("thread", thread);
+        return action.payload.messageThread.chatBetween
+          .map(element => {
+            // console.log("element", element);
+            // console.log("element._id == thread._id", element._id == thread._id);
+            return element._id == thread._id;
+          })
+          .includes(true);
       });
-      // console.log("found user", foundUser);
+      // console.log("foundContact", foundContact);
+      const properMessageThreadPayload = {
+        messageThread: {
+          ...action.payload.messageThread,
+          chatBetween: action.payload.messageThread.chatBetween.filter(
+            userInChat => {
+              return foundContact[0]._id == userInChat._id;
+            }
+          )
+        }
+      };
+      // console.log("properContactThreadPayload", properContactThreadPayload);
       const filteredStateWithoutFoundUser = [
         ...state.data.contacts.filter(contact => {
-          return contact._id != foundUser[0]._id;
+          return contact._id != foundContact[0]._id;
         })
       ];
-      const updatedFoundUser: User = {
-        _id: foundUser[0]._id,
-        username: foundUser[0].username,
-        messageThread: [action.payload.messageThread],
-        avatar: foundUser[0].avatar
+      // console.log("filter works");
+      const updatedFoundContact: User = {
+        _id: foundContact[0]._id,
+        username: foundContact[0].username,
+        messageThread: [properMessageThreadPayload.messageThread],
+        avatar: foundContact[0].avatar
       };
+
       return {
         ...state,
         loading: true,
         data: {
           ...state.data,
-          contacts: [...filteredStateWithoutFoundUser, updatedFoundUser]
+          contacts: [...filteredStateWithoutFoundUser, updatedFoundContact]
         }
       };
     }

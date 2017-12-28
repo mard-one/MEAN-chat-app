@@ -1,6 +1,7 @@
 import { Message } from "../../models/message.model";
 
 import * as fromMessage from "../actions";
+import { element } from "protractor";
 
 export interface MessageState {
   data: Message[];
@@ -34,9 +35,27 @@ export function messageReducer(
       };
     }
     case fromMessage.ADD_NEW_MESSAGE_TO_MESSAGES: {
-      console.log("new message payload", action.payload);
-      console.log("new message state", state);
-      return { ...state, data: [...state.data, action.payload.message] };
+      if(state.data.length){
+        const isInclude = function(data) {
+          return action.payload.messageThread.chatBetween
+            .map(element => {
+              return element._id == data;
+            })
+            .includes(true);
+        };
+
+        // console.log("new message payload", action.payload);
+        // console.log("new message state", state);
+        // console.log("includes reciever", isInclude(state.data[0].reciever));
+        // console.log("includes sender", isInclude(state.data[0].sender));
+        if (isInclude(state.data[0].reciever) && isInclude(state.data[0].sender)) {
+          return { ...state, data: [...state.data, action.payload.message] };
+        } else {
+          return state;
+        }
+      }else{
+        return state
+      }
     }
   }
   return state;

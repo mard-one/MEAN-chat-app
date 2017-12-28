@@ -6,6 +6,10 @@
   height: 6vh;
   z-index: 1000
 }
+#navbar-center{
+  color: white;
+  text-transform: capitalize;
+}
 #navbar-left, #navbar-right{
   width: 25%;
 }

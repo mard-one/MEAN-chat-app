@@ -33,10 +33,10 @@
 
       <nav id="navbar-center" class="navbar navbar-dark bg-dark">
         <a class="navbar-brand">
-          {{ currentUser?.user.username }}
+          {{ chosenUser?.user.username }}
         </a>
       </nav>
-      <div id="chat-box" *ngIf="(messages$ | async)">
+      <div id="chat-box" *ngIf="((messages$ | async) && chosenUser?.user) ">
         <ng-container *ngFor="let message of (messages$ | async)">
           <div id="message-by-friend" *ngIf="message.sender == chosenUser.user._id">
             <div id="text">{{message.text}}</div>

@@ -37,20 +37,20 @@ module.exports = Connection = (socket, io) => {
           Message.findById(newMessage._id)
             // .populate({path: "sender reciever", select:"-password -contactThread"})
             .exec((err, foundMessage) => {
-              console.log("foundMEssage", foundMessage);
+              // console.log("foundMEssage", foundMessage);
               MessageThread.findOneAndUpdate({ chatBetween: { $all: [senderId, recieverId] } }, { $addToSet: { messages: message._id }, $set: { lastMessage: message.text } }, { new: true })
                 .populate([
                   {
                     path: "chatBetween",
-                    match: { _id: { $ne: senderId } },
+                    // match: { _id: { $ne: senderId } },
                     select: "username avatar"
                   },
                   {
                     path: "messages",
-                    populate: {
-                      path: "reciever sender",
-                      select: "username"
-                    }
+                    // populate: {
+                    //   path: "reciever sender",
+                    //   select: "username"
+                    // }
                   }
                 ])
                 .exec(function(err, foundMessageThread) {
@@ -83,17 +83,17 @@ module.exports = Connection = (socket, io) => {
                           .populate([
                             {
                               path: "chatBetween",
-                              match: {
-                                _id: { $ne: senderId }
-                              },
+                              // match: {
+                              //   _id: { $ne: senderId }
+                              // },
                               select: "username avatar"
                             },
                             {
                               path: "messages",
-                              populate: {
-                                path: "reciever sender",
-                                select: "username"
-                              }
+                              // populate: {
+                              //   path: "reciever sender",
+                              //   select: "username"
+                              // }
                             }
                           ])
                           .exec(function(
@@ -143,7 +143,7 @@ module.exports = Connection = (socket, io) => {
                           });
                       });
                     } else {
-                      console.log("foundMessageThread", foundMessageThread);
+                      // console.log("foundMessageThread", foundMessageThread);
                       io.emit("success", {
                         message: "Message was sent",
                         messageSent: message,

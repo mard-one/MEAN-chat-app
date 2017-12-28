@@ -25,7 +25,7 @@ export class MessageEffects {
       // new contactThreadActions.AddNewMessageToContactThread(action.payload);
       // console.log("effect newMessageToContactThread", newMessageToContactThread);
       // console.log("effect newMessageToMessageThread", newMessageToMessageThread);
-      console.log("message effect payload", action.payload);
+      // console.log("message effect payload", action.payload);
       return [
         new messageActions.AddNewMessageToMessages(action.payload),
         new messageThreadActions.AddNewMessageToMessageThread(action.payload),

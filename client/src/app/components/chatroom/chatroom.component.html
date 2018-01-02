@@ -36,7 +36,7 @@
           {{ chosenUser?.user.username }}
         </a>
       </nav>
-      <div id="chat-box" *ngIf="((messages$ | async) && chosenUser?.user) ">
+      <div id="chat-box" *ngIf="((messages$ | async) && chosenUser?.user)">
         <ng-container *ngFor="let message of (messages$ | async)">
           <div id="message-by-friend" *ngIf="message.sender == chosenUser.user._id">
             <div id="text">{{message.text}}</div>
@@ -48,7 +48,7 @@
           </div>
         </ng-container>
       </div>
-      <div id="message-bar">
+      <div id="message-bar" *ngIf="((messages$ | async) && chosenUser?.user)">
         <form [formGroup]="formMessage" (submit)="sendMessage()">
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Message..." aria-label="Search for..." autofocus name="message" formControlName="message">
@@ -58,7 +58,7 @@
           </div>
         </form>
       </div>
-      <div id="hint" *ngIf="!chosenUser?.messageThread">
+      <div id="hint" *ngIf="!((messages$ | async) && chosenUser?.user)">
         <h4>Please, select user to begin chatting</h4>
       </div>
 

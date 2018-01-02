@@ -32,15 +32,18 @@ export function messageThreadReducer(
       return { ...state, loading: false, loaded: false };
     }
     case fromMessageThread.ADD_NEW_MESSAGE_TO_MESSAGE_THREAD: {
-
+      console.log("message thread payload", action.payload);
+      console.log("message thread state", state);
       const filteredStateWithoutNewMessageThread = [
         ...state.data.messageThread.filter(thread => {
           return action.payload.messageThread._id != thread._id;
         })
       ];
+      console.log("filtered state without new message thread", filteredStateWithoutNewMessageThread);
       const foundMessageThread = state.data.messageThread.filter(
         thread => action.payload.messageThread._id == thread._id
       );
+      console.log("found message thread", foundMessageThread);
       const properMessageThreadPayload = {
         messageThread: {
           ...action.payload.messageThread,
@@ -51,10 +54,7 @@ export function messageThreadReducer(
           )
         }
       };
-      // console.log("message thread payload", action.payload);
-      // console.log("message thread state", state);
-      // console.log("filtered message thread state", filteredStateWithoutNewMessageThread);
-      // console.log("proper message thread payload", properMessageThreadPayload);
+      console.log("proper message thread payload", properMessageThreadPayload);
       return {
         ...state,
         loading: false,

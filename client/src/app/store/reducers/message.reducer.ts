@@ -27,14 +27,23 @@ export function messageReducer(
       return { ...state, loading: false, loaded: false };
     }
     case fromMessage.CHOOSE_MESSAGE_FROM_MESSAGE_THREAD: {
-      return {
-        ...state,
-        loading: false,
-        loaded: true,
-        data: [...action.payload.messages]
-      };
+      console.log("choose message payload", action.payload);
+      console.log("choose message state", state);
+      if(action.payload){
+        return {
+          ...state,
+          loading: false,
+          loaded: true,
+          data: [...action.payload.messages]
+        };
+      } else {
+        return state = initialState
+      }
+      
     }
     case fromMessage.ADD_NEW_MESSAGE_TO_MESSAGES: {
+      // console.log("new message payload", action.payload);
+      // console.log("new message state", state);
       if(state.data.length){
         const isInclude = function(data) {
           return action.payload.messageThread.chatBetween
@@ -43,18 +52,15 @@ export function messageReducer(
             })
             .includes(true);
         };
-
-        // console.log("new message payload", action.payload);
-        // console.log("new message state", state);
-        // console.log("includes reciever", isInclude(state.data[0].reciever));
-        // console.log("includes sender", isInclude(state.data[0].sender));
+        console.log("new message payload", action.payload);
+        console.log("new message state", state);
         if (isInclude(state.data[0].reciever) && isInclude(state.data[0].sender)) {
           return { ...state, data: [...state.data, action.payload.message] };
         } else {
           return state;
         }
       }else{
-        return state
+        return state;
       }
     }
   }

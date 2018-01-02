@@ -11,34 +11,45 @@ const ContactThread = require("../models/contactThread");
 const Verify = require("./middleware/authentication");
 
 router.post("/addContact", Verify, function(req, res) {
-  User.findOne({ username: req.body.username }, "username messageThread avatar")
-  .exec((err, newUser)=>{
+  User.findOne(
+    { username: req.body.username },
+    "username messageThread avatar"
+  ).exec((err, newUser) => {
     if (err) {
-          res.json({ success: false, message: "Error occured" + err });
+      res.json({
+        success: false,
+        message: "Error occured with user that you are adding"
+      });
+    } else {
+      if (!newUser) {
+        res.json({ success: false, message: "User not found" });
+      } else {
+        if (newUser._id == req.decoded.user_id) {
+          res.json({ success: false, message: "You cannot add yourself" });
         } else {
-          if (!newUser) {
-            res.json({ success: false, message: "User not found" });
-          } else {
-            if (newUser._id == req.decoded.user_id) {
-              res.json({ success: false, message: "You cannot add yourself" });
-            } else {
-              ContactThread.findOneAndUpdate(
-                { threadOwner: req.decoded.user_id },
-                { $addToSet: { contacts: newUser._id } },
-                { sort: "contacts", new: true }
-              )
-                .populate({ path: "contacts", select: "-password -contactThread" })
-                .exec(function(err, data) {
-                  if (err) return handleError(err);
-                  res.json({
-                    success: true,
-                    user: newUser
-                  });
+          ContactThread.findOneAndUpdate(
+            { threadOwner: req.decoded.user_id },
+            { $addToSet: { contacts: newUser._id } },
+            { sort: "contacts", new: true }
+          )
+            .populate({ path: "contacts", select: "-password -contactThread" })
+            .exec(function(err, data) {
+              if (err) {
+                res.json({
+                  success: false,
+                  message: "Something wrong with contact thread"
                 });
-            }
-          }
+              }
+              res.json({
+                success: true,
+                message: "Success",
+                user: newUser
+              });
+            });
         }
-  })
+      }
+    }
+  });
 });
 
 router.get("/getAllContacts", Verify, function(req, res) {
@@ -51,21 +62,37 @@ router.get("/getAllContacts", Verify, function(req, res) {
         populate: {
           path: "messageThread",
           match: { chatBetween: req.decoded.user_id },
-          populate: [{
-            path: "chatBetween",
-            match: { _id: { $ne: req.decoded.user_id } },
-            select: "username"
-          },
-          {
-            path: "messages"
-          }
-        ]
+          populate: [
+            {
+              path: "chatBetween",
+              match: { _id: { $ne: req.decoded.user_id } },
+              select: "username"
+            },
+            {
+              path: "messages"
+            }
+          ]
         }
       }
     })
     .exec(function(err, data) {
-      if (err) throw err;
-      res.json({ success: true, contactThread: data.contactThread.contacts });
+      if (err) {
+        res.json({ success: false, message: "Error occured " + err });
+      } else {
+        if (!data) {
+          res.json({
+            success: false,
+            message: "User is undefined",
+            contactThread: data.contactThread.contacts
+          });
+        } else {
+          res.json({
+            success: true,
+            message: "All contacts initialized",
+            contactThread: data.contactThread.contacts
+          });
+        }
+      }
     });
 });
 

@@ -8,7 +8,21 @@ const Message = require("../models/message");
 const MessageThread = require("../models/messageThread");
 const ContactThread = require("../models/contactThread");
 
-module.exports = Connection = (socket, io) => {
+module.exports = function Connection(socket, io) {
+  // var user = Verify(socket.handshake.query.token, config.secret)
+  // if(user.type == "success"){
+  //   User.findById(user.data.user_id).exec((err, foundUser)=>{
+  //     foundUser.messageThread.forEach(element=>{
+  //       var nsp = io.of(`${element}`);
+  //       nsp.on("connection", function(socket) {
+  //         console.log("someone connected");
+  //       });
+  //     })
+  //   })
+  // }
+
+  // console.log("socket", socket);
+  // console.log("io", io);
   socket.on("sendMessage", function(data) {
     if (!data.reciever) {
       // console.log("Hi buddy")
@@ -38,7 +52,14 @@ module.exports = Connection = (socket, io) => {
             // .populate({path: "sender reciever", select:"-password -contactThread"})
             .exec((err, foundMessage) => {
               // console.log("foundMEssage", foundMessage);
-              MessageThread.findOneAndUpdate({ chatBetween: { $all: [senderId, recieverId] } }, { $addToSet: { messages: message._id }, $set: { lastMessage: message.text } }, { new: true })
+              MessageThread.findOneAndUpdate(
+                { chatBetween: { $all: [senderId, recieverId] } },
+                {
+                  $addToSet: { messages: message._id },
+                  $set: { lastMessage: message.text }
+                },
+                { new: true }
+              )
                 .populate([
                   {
                     path: "chatBetween",
@@ -46,7 +67,7 @@ module.exports = Connection = (socket, io) => {
                     select: "username avatar"
                   },
                   {
-                    path: "messages",
+                    path: "messages"
                     // populate: {
                     //   path: "reciever sender",
                     //   select: "username"
@@ -71,10 +92,7 @@ module.exports = Connection = (socket, io) => {
                         ],
                         messages: [message._id]
                       });
-                      messageThread.save(function(
-                        err,
-                        newMessageThread
-                      ) {
+                      messageThread.save(function(err, newMessageThread) {
                         MessageThread.findByIdAndUpdate(
                           newMessageThread._id,
                           { lastMessage: message.text },
@@ -89,17 +107,14 @@ module.exports = Connection = (socket, io) => {
                               select: "username avatar"
                             },
                             {
-                              path: "messages",
+                              path: "messages"
                               // populate: {
                               //   path: "reciever sender",
                               //   select: "username"
                               // }
                             }
                           ])
-                          .exec(function(
-                            err,
-                            updatedMessageThread
-                          ) {
+                          .exec(function(err, updatedMessageThread) {
                             if (err) {
                               socket.emit("exception", {
                                 message: "error occured",
@@ -116,39 +131,46 @@ module.exports = Connection = (socket, io) => {
                                 },
                                 {
                                   $addToSet: {
-                                    messageThread:
-                                      updatedMessageThread._id
+                                    messageThread: updatedMessageThread._id
                                   }
                                 },
                                 {
-                                  select:
-                                    "username messageThread",
+                                  select: "username messageThread",
                                   multi: true
                                 }
                               )
                                 // .populate({path: "_id"})
                                 .exec(function(err, updatedUser) {
-                                  console.log(
-                                    "updatedMessageThread",
-                                    updatedMessageThread
-                                  );
-                                  io.emit("success", {
-                                    message:
-                                      "Message thread was created and message was sent",
-                                    messageSent: message,
-                                    messageThread: updatedMessageThread
-                                  });
+                                  // console.log(
+                                  //   "updatedMessageThread",
+                                  //   updatedMessageThread
+                                  // );
+                                  console.log("updatedUser", updatedUser);
+                                  console.log("rooms", socket.rooms);
+                                  io
+                                    .to(recieverId)
+                                    .to(senderId)
+                                    .emit("success", {
+                                      message:
+                                        "Message thread was created and message was sent",
+                                      messageSent: message,
+                                      messageThread: updatedMessageThread
+                                    });
                                 });
                             }
                           });
                       });
                     } else {
-                      // console.log("foundMessageThread", foundMessageThread);
-                      io.emit("success", {
-                        message: "Message was sent",
-                        messageSent: message,
-                        messageThread: foundMessageThread
-                      });
+                      console.log("rooms", socket.rooms);
+                      console.log("foundMessageThread", foundMessageThread._id);
+                      io
+                        .to(recieverId)
+                        .to(senderId)
+                        .emit("success", {
+                          message: "Message was sent",
+                          messageSent: message,
+                          messageThread: foundMessageThread
+                        });
                     }
                   }
                 });
@@ -157,5 +179,4 @@ module.exports = Connection = (socket, io) => {
       }
     }
   });
-  console.log("client connect to socket");
 };

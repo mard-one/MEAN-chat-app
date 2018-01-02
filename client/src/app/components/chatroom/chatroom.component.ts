@@ -27,6 +27,7 @@ import { AuthService } from "../../services/auth.service";
 import { ThreadService } from "../../services/thread.service";
 import { MessageService } from "../../services/message.service";
 import { ApiService } from "../../services/api.service";
+import { element } from "protractor";
 
 @Component({
   selector: "app-chatroom",
@@ -43,16 +44,8 @@ export class ChatroomComponent implements OnInit {
 
   formMessage: FormGroup;
   formContact: FormGroup;
-  // message
-  // messageClass
-  // processing = false
-  // usersInContactThread
-  // usersInMessageThread
-  // chosenUser
-  // tempMessage
 
   private socket;
-  // private messagesUnread
 
   constructor(
     private apiService: ApiService,
@@ -71,16 +64,20 @@ export class ChatroomComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.socket = io.connect(
+      `http://localhost:8080?token=${localStorage.getItem("token")}`
+    );
     this.store.dispatch(new LoadMessageThread());
     this.store.dispatch(new LoadContactThread());
     this.messageThread$ = this.store.select(getMessageThread);
     this.contactThread$ = this.store.select(getContactThread);
     this.messages$ = this.store.select(getMessage);
     this.store.select(getMessageThread).subscribe(messageThread => {
-        console.log("message thread", messageThread);
-      });
+      console.log("message thread", messageThread);
+    });
     this.store.select(getContactThread).subscribe(contactThread => {
       console.log("contact thread", contactThread);
+
     });
     this.store.select(getMessage).subscribe(messages => {
       console.log("messages", messages);
@@ -94,7 +91,10 @@ export class ChatroomComponent implements OnInit {
     //   this.profile = userData;
     //   console.log(this.profile);
     // });
-    this.socket = io.connect("http://localhost:8080");
+    this.socket.on("connect", () => {
+      this.socket.emit("room", localStorage.getItem('token'));
+    });
+
     this.socket.on("success", data => {
       console.log("socket message", data);
       this.store.dispatch(
@@ -135,7 +135,9 @@ export class ChatroomComponent implements OnInit {
     console.log("message user", user);
     this.chosenUser = { user: user.chatBetween[0], messageThread: user };
     console.log("message chosen user", this.chosenUser);
-    this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
+    this.store.dispatch(
+      new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
+    );
     // console.log(user);
     // this.chosenUser$ = this.store
     //   .select(fromStore.getChosenUser)
@@ -149,7 +151,9 @@ export class ChatroomComponent implements OnInit {
     console.log("contact user", user);
     this.chosenUser = { user: user, messageThread: user.messageThread[0] };
     console.log("contact chosen user", this.chosenUser);
-    this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
+    this.store.dispatch(
+      new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
+    );
   }
 
   // sendMessage() {
@@ -176,7 +180,7 @@ export class ChatroomComponent implements OnInit {
     };
     if (user.username) {
       this.disableForm();
-      console.log(user);
+      // console.log(user);
       this.store.dispatch(new AddContactToContactThread(user));
     } else {
       console.log("Please add username");

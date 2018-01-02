@@ -23,7 +23,7 @@ export class ContactThreadEffects {
         return this.contactService
           .getAllContacts()
           .pipe(
-            map(user => new contactThreadActions.LoadContactThreadSuccess(user))
+            map(user => new contactThreadActions.LoadContactThreadReady(user))
           );
       })
     );
@@ -38,13 +38,8 @@ export class ContactThreadEffects {
           .pipe(
             map(
               user => {
-                if(user.success){
-                  console.log("success");
-                  return new contactThreadActions.AddContactToContactThreadSuccess(user);
-                }else{
-                  console.log("fail");
-                  return new contactThreadActions.AddContactToContactThreadFail(user)
-                }
+                console.log("add contact to contact thread effect", user)
+                return new contactThreadActions.AddContactToContactThreadReady(user);
               }
             )
           );

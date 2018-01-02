@@ -27,25 +27,51 @@ router.post("/addContact", Verify, function(req, res) {
         if (newUser._id == req.decoded.user_id) {
           res.json({ success: false, message: "You cannot add yourself" });
         } else {
-          ContactThread.findOneAndUpdate(
-            { threadOwner: req.decoded.user_id },
-            { $addToSet: { contacts: newUser._id } },
-            { sort: "contacts", new: true }
-          )
-            .populate({ path: "contacts", select: "-password -contactThread" })
-            .exec(function(err, data) {
-              if (err) {
+          User.findById(req.decoded.user_id)
+          .populate({ path: "contactThread" })
+          .exec((err, foundUser) => {
+            if (err) {
+              console.log("fucking err");
+              res.json({ success: false, message: "Error occured " + err });
+            } else {
+              if (!foundUser) {
                 res.json({
                   success: false,
-                  message: "Something wrong with contact thread"
+                  message: "Current user not found"
                 });
+              } else {
+                // console.log("foundUser.contactThread.contacts", foundUser.contactThread.contacts);
+                // console.log("newUser._id", newUser._id.toString());
+                // console.log("foundUser.contactThread.contacts.includes(newUser._id)", foundUser.contactThread.contacts.indexOf(newUser._id));
+                if (foundUser.contactThread.contacts.indexOf(newUser._id) + 1) {
+                  res.json({
+                    success: false,
+                    message: "The user exists in your contacts"
+                  });
+                } else {
+                  ContactThread.findOneAndUpdate({ threadOwner: req.decoded.user_id }, { $addToSet: { contacts: newUser._id } }, { sort: "contacts", new: true })
+                    .populate({
+                      path: "contacts",
+                      select: "-password -contactThread"
+                    })
+                    .exec(function(err, data) {
+                      if (err) {
+                        res.json({
+                          success: false,
+                          message:
+                            "Something wrong with contact thread"
+                        });
+                      }
+                      res.json({
+                        success: true,
+                        message: "Success",
+                        user: newUser
+                      });
+                    });
+                }
               }
-              res.json({
-                success: true,
-                message: "Success",
-                user: newUser
-              });
-            });
+            }
+          });
         }
       }
     }

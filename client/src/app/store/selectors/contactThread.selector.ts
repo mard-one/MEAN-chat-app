@@ -20,3 +20,7 @@ export const getContactThreadLoading = createSelector(
   chooseContactThread,
   fromContactThread.getContactThreadLoading
 );
+export const getContactThreadMessage = createSelector(
+  chooseContactThread,
+  fromContactThread.getContactThreadMessage
+);

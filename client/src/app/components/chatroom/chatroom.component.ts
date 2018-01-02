@@ -28,6 +28,7 @@ import { ThreadService } from "../../services/thread.service";
 import { MessageService } from "../../services/message.service";
 import { ApiService } from "../../services/api.service";
 import { element } from "protractor";
+import { stat } from "fs";
 
 @Component({
   selector: "app-chatroom",
@@ -46,6 +47,9 @@ export class ChatroomComponent implements OnInit {
   formContact: FormGroup;
 
   private socket;
+
+  addContactToContactsMessage: string;
+  addContactToContactsStatus: boolean;
 
   constructor(
     private apiService: ApiService,
@@ -77,7 +81,6 @@ export class ChatroomComponent implements OnInit {
     });
     this.store.select(getContactThread).subscribe(contactThread => {
       console.log("contact thread", contactThread);
-
     });
     this.store.select(getMessage).subscribe(messages => {
       console.log("messages", messages);
@@ -92,7 +95,7 @@ export class ChatroomComponent implements OnInit {
     //   console.log(this.profile);
     // });
     this.socket.on("connect", () => {
-      this.socket.emit("room", localStorage.getItem('token'));
+      this.socket.emit("room", localStorage.getItem("token"));
     });
 
     this.socket.on("success", data => {
@@ -179,11 +182,30 @@ export class ChatroomComponent implements OnInit {
       username: this.formContact.get("username").value
     };
     if (user.username) {
-      this.disableForm();
-      // console.log(user);
       this.store.dispatch(new AddContactToContactThread(user));
+      this.store.select(getContactThreadState).subscribe(state => {
+        console.log("contact thread state", state);
+        if (state.loading) {
+          this.disableForm();
+        } else {
+          if (state.loaded) {
+            this.addContactToContactsMessage = state.message;
+            this.addContactToContactsStatus = state.loaded;
+            setTimeout(() => {
+              $("#contactModal").modal("hide");
+              this.enableForm();
+              this.formContact.reset();
+            }, 500);
+          } else {
+            this.addContactToContactsMessage = state.message;
+            this.addContactToContactsStatus = state.loaded;
+            this.enableForm();
+          }
+        }
+      });
     } else {
-      console.log("Please add username");
+      this.addContactToContactsMessage = "Please enter a username";
+      this.addContactToContactsStatus = false;
     }
     // this.contactService.addContact(user).subscribe(data => {
     //   if (!data.success) {
@@ -207,8 +229,10 @@ export class ChatroomComponent implements OnInit {
     // console.log("enable working")
     this.formContact.controls["username"].enable();
   }
-  goBack() {
+  modalClosed() {
     this.formContact.reset();
+    this.addContactToContactsMessage = "";
+
   }
 
   // countUnreadMessages(usersInMessageThread){

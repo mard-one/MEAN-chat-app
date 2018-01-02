@@ -74,24 +74,29 @@
             <div class="modal-header">
               <h5 class="modal-title" id="contactModalLabel">Adding a person to contact list</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+                <span aria-hidden="true" (click)="modalClosed()">&times;</span>
               </button>
             </div>
             <div class="modal-body">
-              <div [ngClass]='messageClass' role="alert">
-                {{message}}
-              </div>
               <form [formGroup]="formContact" (submit)="addContact()">
                 <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput">Enter username</label>
                   <input name="username" formControlName="username" aria-describedby="usernameHelp" type="text" class="form-control" id="formGroupExampleInput"
-                    placeholder="Username...">
+                    placeholder="Username..." autofocus>
                   <small id="usernameHelp" class="form-text text-muted">Please, enter a user that registered</small>
                 </div>
+                <ng-container *ngIf="addContactToContactsMessage">
+                  <div *ngIf="addContactToContactsStatus" class="alert alert-success" role="alert">
+                    {{addContactToContactsMessage}}
+                  </div>
+                  <div *ngIf="!addContactToContactsStatus" class="alert alert-danger" role="alert">
+                    {{addContactToContactsMessage}}
+                  </div>
+                </ng-container>
                 <hr>
                 <div id="actions">
                   <button type="submit" class="btn btn-primary">Save changes</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="goBack()">Close</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="modalClosed()">Close</button>
                 </div>
               </form>
             </div>

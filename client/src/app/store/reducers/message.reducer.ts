@@ -42,8 +42,8 @@ export function messageReducer(
       
     }
     case fromMessage.ADD_NEW_MESSAGE_TO_MESSAGES: {
-      // console.log("new message payload", action.payload);
-      // console.log("new message state", state);
+      console.log("Add new message to messages payload", action.payload);
+      console.log("Add new message to messages state", state);
       if(state.data.length){
         const isInclude = function(data) {
           return action.payload.messageThread.chatBetween
@@ -60,7 +60,7 @@ export function messageReducer(
           return state;
         }
       }else{
-        return state;
+        return { ...state, data: [action.payload.message] };
       }
     }
   }

@@ -63,21 +63,21 @@ export function contactThreadReducer(
       }
     }
     case fromContactThread.ADD_NEW_MESSAGE_TO_CONTACT_THREAD: {
+      console.log("contact thread payload", action.payload);
+      console.log("contact thread state", state);
       if (state.data.contacts.length) {
-        console.log("contact thread payload", action.payload);
-        console.log("contact thread state", state);
         const foundContact = state.data.contacts.filter(thread => {
           console.log("thread", thread);
           return action.payload.messageThread.chatBetween
             .map(element => {
-              // console.log("element", element);
-              // console.log("element._id == thread._id", element._id == thread._id);
+              console.log("element", element);
+              console.log("element._id == thread._id", element._id == thread._id);
               return element._id == thread._id;
             })
             .includes(true);
         });
+        console.log("foundContact", foundContact);
         if (foundContact.length) {
-          console.log("foundContact", foundContact);
           const properMessageThreadPayload = {
             messageThread: {
               ...action.payload.messageThread,
@@ -112,6 +112,8 @@ export function contactThreadReducer(
               contacts: [...filteredStateWithoutFoundUser, updatedFoundContact]
             }
           };
+        } else {
+
         }
       }
     }

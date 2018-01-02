@@ -151,12 +151,16 @@ export class ChatroomComponent implements OnInit {
     // console.log(this.chosenUser$);
   }
   chooseUserFromContactThread(user) {
-    console.log("contact user", user);
-    this.chosenUser = { user: user, messageThread: user.messageThread[0] };
-    console.log("contact chosen user", this.chosenUser);
-    this.store.dispatch(
-      new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
-    );
+    if(user.messageThread.length > 0){
+      console.log("contact user", user);
+      this.chosenUser = { user: user, messageThread: user.messageThread[0] };
+      console.log("contact chosen user", this.chosenUser);
+      this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
+    } else {
+      this.chosenUser = { user: user, messageThread: undefined };
+      this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
+    }
+    
   }
 
   // sendMessage() {
@@ -192,9 +196,10 @@ export class ChatroomComponent implements OnInit {
             this.addContactToContactsMessage = state.message;
             this.addContactToContactsStatus = state.loaded;
             setTimeout(() => {
-              $("#contactModal").modal("hide");
               this.enableForm();
               this.formContact.reset();
+              this.addContactToContactsMessage = "";
+              $("#contactModal").modal("hide");
             }, 500);
           } else {
             this.addContactToContactsMessage = state.message;

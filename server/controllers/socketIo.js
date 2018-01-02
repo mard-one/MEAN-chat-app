@@ -141,27 +141,43 @@ module.exports = function Connection(socket, io) {
                               )
                                 // .populate({path: "_id"})
                                 .exec(function(err, updatedUser) {
-                                  // console.log(
-                                  //   "updatedMessageThread",
-                                  //   updatedMessageThread
-                                  // );
-                                  console.log("updatedUser", updatedUser);
-                                  console.log("rooms", socket.rooms);
-                                  io
-                                    .to(recieverId)
-                                    .to(senderId)
-                                    .emit("success", {
-                                      message:
-                                        "Message thread was created and message was sent",
-                                      messageSent: message,
-                                      messageThread: updatedMessageThread
-                                    });
+                                  console.log(
+                                    "updatedMessageThread",
+                                    updatedMessageThread
+                                  );
+                                  // console.log("updatedUser", updatedUser);
+                                  // console.log("rooms", socket.rooms);
+                                  function filteredFor(anId) {
+                                    return {
+                                      _id: updatedMessageThread._id,
+                                      lastMessage: updatedMessageThread.lastMessage,
+                                      messages: updatedMessageThread.messages,
+                                      chatBetween: updatedMessageThread.chatBetween.filter(
+                                          element => {
+                                            return element._id != anId;
+                                          }
+                                        )
+                                    };
+                                  }
+
+                                  io.to(recieverId).emit("success", {
+                                    message:
+                                      "Message thread was created and message was sent",
+                                    messageSent: message,
+                                    messageThread: filteredFor(recieverId)
+                                  });
+                                  io.to(senderId).emit("success", {
+                                    message:
+                                      "Message thread was created and message was sent",
+                                    messageSent: message,
+                                    messageThread: filteredFor(senderId)
+                                  });
                                 });
                             }
                           });
                       });
                     } else {
-                      console.log("rooms", socket.rooms);
+                      // console.log("rooms", socket.rooms);
                       console.log("foundMessageThread", foundMessageThread._id);
                       io
                         .to(recieverId)

@@ -7,22 +7,48 @@ const User = require("../models/user");
 const Message = require("../models/message");
 const MessageThread = require("../models/messageThread");
 const ContactThread = require("../models/contactThread");
+const usersOnline = [];
 
-module.exports = function Connection(socket, io) {
+module.exports = function Connection(socket, io, currentUser) {
+  console.log("client connected", currentUser.data);
+  usersOnline.push(currentUser.data.user_id);
+  socket.on("give me online users", ()=>{
+    var unique = usersOnline.filter((el, i, a) => i === a.indexOf(el));
+    io.emit("online users", unique);
+  })
+  // console.log("socket.handshake.query.token", socket.handshake.query.token);
+  
   // var user = Verify(socket.handshake.query.token, config.secret)
   // if(user.type == "success"){
   //   User.findById(user.data.user_id).exec((err, foundUser)=>{
-  //     foundUser.messageThread.forEach(element=>{
-  //       var nsp = io.of(`${element}`);
-  //       nsp.on("connection", function(socket) {
-  //         console.log("someone connected");
-  //       });
-  //     })
+  //     // console.log("socket found user", foundUser);
+  //     io.emit("online user", {_id: foundUser._id, username: foundUser.username})
+  //        console.info(`Client connected [id=${socket.id}]`);
+  //        console.info(`Client connected [_id=${foundUser._id}, username=${foundUser.username}]`);
+    
   //   })
-  // }
+ 
 
+  // }
+  
+  socket.on("disconnect", () => {
+    console.log("client disconnected", currentUser.data);
+    var index = usersOnline.indexOf(currentUser.data.user_id);
+    var disconnectUser = usersOnline.splice(index, 1);
+    io.emit("online users", usersOnline);
+  });
   // console.log("socket", socket);
   // console.log("io", io);
+  socket.on("room", function(token) {
+    var user = Verify(token, config.secret);
+    // console.log("user_id", user.data.user_id);
+    if (user.type == "success") {
+      // console.log("user.data.user_id", user.data.user_id);
+      socket.join(user.data.user_id);
+      // console.log("socket rooms", socket.adapter.rooms[user.data.user_id]);
+    }
+  });
+  
   socket.on("sendMessage", function(data) {
     if (!data.reciever) {
       // console.log("Hi buddy")

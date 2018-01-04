@@ -54,22 +54,8 @@ const server = app.listen(port, function() {
 var io = require("socket.io").listen(server);
 
 io.on("connection", socket => {
-  socket.on("room", function(token) {
-    var user = Verify(token, config.secret);
-    console.log("user_id", user.data.user_id);
-    if(user.type == "success"){
-      // console.log("user.data.user_id", user.data.user_id);
-      socket.join(user.data.user_id);
-      // console.log("socket rooms", socket.adapter.rooms[user.data.user_id]);
-    }
-    // console.log('id', socket.id);
-    // console.log("room", room);
-    // console.log("Room",socket.adapter.rooms[room]);
-    // console.log("socket rooms", socket.rooms);
-  });
-  console.info(`Client connected [id=${socket.id}]`);
-  socket.on("disconnect", () => {
-    console.info(`Client gone [id=${socket.id}]`);
-  });
-  Connection(socket, io)
+  var user = Verify(socket.handshake.query.token, config.secret);
+  if(user.type == "success"){
+    Connection(socket, io, user);
+  }
 });

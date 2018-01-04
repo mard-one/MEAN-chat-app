@@ -115,6 +115,11 @@
             <div class="wrapper">
               <div id="username-contact">{{contact.username}}</div>
             </div>
+              <ng-container *ngFor="let oUser of onlineUsers">
+                <div id="online-status" *ngIf="oUser == contact._id ">
+                  online
+                </div>
+              </ng-container>
           </div>
         </ng-container>
       </div>

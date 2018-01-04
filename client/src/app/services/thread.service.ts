@@ -7,21 +7,38 @@ import { AuthService } from "./auth.service";
 
 @Injectable()
 export class ThreadService {
+  domain = "http://localhost:8080";
 
-  domain = "http://localhost:8080"
+  constructor(private http: Http, private authService: AuthService) {}
 
-  constructor(private http: Http, private authService: AuthService) { }
-
-  getAllMessageThread(){
-    this.authService.createAuthenticationHeader()
-    return this.http.get(this.domain + "/thread/getAllMessageThread", this.authService.options).map(res=>res.json())
+  getAllMessageThread() {
+    this.authService.createAuthenticationHeader();
+    return this.http
+      .get(
+        this.domain + "/thread/getAllMessageThread",
+        this.authService.options
+      )
+      .map(res => res.json());
   }
 
-  setCurrentThread(user){
+  setCurrentThread(user) {
     // console.log("user", user)
-    this.authService.createAuthenticationHeader()
-    return this.http.post(this.domain + "/thread/setCurrentThread", user, this.authService.options).map(res=>res.json())
+    this.authService.createAuthenticationHeader();
+    return this.http
+      .post(
+        this.domain + "/thread/setCurrentThread",
+        user,
+        this.authService.options
+      )
+      .map(res => res.json());
   }
-
-
+  removeUnreadMessage(messageThread) {
+    // console.log("messageThread", messageThread);
+    return this.http
+      .post(
+        this.domain + "/thread/removeUnreadMessage",
+        messageThread
+      )
+      .map(res => res.json());
+  }
 }

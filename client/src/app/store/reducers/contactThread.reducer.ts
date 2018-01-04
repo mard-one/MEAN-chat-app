@@ -23,19 +23,21 @@ export function contactThreadReducer(
 ): ContactThreadState {
   switch (action.type) {
     case fromContactThread.LOAD_CONTACT_THREAD: {
-      return { ...state, loading: true };
+      console.log("load contact thread payload", action.payload);
+      console.log("load contact thread state", state);
+      return { ...state, loading: false, loaded: action.payload.success, data: action.payload.userData.contactThread };
     }
-    case fromContactThread.LOAD_CONTACT_THREAD_READY: {
-      const contacts = action.payload.contactThread;
-      // console.log("action.payload", action.payload);
-      return {
-        ...state,
-        loading: false,
-        loaded: action.payload.success,
-        message: action.payload.message,
-        data: { contacts: contacts }
-      };
-    }
+    // case fromContactThread.LOAD_CONTACT_THREAD_READY: {
+    //   const contacts = action.payload.contactThread;
+    //   // console.log("action.payload", action.payload);
+    //   return {
+    //     ...state,
+    //     loading: false,
+    //     loaded: action.payload.success,
+    //     message: action.payload.message,
+    //     data: { contacts: contacts }
+    //   };
+    // }
     case fromContactThread.ADD_CONTACT_TO_CONTACT_THREAD: {
       return { ...state, loading: true };
     }
@@ -67,16 +69,16 @@ export function contactThreadReducer(
       console.log("contact thread state", state);
       if (state.data.contacts.length) {
         const foundContact = state.data.contacts.filter(thread => {
-          console.log("thread", thread);
+          // console.log("thread", thread);
           return action.payload.messageThread.chatBetween
             .map(element => {
-              console.log("element", element);
-              console.log("element._id == thread._id", element._id == thread._id);
+              // console.log("element", element);
+              // console.log("element._id == thread._id", element._id == thread._id);
               return element._id == thread._id;
             })
             .includes(true);
         });
-        console.log("foundContact", foundContact);
+        // console.log("foundContact", foundContact);
         if (foundContact.length) {
           const properMessageThreadPayload = {
             messageThread: {
@@ -88,13 +90,13 @@ export function contactThreadReducer(
               )
             }
           };
-          console.log("properContactThreadPayload", properMessageThreadPayload);
+          // console.log("properContactThreadPayload", properMessageThreadPayload);
           const filteredStateWithoutFoundUser = [
             ...state.data.contacts.filter(contact => {
               return contact._id != foundContact[0]._id;
             })
           ];
-          console.log("filter works");
+          // console.log("filter works");
           const updatedFoundContact: User = {
             _id: foundContact[0]._id,
             username: foundContact[0].username,

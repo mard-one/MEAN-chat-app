@@ -9,18 +9,20 @@
         <ng-container *ngIf="(messageThread$ | async)">
           <div id="user-in-thread" *ngFor="let thread of (messageThread$ | async).messageThread.reverse()" (click)="chooseUserFromMessageThread(thread)">
             <div id="thread-main">
-              <div id="user-image">
-                <img *ngIf="thread.chatBetween[0].avatar.length == 0" src='./assets/images/Asset 3.svg'>
-                <img *ngIf="thread.chatBetween[0].avatar.length" src='{{thread.chatBetween[0].avatar.avatar}}'>
-              </div>
-              <div class="wrapper">
-                <div id="username">{{thread.chatBetween[0].username}}</div>
-                <div id="last-message">{{thread.lastMessage}}</div>
-              </div>
+              <ng-container *ngFor="let user of thread.chatBetween">
+                <div id="user-image" *ngIf="user._id != currentUser._id">
+                  <img *ngIf="user.avatar.length == 0" src='./assets/images/Asset 3.svg'>
+                  <img *ngIf="user.avatar.length" src='{{user.avatar.avatar}}'>
+                </div>
+                <div class="wrapper" *ngIf="user._id != currentUser._id">
+                  <div id="username">{{user.username}}</div>
+                  <div id="last-message">{{thread.lastMessage}}</div>
+                </div>
+              </ng-container>
             </div>
             <ng-container>
-              <div id="unread-messages">
-                <span class="badge badge-info"></span>
+              <div id="unread-messages" *ngIf="thread.unreadMessages > 0">
+                <span class="badge badge-info">{{thread.unreadMessages}}</span>
               </div>
             </ng-container>
           </div>

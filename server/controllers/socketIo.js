@@ -160,18 +160,36 @@ module.exports = function Connection(socket, io) {
                                     };
                                   }
 
-                                  io.to(recieverId).emit("success", {
-                                    message:
-                                      "Message thread was created and message was sent",
-                                    messageSent: message,
-                                    messageThread: filteredFor(recieverId)
-                                  });
-                                  io.to(senderId).emit("success", {
-                                    message:
-                                      "Message thread was created and message was sent",
-                                    messageSent: message,
-                                    messageThread: filteredFor(senderId)
-                                  });
+                                  io
+                                    .to(
+                                      recieverId
+                                    )
+                                    .emit(
+                                      "successfully sent",
+                                      {
+                                        message:
+                                          "Message thread was created and message was sent",
+                                        messageSent: message,
+                                        messageThread: filteredFor(
+                                          recieverId
+                                        )
+                                      }
+                                    );
+                                  io
+                                    .to(
+                                      senderId
+                                    )
+                                    .emit(
+                                      "successfully recieved",
+                                      {
+                                        message:
+                                          "Message thread was created and message was sent",
+                                        messageSent: message,
+                                        messageThread: filteredFor(
+                                          senderId
+                                        )
+                                      }
+                                    );
                                 });
                             }
                           });
@@ -181,8 +199,14 @@ module.exports = function Connection(socket, io) {
                       console.log("foundMessageThread", foundMessageThread._id);
                       io
                         .to(recieverId)
+                        .emit("successfully sent", {
+                          message: "Message was sent",
+                          messageSent: message,
+                          messageThread: foundMessageThread
+                        });
+                      io
                         .to(senderId)
-                        .emit("success", {
+                        .emit("successfully recieved", {
                           message: "Message was sent",
                           messageSent: message,
                           messageThread: foundMessageThread

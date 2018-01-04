@@ -7,5 +7,6 @@ export interface MessageThread {
   chatBetween?: User[];
   messages?: Message[];
   lastMessage?: string;
+  unreadMessages?: number;
 }
 

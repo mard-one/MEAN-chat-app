@@ -17,7 +17,7 @@ import { PageNotFoundComponent } from './components/page-not-found/page-not-foun
 
 import { AppRoutingModule } from './app-routing.module';
 
-import { ApiService } from './services/api.service';
+import { UserService } from './services/user.service';
 import { AuthService } from './services/auth.service';
 import { ContactService } from './services/contact.service';
 import { ThreadService } from './services/thread.service';
@@ -46,7 +46,7 @@ import { OrderModule } from "ngx-order-pipe";
     OrderModule
   ],
   providers: [
-    ApiService,
+    UserService,
     AuthService,
     ContactService,
     ThreadService,

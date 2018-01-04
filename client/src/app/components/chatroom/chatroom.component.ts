@@ -17,7 +17,11 @@ import {
   getContactThreadState,
   AddNewMessageSuccess,
   AddContactToContactThread,
-  ChooseMessageFromMessageThread
+  ChooseMessageFromMessageThread,
+  RemoveUnreadMessageFromMessageThread,
+  AddUnreadMessageToMessageThread,
+  LoadCurrentUser,
+  getUser
 } from "../../store";
 
 import { User } from "../../models/user.model";
@@ -26,7 +30,7 @@ import { ContactService } from "../../services/contact.service";
 import { AuthService } from "../../services/auth.service";
 import { ThreadService } from "../../services/thread.service";
 import { MessageService } from "../../services/message.service";
-import { ApiService } from "../../services/api.service";
+import { UserService } from "../../services/user.service";
 import { element } from "protractor";
 import { stat } from "fs";
 
@@ -37,6 +41,7 @@ import { stat } from "fs";
   // pipes: [OrderByPipe]
 })
 export class ChatroomComponent implements OnInit {
+  currentUser;
   chosenUser: { user: any; messageThread: { any } };
   messages$: Observable<any>;
   messageThread$: Observable<any>;
@@ -52,7 +57,7 @@ export class ChatroomComponent implements OnInit {
   addContactToContactsStatus: boolean;
 
   constructor(
-    private apiService: ApiService,
+    private userService: UserService,
     private formBuilder: FormBuilder,
     private contactService: ContactService,
     private authService: AuthService,
@@ -68,14 +73,17 @@ export class ChatroomComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.socket = io.connect(
-      `http://localhost:8080?token=${localStorage.getItem("token")}`
-    );
-    this.store.dispatch(new LoadMessageThread());
-    this.store.dispatch(new LoadContactThread());
+    this.socket = io.connect(`http://localhost:8080`);
+    this.store.dispatch(new LoadCurrentUser());
+    // this.store.dispatch(new LoadMessageThread());
+    // this.store.dispatch(new LoadContactThread());
     this.messageThread$ = this.store.select(getMessageThread);
     this.contactThread$ = this.store.select(getContactThread);
     this.messages$ = this.store.select(getMessage);
+    this.store.select(getUser).subscribe(user => {
+      this.currentUser = user;
+      console.log("user", user);
+    });
     this.store.select(getMessageThread).subscribe(messageThread => {
       console.log("message thread", messageThread);
     });
@@ -90,7 +98,7 @@ export class ChatroomComponent implements OnInit {
     // });
     // console.log("message thread", this.messageThread$)
     // this.store.dispatch(new fromStore.LoadChosenUser());
-    // this.apiService.pageInit().subscribe(userData => {
+    // this.userService.pageInit().subscribe(userData => {
     //   this.profile = userData;
     //   console.log(this.profile);
     // });
@@ -98,48 +106,48 @@ export class ChatroomComponent implements OnInit {
       this.socket.emit("room", localStorage.getItem("token"));
     });
 
-    this.socket.on("success", data => {
+    this.socket.on("successfully recieved", data => {
       console.log("socket message", data);
       this.store.dispatch(
         new AddNewMessageSuccess({
-          // thisUser:
           message: data.messageSent,
           messageThread: data.messageThread
         })
       );
-      //   this.threadService.getAllMessageThread().subscribe((data)=>{
-      //     // console.log("success")
-      //     this.usersInMessageThread = data.users
-      //     console.log("this.usersInMessageThread", this.usersInMessageThread)
-      //   })
-      //   if(this.chosenUser){
-      //     this.chosenUser.messages = data.updatedMessageThread.messages
-      //     console.log("this.chosenUser", this.chosenUser)
-      //   }
-      //   this.tempMessage = null
-      //   this.countUnreadMessages(this.usersInMessageThread)
-      // })
-      //
-      // this.contactService.getAllContacts().subscribe((data)=>{
-      //   this.usersInContactThread = data.users
-      // })
-      // this.threadService.getAllMessageThread().subscribe((data)=>{
-      //   this.usersInMessageThread = data.users
-      //
-      //   this.countUnreadMessages(this.usersInMessageThread)
+    });
+    this.socket.on("successfully sent", data => {
+      console.log("socket message", data);
+      this.store.dispatch(
+        new AddNewMessageSuccess({
+          message: data.messageSent,
+          messageThread: data.messageThread
+        })
+      );
+      this.store.dispatch(
+        new AddUnreadMessageToMessageThread({
+          message: data.messageSent,
+          messageThread: data.messageThread,
+          currentUser: this.currentUser
+        })
+      );
     });
     this.socket.on("exception", data => {
       console.log(data);
-      // this.tempMessage = null
     });
   }
 
   chooseUserFromMessageThread(user) {
-    console.log("message user", user);
-    this.chosenUser = { user: user.chatBetween[0], messageThread: user };
-    console.log("message chosen user", this.chosenUser);
+    let chosenUserFromMessageThread = user.chatBetween.filter(userInChatBetween=>{
+      return userInChatBetween._id != this.currentUser._id 
+    })
+    console.log("message thead user", user);
+    this.chosenUser = { user: chosenUserFromMessageThread[0], messageThread: user };
+    console.log("message thead chosen user", this.chosenUser);
     this.store.dispatch(
       new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
+    );
+    this.store.dispatch(
+      new RemoveUnreadMessageFromMessageThread({messageThread: this.chosenUser.messageThread, currentUser: this.currentUser})
     );
     // console.log(user);
     // this.chosenUser$ = this.store
@@ -151,16 +159,29 @@ export class ChatroomComponent implements OnInit {
     // console.log(this.chosenUser$);
   }
   chooseUserFromContactThread(user) {
-    if(user.messageThread.length > 0){
-      console.log("contact user", user);
-      this.chosenUser = { user: user, messageThread: user.messageThread[0] };
-      console.log("contact chosen user", this.chosenUser);
-      this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
+    if (user.messageThread.length > 0) {
+      let ourMessageThread = user.messageThread.filter(thread=>{
+        return this.currentUser.messageThread
+          .map(currentThread => {
+            return currentThread._id == thread._id;
+          })
+          .includes(true);
+      })
+      if(ourMessageThread){
+        console.log("ourMessageThread", ourMessageThread);
+        console.log("contact user", user);
+        this.chosenUser = { user: user, messageThread: ourMessageThread[0] };
+        console.log("contact chosen user", this.chosenUser);
+        this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
+      } else {
+        console.log('you do not have shared message thread with this user');
+      }      
     } else {
       this.chosenUser = { user: user, messageThread: undefined };
-      this.store.dispatch(new ChooseMessageFromMessageThread(this.chosenUser.messageThread));
+      this.store.dispatch(
+        new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
+      );
     }
-    
   }
 
   // sendMessage() {
@@ -237,7 +258,6 @@ export class ChatroomComponent implements OnInit {
   modalClosed() {
     this.formContact.reset();
     this.addContactToContactsMessage = "";
-
   }
 
   // countUnreadMessages(usersInMessageThread){

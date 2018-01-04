@@ -15,18 +15,18 @@ export class ContactThreadEffects {
     private contactService: fromService.ContactService
   ) {}
 
-  @Effect({ dispatch: true })
-  loadContactThread$ = this.actions$
-    .ofType(contactThreadActions.LOAD_CONTACT_THREAD)
-    .pipe(
-      switchMap((action: any) => {
-        return this.contactService
-          .getAllContacts()
-          .pipe(
-            map(user => new contactThreadActions.LoadContactThreadReady(user))
-          );
-      })
-    );
+  // @Effect({ dispatch: true })
+  // loadContactThread$ = this.actions$
+  //   .ofType(contactThreadActions.LOAD_CONTACT_THREAD)
+  //   .pipe(
+  //     switchMap((action: any) => {
+  //       return this.contactService
+  //         .getAllContacts()
+  //         .pipe(
+  //           map(user => new contactThreadActions.LoadContactThreadReady(user))
+  //         );
+  //     })
+  //   );
 
   @Effect({ dispatch: true })
   addContactToContactThread$ = this.actions$

@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 const authentication = require("./server/routes/authentication");
 const contact = require("./server/routes/contactThread");
 const thread = require("./server/routes/messageThread");
-const api = require("./server/routes/api");
+const user = require("./server/routes/user");
 
 const config = require("./server/config");
 
@@ -34,10 +34,10 @@ mongoose.connect(config.database, err => {
 });
 
 app.use(cors({ origin: "http://localhost:4200" }));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
 app.use(express.static(__dirname + "/client/dist"));
-app.use("/api", api);
+app.use("/user", user);
 app.use("/authentication", authentication);
 app.use("/contact", contact);
 app.use("/thread", thread);

@@ -3,7 +3,6 @@ import { Effect, Actions } from "@ngrx/effects";
 
 import { Observable } from "rxjs/Observable";
 import { catchError, switchMap, map, mergeMap } from "rxjs/operators";
-// import { of } from "rxjs/observable/of";
 import "rxjs/add/observable/from";
 import "rxjs/add/observable/of";
 

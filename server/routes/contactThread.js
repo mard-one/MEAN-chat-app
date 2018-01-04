@@ -13,8 +13,8 @@ const Verify = require("./middleware/authentication");
 router.post("/addContact", Verify, function(req, res) {
   User.findOne({ username: req.body.username }, "username messageThread avatar")
     .populate({
-      path: "messageThread", match: { chatBetween:{ _id: req.decoded.user_id } },
-      populate: { path: "chatBetween" }
+      path: "messageThread",
+      populate: [{ path: "chatBetween" }, {path: "messages"}]
     })
     .exec((err, newUser) => {
       console.log("newUser", newUser);

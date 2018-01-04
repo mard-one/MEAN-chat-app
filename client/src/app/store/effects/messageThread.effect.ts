@@ -14,20 +14,36 @@ export class MessageThreadEffects {
     private threadService: fromService.ThreadService
   ) {}
 
+  // @Effect({ dispatch: true })
+  // loadMessageThread$ = this.actions$
+  //   .ofType(messageThreadActions.LOAD_MESSAGE_THREAD)
+  //   .pipe(
+  //     switchMap((action: any) => {
+  //       // console.log(action.payload)
+  //       return this.threadService
+  //         .getAllMessageThread()
+  //         .pipe(
+  //           map(user => new messageThreadActions.LoadMessageThreadSuccess(user))
+  //         );
+  //     })
+  //   );
   @Effect({ dispatch: true })
-  loadMessageThread$ = this.actions$
+  loadMessageThreadSuccess$ = this.actions$
     .ofType(messageThreadActions.LOAD_MESSAGE_THREAD)
+    .map((action: any) => {
+      console.log("Load message thread effect payload", action.payload);
+      return new messageThreadActions.CountUnreadMessageInMessageThread(
+        action.payload
+      );
+    });
+  @Effect({ dispatch: false })
+  removeUnreadMessageFromMessageThread$ = this.actions$
+    .ofType(messageThreadActions.REMOVE_UNREAD_MESSAGE_FROM_MESSAGE_THREAD)
     .pipe(
       switchMap((action: any) => {
-        // console.log(action.payload)
-        return this.threadService
-          .getAllMessageThread()
-          .pipe(
-            map(
-              user =>
-                new messageThreadActions.LoadMessageThreadSuccess(user)
-            )
-          );
+      console.log("remove unread message effect", action.payload);
+      return this.threadService
+        .removeUnreadMessage(action.payload)
       })
-    );
+    )
 }

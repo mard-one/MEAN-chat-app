@@ -6,12 +6,14 @@ export interface UserState {
   data: User;
   loading: boolean;
   loaded: boolean;
+  message: string;
 }
 
 export const initialState: UserState = {
   data: null,
   loading: false,
-  loaded: false
+  loaded: false,
+  message: null
 };
 
 export function userReducer(
@@ -26,7 +28,7 @@ export function userReducer(
     case fromUser.LOAD_CURRENT_USER_READY: {
       console.log("load current user ready payload", action.payload);
       console.log("load current user ready state", state);
-      return {...state, loaded: action.payload.success, loading: true, data: action.payload.userData}
+      return {...state, loaded: action.payload.success, loading: false, data: action.payload.userData, message: action.payload.message}
     }
   }
   return state;

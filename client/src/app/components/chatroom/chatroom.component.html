@@ -3,18 +3,87 @@
     <div id="left-column">
 
       <nav id="navbar-left" class="navbar navbar-dark bg-dark">
-        <input class="form-control form-control-sm" type="text" placeholder="Search...">
+        <a data-toggle="modal" data-target="#profileModal">Profile</a>
       </nav>
+      <div class="modal" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="profileModalLabel">Profile of {{currentUser.data?.username}}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span id="profile-modal-close" aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div id="profile-info">
+                <div id="profile-image" *ngIf="currentUser.data">
+                  <img src="./assets/images/{{currentUser.data?.avatar}}">
+                </div>
+                <div id="profile-name-avatar">
+                  <div id="profile-username">
+                    <h3>
+                      {{currentUser.data?.username}}
+                    </h3>
+                  </div>
+                  <div id="change-avatar">
+                    <a id="change-avatar-modal">change profile image</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="avatarModal" tabindex="-1" role="dialog" aria-labelledby="avatarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="avatarModalLabel">Choose image</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span id="avatar-modal-close" aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <form enctype="multipart/form-data" method="post" action="user/changeAvatar/" [formGroup]="formAvatar" (ngSubmit)="avatarFormSubmitted()">
+              <div class="modal-body">
+                <div class="wrap">
+                  <div class="main-group">
+                    <label for="exampleFile">Choose images to upload (JPG, JPEG, PNG)</label>
+                    <input type="file" accept=".jpg, .jpeg, .png" class="form-control-file" id="avatarImage" aria-describedby="fileHelp" name="avatarImage"
+                      formControlName="avatar">
+                  </div>
+                  <div id="chosen-image-result"></div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <button id="avatar-modal-back" type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
+              </div>
+            </form>
+            <div style="width: 100%; height: 1px; border: 0.1px solid #E9ECEF; border-bottom: 0;"></div>
+            <div id="avatar-examples">
+              <div id="avatar-example-header">
+                <h4>Or choose from examples</h4>
+              </div>
+              <div id="avatar-example-body">
+                <div id="avatar-example" *ngFor="let image of defaultImages">
+                  <img src="./assets/images/{{image}}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="thread-body">
         <ng-container *ngIf="(messageThread$ | async)">
           <div id="user-in-thread" *ngFor="let thread of (messageThread$ | async).messageThread.reverse()" (click)="chooseUserFromMessageThread(thread)">
             <div id="thread-main">
               <ng-container *ngFor="let user of thread.chatBetween">
-                <div id="user-image" *ngIf="user._id != currentUser._id">
-                  <img *ngIf="user.avatar.length == 0" src='./assets/images/Asset 3.svg'>
-                  <img *ngIf="user.avatar.length" src='{{user.avatar.avatar}}'>
+                <div id="user-image" *ngIf="user._id != currentUser.data._id">
+                  <img *ngIf="user.avatar.length == 0" src='./assets/images/Asset3.svg'>
+                  <img *ngIf="user.avatar.length" src='./assets/images/{{user.avatar}}'>
                 </div>
-                <div class="wrapper" *ngIf="user._id != currentUser._id">
+                <div class="wrapper" *ngIf="user._id != currentUser.data._id">
                   <div id="username">{{user.username}}</div>
                   <div id="last-message">{{thread.lastMessage}}</div>
                 </div>
@@ -55,20 +124,23 @@
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Message..." aria-label="Search for..." autofocus name="message" formControlName="message">
             <span class="input-group-btn">
-              <button class="btn btn-secondary" type="button" (click)="sendMessage()">Send</button>
+              <button class="btn btn-secondary" type="submit">Send</button>
             </span>
           </div>
         </form>
       </div>
       <div id="hint" *ngIf="!((messages$ | async) && chosenUser?.user)">
-        <h4>Please, select user to begin chatting</h4>
+        <h4 *ngIf="currentUser.data?.loaded">Please, select user to begin chatting</h4>
+        <div id="token-expired" *ngIf="!currentUser.data?.loaded">
+          {{currentUser.data?.message}}
+        </div>
       </div>
 
     </div>
     <div id="right-column">
 
       <nav id="navbar-right" class="navbar navbar-dark bg-dark">
-        <button type="button" name="button" data-toggle="modal" data-target="#contactModal">Add contacts</button>
+        <a data-toggle="modal" data-target="#contactModal">Add contacts</a>
       </nav>
       <div class="modal" id="contactModal" tabindex="-1" role="dialog" aria-labelledby="contactModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -109,17 +181,17 @@
         <ng-container *ngIf="(contactThread$ | async)">
           <div id="user-in-contact" *ngFor='let contact of (contactThread$ | async).contacts | orderBy:order' (click)="chooseUserFromContactThread(contact)">
             <div id="user-contact-image">
-              <img *ngIf="contact.avatar.length == 0" src='./assets/images/Asset 5.svg'>
-              <img *ngIf="contact.avatar.length" src='{{contact.avatar}}'>
+              <img *ngIf="contact.avatar.length == 0" src='./assets/images/Asset5.svg'>
+              <img *ngIf="contact.avatar.length" src='./assets/images/{{contact.avatar}}'>
             </div>
             <div class="wrapper">
               <div id="username-contact">{{contact.username}}</div>
             </div>
-              <ng-container *ngFor="let oUser of onlineUsers">
-                <div id="online-status" *ngIf="oUser == contact._id ">
-                  online
-                </div>
-              </ng-container>
+            <ng-container *ngFor="let oUser of onlineUsers">
+              <div id="online-status" *ngIf="oUser == contact._id ">
+                online
+              </div>
+            </ng-container>
           </div>
         </ng-container>
       </div>

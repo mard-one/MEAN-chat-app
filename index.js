@@ -5,6 +5,9 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+
+var upload = multer();
 
 const authentication = require("./server/routes/authentication");
 const contact = require("./server/routes/contactThread");
@@ -32,6 +35,33 @@ mongoose.connect(config.database, err => {
     console.log("Connected to database: " + config.database);
   }
 });
+
+
+// var Storage = multer.diskStorage({
+//   destination: function(req, file, callback) {
+//     callback(null, "../../assets/images");
+//   },
+//   filename: function(req, file, callback) {
+//     callback(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
+//   }
+// });
+
+
+
+// app.post("/user/changeAvatar", (req, res) => {
+//   console.log("submitted");
+//   // console.log("files", req.files);
+//   // console.log("body", req.body);
+//   // upload(req, res, function(err) {
+//   //   if (err) {
+//   //     console.log("err", err);
+//   //     return res.end("Something went wrong!" + err);
+//   //   }
+//   //   return res.end("File uploaded sucessfully!.");
+//   // });
+// });
+
+
 
 app.use(cors({ origin: "http://localhost:4200" }));
 app.use(bodyParser.json({ limit: "50mb" }));

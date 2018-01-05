@@ -69,7 +69,7 @@ const MessageThread = require('./contactThread');
 var userSchema = new Schema({
   username: {type: String},
   password: {type: String},
-  avatar: [String],
+  avatar: String,
   messageThread: [{ type: Schema.Types.ObjectId, ref: 'MessageThread' }],
   contactThread: { type: Schema.Types.ObjectId, ref: 'ContactThread'}
 })

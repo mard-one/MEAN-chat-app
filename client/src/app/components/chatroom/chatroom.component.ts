@@ -21,7 +21,8 @@ import {
   RemoveUnreadMessageFromMessageThread,
   AddUnreadMessageToMessageThread,
   LoadCurrentUser,
-  getUser
+  getUser,
+  getUserState
 } from "../../store";
 
 import { User } from "../../models/user.model";
@@ -31,8 +32,6 @@ import { AuthService } from "../../services/auth.service";
 import { ThreadService } from "../../services/thread.service";
 import { MessageService } from "../../services/message.service";
 import { UserService } from "../../services/user.service";
-import { element } from "protractor";
-import { stat } from "fs";
 
 @Component({
   selector: "app-chatroom",
@@ -43,14 +42,33 @@ import { stat } from "fs";
 export class ChatroomComponent implements OnInit {
   currentUser;
   chosenUser: { user: any; messageThread: { any } };
-  onlineUsers;
+  onlineUsers: string[];
   messages$: Observable<any>;
   messageThread$: Observable<any>;
   contactThread$: Observable<any>;
   order: string = "username";
+  defaultImages = [
+    "Asset1.svg",
+    "Asset2.svg",
+    "Asset3.svg",
+    "Asset4.svg",
+    "Asset5.svg",
+    "Asset6.svg",
+    "Asset7.svg",
+    "Asset8.svg",
+    "Asset9.svg",
+    "Asset10.svg",
+    "Asset11.svg",
+    "Asset12.svg",
+    "Asset13.svg",
+    "Asset14.svg",
+    "Asset15.svg",
+    "Asset16.svg"
+  ];
 
   formMessage: FormGroup;
   formContact: FormGroup;
+  formAvatar: FormGroup;
 
   private socket;
 
@@ -70,6 +88,7 @@ export class ChatroomComponent implements OnInit {
     (() => {
       this.formMessage = this.formBuilder.group({ message: "" });
       this.formContact = this.formBuilder.group({ username: "" });
+      this.formAvatar = this.formBuilder.group({ avatar: "" });
     })();
   }
 
@@ -83,7 +102,7 @@ export class ChatroomComponent implements OnInit {
     this.messageThread$ = this.store.select(getMessageThread);
     this.contactThread$ = this.store.select(getContactThread);
     this.messages$ = this.store.select(getMessage);
-    this.store.select(getUser).subscribe(user => {
+    this.store.select(getUserState).subscribe(user => {
       this.currentUser = user;
       console.log("user", user);
     });
@@ -107,12 +126,11 @@ export class ChatroomComponent implements OnInit {
     // });
     this.socket.on("connect", () => {
       this.socket.emit("room", localStorage.getItem("token"));
-      this.socket.emit("give me online users")
+      this.socket.emit("give me online users");
       this.socket.on("online users", usersOnline => {
         this.onlineUsers = usersOnline;
       });
     });
-    
 
     this.socket.on("successfully recieved", data => {
       console.log("socket message", data);
@@ -135,19 +153,80 @@ export class ChatroomComponent implements OnInit {
         new AddUnreadMessageToMessageThread({
           message: data.messageSent,
           messageThread: data.messageThread,
-          currentUser: this.currentUser
+          currentUser: this.currentUser.data
         })
       );
     });
     this.socket.on("exception", data => {
       console.log(data);
     });
+    // ------------------- Files ---------------------
+    function handleFileSelect(evt) {
+      // console.log("Evt", evt);
+      var files = evt.target.files;
+      // console.log("files length", files.length); 
+
+      for (var i = 0, f; (f = files[i]); i++) {
+        if (!f.type.match("image.*")) {
+          return false
+        } else {
+          var reader = new FileReader();
+
+          reader.onload = (function(theFile) {
+            return function(e) {
+              // Render thumbnail.
+              var span = document.createElement("span");
+              span.innerHTML = ['<img id="avatar-thumb" style="width: 180px; height: 200px; object-fit: cover" src="', e.target.result, '" title="', decodeURI(theFile.name), '"/>'].join("");
+              document
+                .getElementById("chosen-image-result")
+                .insertBefore(span, null);
+            };
+          })(f);
+
+          reader.readAsDataURL(f);
+          // console.log("reader", reader); 
+        }        
+      }
+    }
+     function removePreImage() {
+       $("#chosen-image-result").empty();
+     }
+
+    document
+      .getElementById("avatarInputFile")
+      .addEventListener("change", handleFileSelect, false);
+    document
+      .getElementById("avatarInputFile")
+      .addEventListener("click", removePreImage);
+    // ------------------- Modal ---------------------
+    $("#change-avatar-modal").on("click", function() {
+      $("#profileModal").modal("hide");
+    });
+    //trigger next modal
+    $("#change-avatar-modal").on("click", function() {
+      $("#avatarModal").modal("show");
+    });
+    $("#avatar-modal-close").on("click", function() {
+      $("#avatarModal").modal("hide");
+    });
+    //trigger next modal
+    $("#avatar-modal-close").on("click", function() {
+      $("#profileModal").modal("show");
+    });
+    $("#avatar-modal-back").on("click", function() {
+      $("#avatarModal").modal("hide");
+    });
+    //trigger next modal
+    $("#avatar-modal-back").on("click", function() {
+      $("#profileModal").modal("show");
+    });
+
   }
 
   chooseUserFromMessageThread(user) {
     let chosenUserFromMessageThread = user.chatBetween.filter(
       userInChatBetween => {
-        return userInChatBetween._id != this.currentUser._id;
+        return userInChatBetween._id != this.currentUser.data._id;
       }
     );
     console.log("message thead user", user);
@@ -162,7 +241,7 @@ export class ChatroomComponent implements OnInit {
     this.store.dispatch(
       new RemoveUnreadMessageFromMessageThread({
         messageThread: this.chosenUser.messageThread,
-        currentUser: this.currentUser
+        currentUser: this.currentUser.data
       })
     );
     // console.log(user);
@@ -177,7 +256,7 @@ export class ChatroomComponent implements OnInit {
   chooseUserFromContactThread(user) {
     if (user.messageThread.length > 0) {
       let ourMessageThread = user.messageThread.filter(thread => {
-        return this.currentUser.messageThread
+        return this.currentUser.data.messageThread
           .map(currentThread => {
             return currentThread._id == thread._id;
           })

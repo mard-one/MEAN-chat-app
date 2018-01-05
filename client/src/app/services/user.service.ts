@@ -16,6 +16,9 @@ export class UserService {
     this.authService.createAuthenticationHeader()
     return this.http.get(this.domain + "/user/currentUser", this.authService.options).map(res=>res.json())
   }
+  // avatar(){
+  //   return this.http.post(this.domain + "/user/changeAvatar");
+  // }
 
 
 }

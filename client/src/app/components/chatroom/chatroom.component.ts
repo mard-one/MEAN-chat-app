@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, FormControl } from "@angular/forms";
+// import { FormBuilder, FormGroup, FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
 import * as io from "socket.io-client";
 
@@ -66,9 +66,12 @@ export class ChatroomComponent implements OnInit {
     "Asset16.svg"
   ];
 
-  formMessage: FormGroup;
-  formContact: FormGroup;
-  formAvatar: FormGroup;
+  formMessage 
+  // FormGroup;
+  formContact 
+  // FormGroup;
+  formAvatar 
+  // FormGroup;
 
   private socket;
 
@@ -77,7 +80,7 @@ export class ChatroomComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private formBuilder: FormBuilder,
+    // private formBuilder: FormBuilder,
     private contactService: ContactService,
     private authService: AuthService,
     private threadService: ThreadService,
@@ -85,11 +88,11 @@ export class ChatroomComponent implements OnInit {
     private router: Router,
     private store: Store<fromStore.ChatState>
   ) {
-    (() => {
-      this.formMessage = this.formBuilder.group({ message: "" });
-      this.formContact = this.formBuilder.group({ username: "" });
-      this.formAvatar = this.formBuilder.group({ avatar: "" });
-    })();
+    // (() => {
+    //   this.formMessage = this.formBuilder.group({ message: "" });
+    //   this.formContact = this.formBuilder.group({ username: "" });
+    //   this.formAvatar = this.formBuilder.group({ avatar: "" });
+    // })();
   }
 
   ngOnInit() {
@@ -164,11 +167,11 @@ export class ChatroomComponent implements OnInit {
     function handleFileSelect(evt) {
       // console.log("Evt", evt);
       var files = evt.target.files;
-      // console.log("files length", files.length); 
+      // console.log("files length", files.length);
 
       for (var i = 0, f; (f = files[i]); i++) {
         if (!f.type.match("image.*")) {
-          return false
+          return false;
         } else {
           var reader = new FileReader();
 
@@ -176,7 +179,13 @@ export class ChatroomComponent implements OnInit {
             return function(e) {
               // Render thumbnail.
               var span = document.createElement("span");
-              span.innerHTML = ['<img id="avatar-thumb" style="width: 180px; height: 200px; object-fit: cover" src="', e.target.result, '" title="', decodeURI(theFile.name), '"/>'].join("");
+              span.innerHTML = [
+                '<img id="avatar-thumb" style="width: 180px; height: 200px; object-fit: cover" src="',
+                e.target.result,
+                '" title="',
+                decodeURI(theFile.name),
+                '"/>'
+              ].join("");
               document
                 .getElementById("chosen-image-result")
                 .insertBefore(span, null);
@@ -184,19 +193,19 @@ export class ChatroomComponent implements OnInit {
           })(f);
 
           reader.readAsDataURL(f);
-          // console.log("reader", reader); 
-        }        
+          // console.log("reader", reader);
+        }
       }
     }
-     function removePreImage() {
-       $("#chosen-image-result").empty();
-     }
+    function removePreImage() {
+      $("#chosen-image-result").empty();
+    }
 
     document
-      .getElementById("avatarInputFile")
+      .getElementById("avatarImage")
       .addEventListener("change", handleFileSelect, false);
     document
-      .getElementById("avatarInputFile")
+      .getElementById("avatarImage")
       .addEventListener("click", removePreImage);
     // ------------------- Modal ---------------------
     $("#change-avatar-modal").on("click", function() {
@@ -220,7 +229,6 @@ export class ChatroomComponent implements OnInit {
     $("#avatar-modal-back").on("click", function() {
       $("#profileModal").modal("show");
     });
-
   }
 
   chooseUserFromMessageThread(user) {
@@ -288,6 +296,9 @@ export class ChatroomComponent implements OnInit {
   //     message: this.formMessage.get("message").value
   //   });
   // }
+  avatarFormSubmitted(){
+    console.log("form submitted");
+  };
 
   sendMessage() {
     // this.tempMessage = { message: this.formChat.get('message').value, sentAt: new Date()}
@@ -356,18 +367,4 @@ export class ChatroomComponent implements OnInit {
     this.formContact.reset();
     this.addContactToContactsMessage = "";
   }
-
-  // countUnreadMessages(usersInMessageThread){
-  //   let unread = 0
-  //   usersInMessageThread.messageThread.forEach((userMessage)=>{
-  //     userMessage.messages.forEach((message)=>{
-  //       if(!message.isRead){
-  //         unread++
-  //       }
-  //     })
-  //     this.messagesUnread = {messageThreadId: userMessage._id, unread: unread}
-  //   })
-  //   // console.log(this.messagesUnread)
-  //   return false
-  // }
 }

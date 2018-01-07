@@ -5,38 +5,49 @@ import { tokenNotExpired } from 'angular2-jwt';
 
 @Injectable()
 export class AuthService {
-  authToken
-  options
+  authToken;
+  options;
+  optionsFile;
 
-  domain = "http://localhost:8080"
+  domain = "http://localhost:8080";
 
-  constructor( private http: Http) {
-
-   }
-  createAuthenticationHeader(){
-    this.loadToken()
+  constructor(private http: Http) {}
+  createFileHeader() {
+    this.loadToken();
+    this.optionsFile = new RequestOptions({
+      headers: new Headers({
+        authorization: this.authToken
+      })
+    });
+  }
+  createAuthenticationHeader() {
+    this.loadToken();
     this.options = new RequestOptions({
       headers: new Headers({
-        "Content-Type": 'application/json',
-        "authorization": this.authToken
+        "Content-Type": "application/json",
+        authorization: this.authToken
       })
-    })
+    });
   }
-  loadToken(){
-    this.authToken = localStorage.getItem('token')
-  }
-
-  registerUser(user){
-    return this.http.post(this.domain + "/authentication/register", user).map(res=>res.json())
+  loadToken() {
+    this.authToken = localStorage.getItem("token");
   }
 
-  login(user){
-    return this.http.post(this.domain + "/authentication/login", user).map(res=>res.json())
+  registerUser(user) {
+    return this.http
+      .post(this.domain + "/authentication/register", user)
+      .map(res => res.json());
   }
 
-  storeUserData(token, username){
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', JSON.stringify(username))
+  login(user) {
+    return this.http
+      .post(this.domain + "/authentication/login", user)
+      .map(res => res.json());
+  }
+
+  storeUserData(token, username) {
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", JSON.stringify(username));
   }
 
   loggedIn() {

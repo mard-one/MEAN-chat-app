@@ -6,19 +6,24 @@ import { AuthService } from "./auth.service";
 
 @Injectable()
 export class UserService {
+  domain = "http://localhost:8080";
 
-  domain = "http://localhost:8080"
+  constructor(private http: Http, private authService: AuthService) {}
 
-  constructor(private http: Http, private authService: AuthService) { }
-
-  currentUser(){
+  currentUser() {
     console.log("current user");
-    this.authService.createAuthenticationHeader()
-    return this.http.get(this.domain + "/user/currentUser", this.authService.options).map(res=>res.json())
+    this.authService.createAuthenticationHeader();
+    return this.http
+      .get(this.domain + "/user/currentUser", this.authService.options)
+      .map(res => res.json());
   }
-  // avatar(){
-  //   return this.http.post(this.domain + "/user/changeAvatar");
-  // }
-
-
+  changeAvatar(inputEvent) {
+    let file = inputEvent.files[0]
+    let formData = new FormData();
+    formData.append("inputAvatar", file);
+    this.authService.createFileHeader();
+    return this.http
+      .post(this.domain + "/user/changeAvatar", formData, this.authService.optionsFile)
+      .map(res => res.json());
+  }
 }

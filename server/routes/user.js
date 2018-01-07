@@ -2,21 +2,21 @@ const router = require("express").Router();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const config = require("../config");
-// const multer = require("multer");
+const multer = require("multer");
 
 const User = require("../models/user");
 
 const Verify = require("./middleware/authentication");
 
-// var Storage = multer.diskStorage({
-//   destination: function(req, file, callback) {
-//     callback(null, "../../assets/images");
-//   },
-//   filename: function(req, file, callback) {
-//     callback(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
-//   }
-// });
-// var upload = multer({ storage: Storage }).single("avatar");
+var Storage = multer.diskStorage({
+  destination: function(req, file, callback) {
+    callback(null, "./server/assets/images");
+  },
+  filename: function(req, file, callback) {
+    callback(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
+  }
+});
+var upload = multer({ storage: Storage }).single("inputAvatar");
 
 router.get("/currentUser", Verify, (req, res) => {
   // console.log("req", req.body);
@@ -58,17 +58,16 @@ router.get("/currentUser", Verify, (req, res) => {
     });
 });
 
-router.post("/changeAvatar", (req, res) => {
-  console.log('submit motherfucker');
-  // console.log("files", req.files)
-  // console.log("body", req.body)
-  // upload(req, res, function(err) {
-  //   if (err) {
-  //     console.log("err", err);
-  //     return res.end("Something went wrong!" + err);
-  //   }
-  //   return res.end("File uploaded sucessfully!.");
-  // }); 
+router.post("/changeAvatar", Verify, (req, res) => {
+  upload(req, res, function(err) {
+    if (err) {
+      res.json({success: false, message: "Something went wrong!" + err});
+    } else {
+      User.findByIdAndUpdate(req.decoded.user_id, {$set: { avatar: req.file.filename }}).exec((err, updatedUser)=>{
+        res.json({success: true, message: "File uploaded sucessfully!"});
+      })
+    }
+  }); 
 });
 
 module.exports = router;

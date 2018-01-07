@@ -161,7 +161,7 @@ export class ChatroomComponent implements OnInit {
       console.log(data);
     });
     // ------------------- Files ---------------------
-    const handleFileSelect = (evt) => {
+    const handleFileSelect = evt => {
       // console.log("Evt", evt);
       var files = evt.target.files;
       // console.log("files length", files.length);
@@ -193,10 +193,10 @@ export class ChatroomComponent implements OnInit {
           // console.log("reader", reader);
         }
       }
-    }
+    };
 
     document
-      .getElementById("avatarImage")
+      .getElementById("inputAvatar")
       .addEventListener("change", handleFileSelect, false);
     // ------------------- Modal ---------------------
     $("#change-avatar-modal").on("click", function() {
@@ -287,9 +287,6 @@ export class ChatroomComponent implements OnInit {
   //     message: this.formMessage.get("message").value
   //   });
   // }
-  avatarFormSubmitted(){
-    console.log("form submitted");
-  };
 
   sendMessage() {
     // this.tempMessage = { message: this.formChat.get('message').value, sentAt: new Date()}
@@ -357,5 +354,11 @@ export class ChatroomComponent implements OnInit {
   modalClosed() {
     this.formContact.reset();
     this.addContactToContactsMessage = "";
+  }
+  avatarFormSubmitted(event){
+    let inputEvent = event.target[0]
+    this.userService.changeAvatar(inputEvent).subscribe(data => {
+      console.log("data form avatar", data);
+    });
   }
 }

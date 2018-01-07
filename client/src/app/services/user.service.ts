@@ -18,12 +18,30 @@ export class UserService {
       .map(res => res.json());
   }
   changeAvatar(inputEvent) {
-    let file = inputEvent.files[0]
-    let formData = new FormData();
-    formData.append("inputAvatar", file);
-    this.authService.createFileHeader();
-    return this.http
-      .post(this.domain + "/user/changeAvatar", formData, this.authService.optionsFile)
-      .map(res => res.json());
+    if (inputEvent && inputEvent.files && inputEvent.files.length) {
+      let file = inputEvent.files[0];
+      let formData = new FormData();
+      formData.append("inputAvatar", file);
+      this.authService.createFileHeader();
+      return this.http
+        .post(
+          this.domain + "/user/changeAvatar",
+          formData,
+          this.authService.optionsFile
+        )
+        .map(res => res.json());
+    } else {
+      let chosenDefaultAvatarUrl = inputEvent,
+        avatarName = chosenDefaultAvatarUrl.substring(chosenDefaultAvatarUrl.lastIndexOf("/"), chosenDefaultAvatarUrl.length),
+        avatarJson = { avatarName: avatarName };
+      this.authService.createAuthenticationHeader();
+      return this.http
+        .post(
+          this.domain + "/user/changeAvatar",
+          avatarJson,
+          this.authService.options
+        )
+        .map(res => res.json());
+    }
   }
 }

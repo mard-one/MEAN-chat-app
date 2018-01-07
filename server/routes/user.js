@@ -59,15 +59,31 @@ router.get("/currentUser", Verify, (req, res) => {
 });
 
 router.post("/changeAvatar", Verify, (req, res) => {
-  upload(req, res, function(err) {
-    if (err) {
-      res.json({success: false, message: "Something went wrong!" + err});
-    } else {
-      User.findByIdAndUpdate(req.decoded.user_id, {$set: { avatar: req.file.filename }}).exec((err, updatedUser)=>{
-        res.json({success: true, message: "File uploaded sucessfully!"});
-      })
-    }
-  }); 
+  if(req.body && req.body.avatarName ){
+    User.findByIdAndUpdate(req.decoded.user_id, {
+      $set: { avatar: req.body.avatarName }
+    }).exec((err, updatedUser) => {
+      res.json({ success: true, message: "File uploaded sucessfully!" });
+    });
+  } else {
+    upload(req, res, function(err) {
+      if (err) {
+        res.json({
+          success: false,
+          message: "Something went wrong!" + err
+        });
+      } else {
+        User.findByIdAndUpdate(req.decoded.user_id, {
+          $set: { avatar: req.file.filename }
+        }).exec((err, updatedUser) => {
+          res.json({
+            success: true,
+            message: "File uploaded sucessfully!"
+          });
+        });
+      }
+    }); 
+  }
 });
 
 module.exports = router;

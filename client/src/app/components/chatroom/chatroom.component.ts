@@ -302,10 +302,18 @@ export class ChatroomComponent implements OnInit {
     this.addContactToContactsMessage = "";
   }
   avatarFormSubmitted(event) {
-    let inputEvent = event.target[0];
-    this.userService.changeAvatar(inputEvent).subscribe(data => {
-      console.log("data form avatar", data);
-    });
+    if(this.chosenAvatar.type == 'userAvatar'){
+      let inputEvent = event.target[0];
+      this.userService.changeAvatar(inputEvent).subscribe(data => {
+        console.log("data form avatar", data);
+      });
+    } else {
+      if(this.chosenAvatar.type == 'defaultAvatar'){
+        this.userService.changeAvatar(this.chosenAvatar.url).subscribe(data => {
+          console.log("data form avatar", data);
+        });
+      }
+    }    
   }
   chosenAvatarDefault(imageName){
     this.chosenAvatar = { type: "defaultAvatar", url: "./assets/images/" + imageName };

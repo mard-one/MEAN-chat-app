@@ -9,7 +9,7 @@
         <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="profileModalLabel">Profile of {{currentUser.user?.username}}</h5>
+              <h5 class="modal-title" id="profileModalLabel">Dashboard</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span id="profile-modal-close" aria-hidden="true">&times;</span>
               </button>
@@ -116,20 +116,63 @@
     <div id="central-column">
 
       <nav id="navbar-center" class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand">
+        <a class="navbar-brand" data-toggle="modal" data-target="#chosenUserModal">
           {{ chosenUser?.user.username }}
         </a>
       </nav>
+      <div class="modal" id="chosenUserModal" tabindex="-1" role="dialog" aria-labelledby="chosenUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="chosenUserModalLabel">Profile of {{chosenUser.user?.username}}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span id="chosenUser-modal-close" aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div id="chosenUser-info">
+                <div id="chosenUser-image" *ngIf="chosenUser?.user">
+                  <img src="./assets/images/{{chosenUser?.user && chosenUser.user?.avatar}}">
+                </div>
+                <div id="chosenUser-name-avatar">
+                  <div id="chosenUser-username">
+                    <h3>
+                      {{chosenUser.user?.username}}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="chat-box" *ngIf="((messages$ | async) && chosenUser?.user)">
         <ng-container *ngFor="let message of (messages$ | async)">
-          <div id="message-by-friend" *ngIf="message.sender == chosenUser.user._id">
-            <div id="text">{{message.text}}</div>
-            <div id="recieved-time">{{message.sentAt | date : "H:mm"}}</div>
+          <div *ngIf="message.sender == chosenUser.user._id" class="message" id="friend-message">
+            <div class="message-icon">
+              <div class="icon-wrap">
+                <img src="./assets/images{{chosenUser?.user && chosenUser.user?.avatar}}" alt="" class="icon">
+              </div>
+            </div>
+            <div id="message-by-friend" >
+              <div id="text">{{message.text}}</div>
+              <div id="recieved-time">{{message.sentAt | date : "H:mm"}}</div>
+            </div>
           </div>
-          <div id="message-by-me" *ngIf="message.sender != chosenUser.user._id">
-            <div id="text">{{message.text}}</div>
-            <div id="sent-time">{{message.sentAt | date : "H:mm"}}</div>
+          <div *ngIf="message.sender != chosenUser.user._id" class="message" id="my-message">
+            <div id="message-by-me" >
+              <div id="text">{{message.text}}</div>
+              <div id="sent-time">{{message.sentAt | date : "H:mm"}}</div>
+            </div>
+            <div class="message-icon">
+              <div class="icon-wrap">
+                <img [attr.src]="(chosenAvatar?.url) ? (chosenAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
+                  [ngStyle]="{'object-fit': (chosenAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
+              </div>
+            </div>
           </div>
+          
+          
         </ng-container>
       </div>
       <div id="message-bar" *ngIf="((messages$ | async) && chosenUser?.user)">
@@ -142,33 +185,12 @@
           </div>
         </form>
       </div>
-      <!-- <form action="http://localhost:8080/user/changeAvatar" name="yourForm" id="theForm" method="post">
-        <input type="file" name="fname" id="fname" />
-        <input type="submit" value="submit" />
-      </form> -->
-      <!-- <form action="/user/changeAvatar" method="POST" enctype="multipart/form-data" 
-        (ngSubmit)="avatarFormSubmitted()">
-        <div class="modal-body">
-          <div class="wrap">
-            <div class="main-group">
-              <label for="exampleFile">Choose images to upload (JPG, JPEG, PNG)</label>
-              <input type="file" accept=".jpg, .jpeg, .png" class="form-control-file" id="avatarImage" aria-describedby="fileHelp" name="avatarImage"
-                formControlName="avatar">
-            </div>
-            <div id="chosen-image-result"></div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Save changes</button>
-          <button id="avatar-modal-back" type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-        </div>
-      </form> -->
-      <!-- <div id="hint" *ngIf="!((messages$ | async) && chosenUser?.user)">
+      <div id="hint" *ngIf="!((messages$ | async) && chosenUser?.user)">
         <h4 *ngIf="currentUser.user?.loaded">Please, select user to begin chatting</h4>
         <div id="token-expired" *ngIf="!currentUser.user?.loaded">
           {{currentUser.user?.message}}
         </div>
-      </div> -->
+      </div>
 
     </div>
     <div id="right-column">

@@ -94,7 +94,7 @@ router.get("/getAllMessageThread", Verify, function(req, res) {
 
 router.post("/removeUnreadMessage", function(req, res) {
   // console.log("MessageThread");
-  console.log("req.body", req.body);
+  // console.log("req.body", req.body);
     var messageIds = req.body.messageThread.messages.map(message=>{
       return message._id
     })
@@ -102,64 +102,6 @@ router.post("/removeUnreadMessage", function(req, res) {
     Message.update({ _id: {$in: messageIds }, reciever: req.body.currentUser._id }, {$set: {isRead: true}}, {multi: true}).exec((err,updatedMessage)=>{
       console.log("updatedMessage", updatedMessage);
     });
-    // MessageThread.findById(req.body._id).populate({path: "messages"}).exec((err, foundMessageThread)=>{
-    //   var filteredIsRead = foundMessageThread.messages.map(message => {
-    //     return Object.assign({}, message.toObject(), { isRead: true });
-    //   });
-    //   console.log("filteredIsRead", filteredIsRead);
-    //   // var properMessages = Object.assign(
-    //   //   {},
-    //   //   foundMessageThread.toObject(),
-    //   //   {
-    //   //     messages: filteredIsRead
-    //   //   }
-    //   // );
-    //   // console.log("properMessages", properMessages);
-    //   foundMessageThread.messages = filteredIsRead;
-    //   foundMessageThread.save((err, done)=>{
-    //     console.log("done", done);
-    //   })
-    // })
-  // MessageThread.findById(req.body._id, function(err, foundMessageThread) {
-  //   MessageThread.populate(
-  //     foundMessageThread,
-  //     {
-  //       path: "messages"
-  //     },
-  //     function(err, messages) {
-  //       console.log("messages", messages);
-  //     }
-  //   );
-  //   console.log("foundMessageThread", foundMessageThread);
-  //   console.log("foundMessageThread.messages", foundMessageThread.messages);
-
-  //   var filteredIsRead = foundMessageThread.messages.map(message => {
-  //     return Object.assign({}, message, {
-  //       isRead: true
-  //     });
-  //   });
-  //   console.log("filteredIsRead", filteredIsRead);
-  //   var filteredMessages = Object.assign(
-  //     [],
-  //     foundMessageThread.messages,
-  //     filteredIsRead
-  //   );
-  //   console.log("filteredMessages", filteredMessages);
-  //   var properMessages = Object.assign({}, foundMessageThread, {
-  //     messages: filteredMessages
-  //   });
-  //   console.log("properMessages", properMessages);
-  //   // foundMessageThread = properMessages;
-  //   // foundMessageThread.save((err, done) => {
-  //   //   console.log("done", done);
-  //   // });
-  // })
-
-  // MessageThread.findByIdAndUpdate(req.body._id, {
-  //   $set: { "messages.$.isRead": true }
-  // })
-  //   .populate({ path: "messages" })
-  //   .exec((err, foundMessageThread) => {});
 });
 
 module.exports = router;

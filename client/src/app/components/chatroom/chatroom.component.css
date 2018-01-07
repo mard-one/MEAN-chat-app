@@ -54,21 +54,21 @@
 #navbar-right a:hover {
   border: 0.2vh solid#17A2B8;
 }
-#profile-info{
+#profile-info, #chosenUser-info{
   width: 100%;
   display: flex;
 }
-#profile-image{
+#profile-image, #chosenUser-image {
   max-width: 200px;
   width: 40%;
   height: 200px;
 }
-#profile-image img{
+#profile-image img, #chosenUser-image img{
   height: 100%;
   width: 100%;
   border: 0.3px solid #D3D6D8;
 }
-#profile-name-avatar{
+#profile-name-avatar, #chosenUser-name-avatar{
   width: 60%;
   display: flex;
   flex-direction: column;
@@ -87,6 +87,7 @@
 .modal-body form-group{
   width: 50%;
 }
+
 #chosen-image-result{
   margin: 0 auto;
   width: 180px;
@@ -154,6 +155,28 @@
 }
 #chat-box {
   padding: 6vh 0;
+}
+#chat-box .message{
+  padding: 0 3% 1vh 3%
+}
+#friend-message{
+  display: flex;
+  
+}
+#my-message{
+  display: flex;
+  justify-content: flex-end
+}
+#chat-box .message-icon{
+  display: flex;
+  flex-direction: column-reverse;
+}
+#chat-box .message-icon .icon-wrap{
+  height: 6vh;
+}
+#chat-box .message-icon .icon-wrap img{
+  object-fit: cover;
+  height: 100%;
 }
 #message-bar {
   position: fixed;
@@ -292,6 +315,7 @@
   flex-direction: column;
   padding: 1%;
   font-size: 2.3vh;
+  width: 80%;
 }
 #message-by-friend::before {
   content: "";
@@ -325,6 +349,7 @@
   flex-direction: column;
   padding: 1%;
   font-size: 2.3vh;
+  width: 80%;
 }
 #message-by-me::before {
   content: "";

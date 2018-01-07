@@ -32,6 +32,7 @@ import { AuthService } from "../../services/auth.service";
 import { ThreadService } from "../../services/thread.service";
 import { MessageService } from "../../services/message.service";
 import { UserService } from "../../services/user.service";
+import { GroupService } from "../../services/group.service";
 
 @Component({
   selector: "app-chatroom",
@@ -96,6 +97,7 @@ export class ChatroomComponent implements OnInit {
     private authService: AuthService,
     private threadService: ThreadService,
     private messageService: MessageService,
+    private groupService: GroupService,
     private router: Router,
     private store: Store<fromStore.ChatState>
   ) {
@@ -488,10 +490,12 @@ export class ChatroomComponent implements OnInit {
       avatar: groupAvatar,
       description: groupInfoValue
     };
-    if(!groupNameValue){
-      this.formGroupMessage = "Name of group is required"
-    } else{
-      
+    if (!groupNameValue) {
+      this.formGroupMessage = "Name of group is required";
+    } else {
+      this.groupService.newGroup(groupFormData).subscribe(data => {
+        console.log("response", data);
+      });
     }
   }
 }

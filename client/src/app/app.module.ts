@@ -22,6 +22,7 @@ import { AuthService } from './services/auth.service';
 import { ContactService } from './services/contact.service';
 import { ThreadService } from './services/thread.service';
 import { MessageService } from './services/message.service';
+import { GroupService } from "./services/group.service";
 
 import { OrderModule } from "ngx-order-pipe";
 
@@ -50,7 +51,8 @@ import { OrderModule } from "ngx-order-pipe";
     AuthService,
     ContactService,
     ThreadService,
-    MessageService
+    MessageService,
+    GroupService
   ],
   bootstrap: [AppComponent]
 })

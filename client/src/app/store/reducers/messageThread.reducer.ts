@@ -147,7 +147,7 @@ export function messageThreadReducer(
               let numUnread = 0;
               thread.messages.map(innerElement => {
                 // console.log("inner thread", innerElement);
-                console.log("logic", (innerElement.isRead && innerElement.reciever == action.payload.currentUser._id));
+                // console.log("logic", (innerElement.isRead && innerElement.reciever == action.payload.currentUser._id));
                 if (!innerElement.isRead && (innerElement.reciever == action.payload.currentUser._id)) {
                   return numUnread++;
                 } else {
@@ -183,18 +183,23 @@ export function messageThreadReducer(
     case fromMessageThread.REMOVE_UNREAD_MESSAGE_FROM_MESSAGE_THREAD: {
       console.log("remove unread message from message thread payload", action.payload);
       console.log("remove unread message from message thread state", state.data.messageThread);
-      let filteredState = state.data.messageThread.map(thread => {
-        // console.log("thread", thread);
-        // console.log("thread._id == action.payload.messageThread._id", thread._id == action.payload.messageThread._id);
-        if(thread._id == action.payload.messageThread._id){
-          return {...thread, unreadMessages: 0}
-        } else {
-          return thread;
-        }
-      });
-      console.log("filteredState", filteredState);
+      if(action.payload.messageThread.unreadMessages){
+        let filteredState = state.data.messageThread.map(thread => {
+          // console.log("thread", thread);
+          // console.log("thread._id == action.payload.messageThread._id", thread._id == action.payload.messageThread._id);
+          if (thread._id == action.payload.messageThread._id) {
+            return { ...thread, unreadMessages: 0 };
+          } else {
+            return thread;
+          }
+        });
+        console.log("filteredState", filteredState);
+
+        return { ...state, data: { messageThread: [...filteredState] } };
+      } else {
+        return state
+      }
       
-      return { ...state, data:{ messageThread: [...filteredState]} };
     }
   }
   return state;

@@ -117,14 +117,14 @@
 
       <nav id="navbar-center" class="navbar navbar-dark bg-dark">
         <a class="navbar-brand" data-toggle="modal" data-target="#chosenUserModal">
-          {{ chosenUser?.user.username }}
+          {{ chosenUser?.user && chosenUser.user?.username }}
         </a>
       </nav>
       <div class="modal" id="chosenUserModal" tabindex="-1" role="dialog" aria-labelledby="chosenUserModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="chosenUserModalLabel">Profile of {{chosenUser.user?.username}}</h5>
+              <h5 class="modal-title" id="chosenUserModalLabel">Profile of {{chosenUser?.user && chosenUser.user?.username}}</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span id="chosenUser-modal-close" aria-hidden="true">&times;</span>
               </button>
@@ -137,7 +137,7 @@
                 <div id="chosenUser-name-avatar">
                   <div id="chosenUser-username">
                     <h3>
-                      {{chosenUser.user?.username}}
+                      {{chosenUser?.user && chosenUser.user?.username}}
                     </h3>
                   </div>
                 </div>

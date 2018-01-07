@@ -31,17 +31,19 @@ export class UserService {
         )
         .map(res => res.json());
     } else {
-      let chosenDefaultAvatarUrl = inputEvent,
-        avatarName = chosenDefaultAvatarUrl.substring(chosenDefaultAvatarUrl.lastIndexOf("/"), chosenDefaultAvatarUrl.length),
-        avatarJson = { avatarName: avatarName };
-      this.authService.createAuthenticationHeader();
-      return this.http
-        .post(
-          this.domain + "/user/changeAvatar",
-          avatarJson,
-          this.authService.options
-        )
-        .map(res => res.json());
+      if(inputEvent.type == 'defaultAvatar'){
+        let chosenDefaultAvatarUrl = inputEvent.url,
+          avatarName = chosenDefaultAvatarUrl.substring(chosenDefaultAvatarUrl.lastIndexOf("/"), chosenDefaultAvatarUrl.length),
+          avatarJson = { avatarName: avatarName };
+        this.authService.createAuthenticationHeader();
+        return this.http
+          .post(
+            this.domain + "/user/changeAvatar",
+            avatarJson,
+            this.authService.options
+          )
+          .map(res => res.json());
+      }    
     }
   }
 }

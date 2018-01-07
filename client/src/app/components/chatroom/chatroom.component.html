@@ -9,24 +9,27 @@
         <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="profileModalLabel">Profile of {{currentUser.data?.username}}</h5>
+              <h5 class="modal-title" id="profileModalLabel">Profile of {{currentUser.user?.username}}</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span id="profile-modal-close" aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="modal-body">
               <div id="profile-info">
-                <div id="profile-image" *ngIf="currentUser.data">
-                  <img src="./assets/images/{{currentUser.data?.avatar}}">
+                <div id="profile-image" *ngIf="currentUser.user">
+                  <ng-container *ngIf="(currentUser?.user && currentUser?.user.avatar)">
+                    <img [attr.src]="(chosenAvatar?.url) ? (chosenAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
+                      [ngStyle]="{'object-fit': (chosenAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
+                  </ng-container>
                 </div>
                 <div id="profile-name-avatar">
                   <div id="profile-username">
                     <h3>
-                      {{currentUser.data?.username}}
+                      {{currentUser.user?.username}}
                     </h3>
                   </div>
                   <div id="change-avatar">
-                    <a id="change-avatar-modal">change profile image</a>
+                    <a id="change-avatar-modal" (click)="changeAvatarModal()" >change profile image</a>
                   </div>
                 </div>
               </div>
@@ -40,7 +43,7 @@
             <div class="modal-header">
               <h5 class="modal-title" id="avatarModalLabel">Choose image</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span id="avatar-modal-close" aria-hidden="true">&times;</span>
+                <span id="avatar-modal-close" aria-hidden="true" (click)="avatarModalClose()" >&times;</span>
               </button>
             </div>
             <form [formGroup]="formAvatar" (ngSubmit)="avatarFormSubmitted($event)">
@@ -52,15 +55,21 @@
                       formControlName="avatar">
                   </div>
                   <div id="chosen-image-result">
-                    <img [attr.src]="(chosenAvatar?.url)?(chosenAvatar?.url) : './assets/images/'+currentUser?.avatar" 
-                    [ngStyle]="{'object-fit': (chosenAvatar?.type) == 'defaultAvatar'? 'contain':'cover'}"
-                    />
+                    <ng-container *ngIf="(currentUser?.user && currentUser?.user.avatar)"> 
+                      <img [attr.src]="(chosenAvatar?.url) ? (chosenAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
+                        [ngStyle]="{'object-fit': (chosenAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
+                    </ng-container>
                   </div>
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Save changes</button>
-                <button id="avatar-modal-back" type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
+                <div id="avatar-message" [ngClass]="{'text-danger': !statusAvatar?.success, 'text-primary': statusAvatar?.success}" >
+                  {{statusAvatar?.message}}
+                </div>
+                <div id="avatar-action">
+                  <button type="submit" class="btn btn-primary">Save changes</button>
+                  <button id="avatar-modal-back" type="button" class="btn btn-secondary" data-dismiss="modal" (click)="avatarModalBack()" >Back</button>
+                </div>
               </div>
             </form>
             <div style="width: 100%; height: 1px; border: 0.1px solid #E9ECEF; border-bottom: 0;"></div>
@@ -83,11 +92,11 @@
           <div id="user-in-thread" *ngFor="let thread of (messageThread$ | async).messageThread.reverse()" (click)="chooseUserFromMessageThread(thread)">
             <div id="thread-main">
               <ng-container *ngFor="let user of thread.chatBetween">
-                <div id="user-image" *ngIf="user._id != currentUser.data._id">
+                <div id="user-image" *ngIf="user._id != currentUser.user._id">
                   <img *ngIf="user.avatar.length == 0" src='./assets/images/Asset3.svg'>
                   <img *ngIf="user.avatar.length" src='./assets/images/{{user.avatar}}'>
                 </div>
-                <div class="wrapper" *ngIf="user._id != currentUser.data._id">
+                <div class="wrapper" *ngIf="user._id != currentUser.user._id">
                   <div id="username">{{user.username}}</div>
                   <div id="last-message">{{thread.lastMessage}}</div>
                 </div>
@@ -155,9 +164,9 @@
         </div>
       </form> -->
       <!-- <div id="hint" *ngIf="!((messages$ | async) && chosenUser?.user)">
-        <h4 *ngIf="currentUser.data?.loaded">Please, select user to begin chatting</h4>
-        <div id="token-expired" *ngIf="!currentUser.data?.loaded">
-          {{currentUser.data?.message}}
+        <h4 *ngIf="currentUser.user?.loaded">Please, select user to begin chatting</h4>
+        <div id="token-expired" *ngIf="!currentUser.user?.loaded">
+          {{currentUser.user?.message}}
         </div>
       </div> -->
 

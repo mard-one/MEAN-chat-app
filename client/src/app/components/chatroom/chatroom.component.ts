@@ -39,7 +39,7 @@ import { UserService } from "../../services/user.service";
   styleUrls: ["./chatroom.component.css"]
 })
 export class ChatroomComponent implements OnInit {
-  currentUser;
+  currentUser: { user: any; loaded: any; loading: any; message: any };
   chosenUser: { user: any; messageThread: { any } };
   onlineUsers: string[];
   messages$: Observable<any>;
@@ -64,7 +64,7 @@ export class ChatroomComponent implements OnInit {
     "Asset15.svg",
     "Asset16.svg"
   ];
-  chosenAvatar: { type: "userAvatar" | "defaultAvatar"; url: string };
+  chosenAvatar: { type: "userAvatar" | "defaultAvatar"; url: string; submitted: boolean };
   statusAvatar: { success: boolean; message: string };
 
   formMessage: FormGroup;
@@ -102,7 +102,12 @@ export class ChatroomComponent implements OnInit {
     this.contactThread$ = this.store.select(getContactThread);
     this.messages$ = this.store.select(getMessage);
     this.store.select(getUserState).subscribe(user => {
-      this.currentUser = user;
+      this.currentUser = {
+        user: user.data,
+        loaded: user.loaded,
+        loading: user.loading,
+        message: user.message
+      };
       console.log("user", user);
     });
     this.store.select(getMessageThread).subscribe(messageThread => {
@@ -144,7 +149,7 @@ export class ChatroomComponent implements OnInit {
         new AddUnreadMessageToMessageThread({
           message: data.messageSent,
           messageThread: data.messageThread,
-          currentUser: this.currentUser.data
+          currentUser: this.currentUser.user
         })
       );
     });
@@ -152,7 +157,7 @@ export class ChatroomComponent implements OnInit {
       console.log(data);
     });
     // ------------------- Files ---------------------
-    const handleFileSelect = evt => {
+    const handleFileSelect = (evt) => {
       let that = this;
       var files = evt.target.files;
       for (var i = 0, f; (f = files[i]); i++) {
@@ -162,45 +167,24 @@ export class ChatroomComponent implements OnInit {
           var reader = new FileReader();
           reader.onload = (function(theFile) {
             return function(e) {
-              that.chosenAvatar = { type: "userAvatar", url: e.target.result };
+              that.chosenAvatar = { type: "userAvatar", url: e.target.result, submitted: false };
+              console.log("that.chosenAvatar", that.chosenAvatar);
             };
           })(f);
           reader.readAsDataURL(f);
         }
       }
     };
-
     document
       .getElementById("inputAvatar")
       .addEventListener("change", handleFileSelect, false);
-    // ------------------- Modal ---------------------
-    $("#change-avatar-modal").on("click", function() {
-      $("#profileModal").modal("hide");
-    });
-    //trigger next modal
-    $("#change-avatar-modal").on("click", function() {
-      $("#avatarModal").modal("show");
-    });
-    $("#avatar-modal-close").on("click", function() {
-      $("#avatarModal").modal("hide");
-    });
-    //trigger next modal
-    $("#avatar-modal-close").on("click", function() {
-      $("#profileModal").modal("show");
-    });
-    $("#avatar-modal-back").on("click", function() {
-      $("#avatarModal").modal("hide");
-    });
-    //trigger next modal
-    $("#avatar-modal-back").on("click", function() {
-      $("#profileModal").modal("show");
-    });
+
   }
 
   chooseUserFromMessageThread(user) {
     let chosenUserFromMessageThread = user.chatBetween.filter(
       userInChatBetween => {
-        return userInChatBetween._id != this.currentUser.data._id;
+        return userInChatBetween._id != this.currentUser.user._id;
       }
     );
     console.log("message thead user", user);
@@ -215,14 +199,14 @@ export class ChatroomComponent implements OnInit {
     this.store.dispatch(
       new RemoveUnreadMessageFromMessageThread({
         messageThread: this.chosenUser.messageThread,
-        currentUser: this.currentUser.data
+        currentUser: this.currentUser.user
       })
     );
   }
   chooseUserFromContactThread(user) {
     if (user.messageThread.length > 0) {
       let ourMessageThread = user.messageThread.filter(thread => {
-        return this.currentUser.data.messageThread
+        return this.currentUser.user.messageThread
           .map(currentThread => {
             return currentThread._id == thread._id;
           })
@@ -301,21 +285,68 @@ export class ChatroomComponent implements OnInit {
     this.formContact.reset();
     this.addContactToContactsMessage = "";
   }
+  
   avatarFormSubmitted(event) {
-    if(this.chosenAvatar.type == 'userAvatar'){
+    this.chosenAvatar = {...this.chosenAvatar, submitted: true}
+    if (this.chosenAvatar && this.chosenAvatar.type == "userAvatar") {
       let inputEvent = event.target[0];
       this.userService.changeAvatar(inputEvent).subscribe(data => {
-        console.log("data form avatar", data);
+        this.statusAvatar = data;
+        if (data.success) {
+          setTimeout(() => {
+            this.clearAvatarPageAndBackToProfile();
+          }, 1000);
+        }
       });
     } else {
-      if(this.chosenAvatar.type == 'defaultAvatar'){
-        this.userService.changeAvatar(this.chosenAvatar.url).subscribe(data => {
-          console.log("data form avatar", data);
+      if (this.chosenAvatar && this.chosenAvatar.type == "defaultAvatar") {
+        this.userService.changeAvatar(this.chosenAvatar).subscribe(data => {
+          this.statusAvatar = data;
+          if (data.success) {
+            setTimeout(() => {
+              this.clearAvatarPageAndBackToProfile();
+            }, 1000);
+          }
         });
+      } else {
+        this.statusAvatar = {
+          success: false,
+          message: "Please select a image"
+        };
       }
-    }    
+    }
   }
-  chosenAvatarDefault(imageName){
-    this.chosenAvatar = { type: "defaultAvatar", url: "./assets/images/" + imageName };
+  chosenAvatarDefault(imageName) {
+    this.chosenAvatar = {
+      type: "defaultAvatar",
+      url: "./assets/images/" + imageName,
+      submitted: false
+    };
+  }
+  clearAvatarPageAndBackToProfile() {
+    if (this.chosenAvatar.submitted) {
+       console.log("chosen avatar1", this.chosenAvatar);
+      this.formAvatar.reset();
+      this.statusAvatar = null;
+      $("#avatarModal").modal("hide");
+      $("#profileModal").modal("show");
+    } else {
+      console.log("chosen avatar2", this.chosenAvatar);
+      this.formAvatar.reset();
+      this.chosenAvatar = null;
+      this.statusAvatar = null;
+      $("#avatarModal").modal("hide");
+      $("#profileModal").modal("show");
+    }
+  }
+  avatarModalBack() {
+    this.clearAvatarPageAndBackToProfile()
+  }
+  avatarModalClose() {
+    this.clearAvatarPageAndBackToProfile();
+  }
+  changeAvatarModal() {
+    $("#profileModal").modal("hide");
+    $("#avatarModal").modal("show");
   }
 }

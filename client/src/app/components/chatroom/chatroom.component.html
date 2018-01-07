@@ -120,7 +120,7 @@
         </ng-container>
       </div>
       <div id="message-bar" *ngIf="((messages$ | async) && chosenUser?.user)">
-        <form [formGroup]="formMessage" (submit)="sendMessage()">
+        <form  (submit)="sendMessage()">
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Message..." aria-label="Search for..." autofocus name="message" formControlName="message">
             <span class="input-group-btn">
@@ -173,7 +173,7 @@
               </button>
             </div>
             <div class="modal-body">
-              <form [formGroup]="formContact" (submit)="addContact()">
+              <form  (submit)="addContact()">
                 <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput">Enter username</label>
                   <input name="username" formControlName="username" aria-describedby="usernameHelp" type="text" class="form-control" id="formGroupExampleInput"

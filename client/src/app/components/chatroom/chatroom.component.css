@@ -410,6 +410,7 @@
   border: 0.3px solid #D3D6D8;
 }
 #group-avatar-placeholder img{
+  width: 180px;
   height: 100%;
   object-fit: cover
 }
@@ -426,7 +427,27 @@
 }
 #group-members-placeholder{
   width: 100%;
-  height: 70vh;
+  height: 60vh;
   margin-top: 5vh;
   border: 0.3px solid #D3D6D8;
+  overflow-y: auto
+}
+
+/* ----------------------- Add members from contact -----------------------*/
+
+#addMemberToModal .modal-body #user-in-contact{
+  border-bottom: 0.1vh solid #ccc;
+}
+#addMemberToModal .modal-body #user-in-contact:nth-of-type(1){
+  border-top: 0.1vh solid #ccc;
+}
+.chosenContactToMemberOfGroup{
+  /* transform: scale(1.2, 1.2); */
+  background-color: #96DAE5
+  /* border: 0.3px solid #96DAE5; */
+}
+#delete-member{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }

@@ -64,8 +64,20 @@ export class ChatroomComponent implements OnInit {
     "Asset15.svg",
     "Asset16.svg"
   ];
-  chosenAvatar: { type: "userAvatar" | "defaultAvatar"; url: string; submitted: boolean };
-  statusAvatar: { success: boolean; message: string };
+  chosenProfileAvatar: {
+    type: "userAvatar" | "defaultAvatar";
+    url: string;
+    submitted: boolean;
+  };
+  statusProfileAvatar: { success: boolean; message: string };
+  chosenGroupAvatar: {
+    type: "userAvatar" | "defaultAvatar";
+    url: string;
+    submitted: boolean;
+  };
+  chosenMembersOfGroup = new Array();
+  groupMessage;
+  formGroupMessage;
 
   formMessage: FormGroup;
   formContact: FormGroup;
@@ -164,7 +176,7 @@ export class ChatroomComponent implements OnInit {
       console.log(data);
     });
     // ------------------- Files ---------------------
-    const handleFileSelect = (evt) => {
+    const handleAvatarFileSelect = evt => {
       let that = this;
       var files = evt.target.files;
       for (var i = 0, f; (f = files[i]); i++) {
@@ -172,20 +184,42 @@ export class ChatroomComponent implements OnInit {
           return false;
         } else {
           var reader = new FileReader();
-          reader.onload = (function(theFile) {
-            return function(e) {
-              that.chosenAvatar = { type: "userAvatar", url: e.target.result, submitted: false };
-              console.log("that.chosenAvatar", that.chosenAvatar);
-            };
-          })(f);
           reader.readAsDataURL(f);
+          setTimeout(() => {
+            that.chosenProfileAvatar = {
+              type: "userAvatar",
+              url: reader.result,
+              submitted: false
+            };
+          }, 100);
+        }
+      }
+    };
+    const handleGroupFileSelect = evt => {
+      let that = this;
+      var files = evt.target.files;
+      for (var i = 0, f; (f = files[i]); i++) {
+        if (!f.type.match("image.*")) {
+          return false;
+        } else {
+          var reader = new FileReader();
+          reader.readAsDataURL(f);
+          setTimeout(() => {
+            that.chosenGroupAvatar = {
+              type: "userAvatar",
+              url: reader.result,
+              submitted: false
+            };
+          }, 100);
         }
       }
     };
     document
-      .getElementById("inputAvatar")
-      .addEventListener("change", handleFileSelect, false);
-
+      .getElementById("profileAvatar")
+      .addEventListener("change", handleAvatarFileSelect, false);
+    document
+      .getElementById("groupAvatar")
+      .addEventListener("change", handleGroupFileSelect, false);
   }
 
   chooseUserFromMessageThread(user) {
@@ -292,13 +326,16 @@ export class ChatroomComponent implements OnInit {
     this.formContact.reset();
     this.addContactToContactsMessage = "";
   }
-  
+
   avatarFormSubmitted(event) {
-    this.chosenAvatar = {...this.chosenAvatar, submitted: true}
-    if (this.chosenAvatar && this.chosenAvatar.type == "userAvatar") {
+    this.chosenProfileAvatar = { ...this.chosenProfileAvatar, submitted: true };
+    if (
+      this.chosenProfileAvatar &&
+      this.chosenProfileAvatar.type == "userAvatar"
+    ) {
       let inputEvent = event.target[0];
       this.userService.changeAvatar(inputEvent).subscribe(data => {
-        this.statusAvatar = data;
+        this.statusProfileAvatar = data;
         if (data.success) {
           setTimeout(() => {
             this.clearAvatarPageAndBackToProfile();
@@ -306,48 +343,53 @@ export class ChatroomComponent implements OnInit {
         }
       });
     } else {
-      if (this.chosenAvatar && this.chosenAvatar.type == "defaultAvatar") {
-        this.userService.changeAvatar(this.chosenAvatar).subscribe(data => {
-          this.statusAvatar = data;
-          if (data.success) {
-            setTimeout(() => {
-              this.clearAvatarPageAndBackToProfile();
-            }, 1000);
-          }
-        });
+      if (
+        this.chosenProfileAvatar &&
+        this.chosenProfileAvatar.type == "defaultAvatar"
+      ) {
+        this.userService
+          .changeAvatar(this.chosenProfileAvatar)
+          .subscribe(data => {
+            this.statusProfileAvatar = data;
+            if (data.success) {
+              setTimeout(() => {
+                this.clearAvatarPageAndBackToProfile();
+              }, 1000);
+            }
+          });
       } else {
-        this.statusAvatar = {
+        this.statusProfileAvatar = {
           success: false,
           message: "Please select a image"
         };
       }
     }
   }
-  chosenAvatarDefault(imageName) {
-    this.chosenAvatar = {
+  chosenProfileAvatarDefault(imageName) {
+    this.chosenProfileAvatar = {
       type: "defaultAvatar",
       url: "./assets/images/" + imageName,
       submitted: false
     };
   }
   clearAvatarPageAndBackToProfile() {
-    if (this.chosenAvatar.submitted) {
-       console.log("chosen avatar1", this.chosenAvatar);
+    if (this.chosenProfileAvatar.submitted) {
+      console.log("chosen avatar1", this.chosenProfileAvatar);
       this.formAvatar.reset();
-      this.statusAvatar = null;
+      this.statusProfileAvatar = null;
       $("#avatarModal").modal("hide");
       $("#profileModal").modal("show");
     } else {
-      console.log("chosen avatar2", this.chosenAvatar);
+      console.log("chosen avatar2", this.chosenProfileAvatar);
       this.formAvatar.reset();
-      this.chosenAvatar = null;
-      this.statusAvatar = null;
+      this.chosenProfileAvatar = null;
+      this.statusProfileAvatar = null;
       $("#avatarModal").modal("hide");
       $("#profileModal").modal("show");
     }
   }
   avatarModalBack() {
-    this.clearAvatarPageAndBackToProfile()
+    this.clearAvatarPageAndBackToProfile();
   }
   avatarModalClose() {
     this.clearAvatarPageAndBackToProfile();
@@ -355,5 +397,101 @@ export class ChatroomComponent implements OnInit {
   changeAvatarModal() {
     $("#profileModal").modal("hide");
     $("#avatarModal").modal("show");
+  }
+  addContactsToMembers() {
+    $("#createGroupModal").modal("hide");
+    $("#addMemberToModal").modal("show");
+  }
+  chosenContactToMembers(contact) {
+    if (this.chosenMembersOfGroup && this.chosenMembersOfGroup.length) {
+      const hasContact = contact => {
+        return this.chosenMembersOfGroup
+          .map(contactInList => {
+            return contactInList._id == contact._id;
+          })
+          .includes(true);
+      };
+      if (!hasContact(contact)) {
+        this.chosenMembersOfGroup.push(contact);
+        console.log("new contact", this.chosenMembersOfGroup);
+        return true;
+      } else {
+        this.chosenMembersOfGroup.splice(
+          this.chosenMembersOfGroup.indexOf(contact),
+          1
+        );
+        console.log("delete", this.chosenMembersOfGroup);
+        return false;
+      }
+    } else {
+      this.chosenMembersOfGroup.push(contact);
+      console.log("first contact", this.chosenMembersOfGroup);
+      return true;
+    }
+  }
+  isChosen(contact) {
+    const hasContact = contact => {
+      return this.chosenMembersOfGroup
+        .map(contactInList => {
+          return contactInList._id == contact._id;
+        })
+        .includes(true);
+    };
+    if (hasContact(contact)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  addUsernameToMembers() {
+    let userToAddToGroup = this.formCreateGroup.get("groupMember").value;
+    let hasMember = this.chosenMembersOfGroup
+      .map(member => {
+        return member.username == userToAddToGroup;
+      })
+      .includes(true);
+    if (hasMember) {
+      this.groupMessage = "The user has already added";
+    } else {
+      this.userService.userExist(userToAddToGroup).subscribe(data => {
+        this.groupMessage = data.message;
+        if (data.success) {
+          this.chosenMembersOfGroup.push(data.user);
+          this.formCreateGroup.get("groupMember").reset();
+        }
+      });
+    }
+  }
+  addMemberToModalBack() {
+    this.chosenMembersOfGroup = [];
+    $("#addMemberToModal").modal("hide");
+    $("#createGroupModal").modal("show");
+  }
+  addMemberToModalSubmit() {
+    $("#addMemberToModal").modal("hide");
+    $("#createGroupModal").modal("show");
+  }
+  deleteMember(member) {
+    this.chosenMembersOfGroup.splice(
+      this.chosenMembersOfGroup.indexOf(member),
+      1
+    );
+  }
+  groupFormSubmitted(event) {
+    let groupInfoValue = this.formCreateGroup.get("groupInfo").value;
+    let groupNameValue = this.formCreateGroup.get("groupName").value;
+    let groupMember = this.chosenMembersOfGroup;
+    let groupAvatar = event.target[0].files[0];
+    let groupFormData = {
+      name: groupNameValue,
+      members: groupMember,
+      avatar: groupAvatar,
+      description: groupInfoValue
+    };
+    if(!groupNameValue){
+      this.formGroupMessage = "Name of group is required"
+    } else{
+      
+    }
   }
 }

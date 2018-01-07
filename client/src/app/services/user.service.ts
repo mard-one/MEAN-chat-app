@@ -31,9 +31,12 @@ export class UserService {
         )
         .map(res => res.json());
     } else {
-      if(inputEvent.type == 'defaultAvatar'){
+      if (inputEvent.type == "defaultAvatar") {
         let chosenDefaultAvatarUrl = inputEvent.url,
-          avatarName = chosenDefaultAvatarUrl.substring(chosenDefaultAvatarUrl.lastIndexOf("/"), chosenDefaultAvatarUrl.length),
+          avatarName = chosenDefaultAvatarUrl.substring(
+            chosenDefaultAvatarUrl.lastIndexOf("/"),
+            chosenDefaultAvatarUrl.length
+          ),
           avatarJson = { avatarName: avatarName };
         this.authService.createAuthenticationHeader();
         return this.http
@@ -43,7 +46,13 @@ export class UserService {
             this.authService.options
           )
           .map(res => res.json());
-      }    
+      }
     }
+  }
+  userExist(userToAddToGroup) {
+    let user = { username: userToAddToGroup };
+    return this.http
+      .post(this.domain + "/user/userExist", user, this.authService.options)
+      .map(res => res.json());
   }
 }

@@ -8,16 +8,6 @@ const User = require("../models/user");
 
 const Verify = require("./middleware/authentication");
 
-var Storage = multer.diskStorage({
-  destination: function(req, file, callback) {
-    callback(null, "./server/assets/images");
-  },
-  filename: function(req, file, callback) {
-    callback(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
-  }
-});
-var upload = multer({ storage: Storage }).single("inputAvatar");
-
 router.get("/currentUser", Verify, (req, res) => {
   // console.log("req", req.body);
   User.findById(req.decoded.user_id, "-password")
@@ -58,6 +48,16 @@ router.get("/currentUser", Verify, (req, res) => {
     });
 });
 
+var Storage = multer.diskStorage({
+  destination: function(req, file, callback) {
+    callback(null, "./server/assets/images");
+  },
+  filename: function(req, file, callback) {
+    callback(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
+  }
+});
+var upload = multer({ storage: Storage }).single("profileAvatar");
+
 router.post("/changeAvatar", Verify, (req, res) => {
   if(req.body && req.body.avatarName ){
     User.findByIdAndUpdate(req.decoded.user_id, {
@@ -85,5 +85,37 @@ router.post("/changeAvatar", Verify, (req, res) => {
     }); 
   }
 });
+router.post("/userExist", Verify, (req, res) => {
+  User.findById(req.decoded.user_id).exec((err, currentUser)=>{
+    User.findOne({ username: req.body.username }).exec((err, foundUser) => {
+      if (err) {
+        res.json({ success: false, message: "Error occured " + err });
+      } else {
+        if (!foundUser) {
+          res.json({ success: false, message: "User not exists" });
+        } else {
+          console.log("currentUser._id", currentUser._id);
+          console.log("foundUser._id", foundUser._id);
+          if (currentUser._id.toString() == foundUser._id.toString()) {
+            console.log("add yourself");
+             res.json({
+               success: false,
+               message:
+                 "Don't need to add yourself. You will be automatically added"
+             });
+          } else {
+            res.json({
+              success: true,
+              message: "User added",
+              user: foundUser
+            });
+          }
+        }
+      }
+    });
+  })  
+});
+
+
 
 module.exports = router;

@@ -43,7 +43,7 @@
                 <span id="avatar-modal-close" aria-hidden="true">&times;</span>
               </button>
             </div>
-            <form action="http://localhost:4200/user/changeAvatar" method="post" enctype="multipart/form-data"  (ngSubmit)="avatarFormSubmitted()">
+            <form [formGroup]="formAvatar" (ngSubmit)="avatarFormSubmitted()">
               <div class="modal-body">
                 <div class="wrap">
                   <div class="main-group">
@@ -120,7 +120,7 @@
         </ng-container>
       </div>
       <div id="message-bar" *ngIf="((messages$ | async) && chosenUser?.user)">
-        <form  (submit)="sendMessage()">
+        <form [formGroup]="formMessage" (submit)="sendMessage()">
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Message..." aria-label="Search for..." autofocus name="message" formControlName="message">
             <span class="input-group-btn">
@@ -129,10 +129,10 @@
           </div>
         </form>
       </div>
-      <form action="http://localhost:8080/user/changeAvatar" name="yourForm" id="theForm" method="post">
+      <!-- <form action="http://localhost:8080/user/changeAvatar" name="yourForm" id="theForm" method="post">
         <input type="file" name="fname" id="fname" />
         <input type="submit" value="submit" />
-      </form>
+      </form> -->
       <!-- <form action="/user/changeAvatar" method="POST" enctype="multipart/form-data" 
         (ngSubmit)="avatarFormSubmitted()">
         <div class="modal-body">
@@ -173,7 +173,7 @@
               </button>
             </div>
             <div class="modal-body">
-              <form  (submit)="addContact()">
+              <form [formGroup]="formContact" (submit)="addContact()">
                 <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput">Enter username</label>
                   <input name="username" formControlName="username" aria-describedby="usernameHelp" type="text" class="form-control" id="formGroupExampleInput"

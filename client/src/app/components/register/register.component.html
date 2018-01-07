@@ -1,4 +1,4 @@
-<form id='register-form' (submit)="onRegisterSubmit()">
+<form id='register-form' [formGroup]="formRegister" (submit)="onRegisterSubmit()">
   <div class="form-header">
     <h1>Register new Account</h1>
   </div>

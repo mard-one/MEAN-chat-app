@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-// import { FormBuilder, FormGroup, FormControl } from "@angular/forms";
+import { FormBuilder, FormGroup, FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
 import * as io from "socket.io-client";
 
@@ -66,12 +66,9 @@ export class ChatroomComponent implements OnInit {
     "Asset16.svg"
   ];
 
-  formMessage 
-  // FormGroup;
-  formContact 
-  // FormGroup;
-  formAvatar 
-  // FormGroup;
+  formMessage: FormGroup;
+  formContact: FormGroup;
+  formAvatar: FormGroup;
 
   private socket;
 
@@ -80,7 +77,7 @@ export class ChatroomComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    // private formBuilder: FormBuilder,
+    private formBuilder: FormBuilder,
     private contactService: ContactService,
     private authService: AuthService,
     private threadService: ThreadService,
@@ -88,11 +85,11 @@ export class ChatroomComponent implements OnInit {
     private router: Router,
     private store: Store<fromStore.ChatState>
   ) {
-    // (() => {
-    //   this.formMessage = this.formBuilder.group({ message: "" });
-    //   this.formContact = this.formBuilder.group({ username: "" });
-    //   this.formAvatar = this.formBuilder.group({ avatar: "" });
-    // })();
+    (() => {
+      this.formMessage = this.formBuilder.group({ message: "" });
+      this.formContact = this.formBuilder.group({ username: "" });
+      this.formAvatar = this.formBuilder.group({ avatar: "" });
+    })();
   }
 
   ngOnInit() {
@@ -164,7 +161,7 @@ export class ChatroomComponent implements OnInit {
       console.log(data);
     });
     // ------------------- Files ---------------------
-    function handleFileSelect(evt) {
+    const handleFileSelect = (evt) => {
       // console.log("Evt", evt);
       var files = evt.target.files;
       // console.log("files length", files.length);
@@ -197,16 +194,10 @@ export class ChatroomComponent implements OnInit {
         }
       }
     }
-    function removePreImage() {
-      $("#chosen-image-result").empty();
-    }
 
     document
       .getElementById("avatarImage")
       .addEventListener("change", handleFileSelect, false);
-    document
-      .getElementById("avatarImage")
-      .addEventListener("click", removePreImage);
     // ------------------- Modal ---------------------
     $("#change-avatar-modal").on("click", function() {
       $("#profileModal").modal("hide");

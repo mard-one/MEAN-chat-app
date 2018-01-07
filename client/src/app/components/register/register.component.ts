@@ -6,44 +6,45 @@ import { Router } from "@angular/router"
 import { AuthService } from '../../services/auth.service'
 
 @Component({
-  selector: 'app-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  selector: "app-register",
+  templateUrl: "./register.component.html",
+  styleUrls: ["./register.component.css"]
 })
 export class RegisterComponent implements OnInit {
-
   formRegister: FormGroup;
-  message
-  messageClass
-  blocked = false
+  message;
+  messageClass;
+  blocked = false;
+  
 
-
-  constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router) {
-      this.createForm()
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.createForm();
   }
-  createForm(){
+  createForm() {
     this.formRegister = this.formBuilder.group({
-      username: '',
-      password: ''
-    })
+      username: "",
+      password: ""
+    });
   }
 
-  onRegisterSubmit(){
+  onRegisterSubmit() {
     const user = {
-      username: this.formRegister.get('username').value,
-      password: this.formRegister.get('password').value
-    }
-    this.authService.registerUser(user).subscribe((data)=>{
-      if(data.success){
-        setTimeout(()=>{
-          this.router.navigate(['/login'])
-        })
+      username: this.formRegister.get("username").value,
+      password: this.formRegister.get("password").value
+    };
+    this.authService.registerUser(user).subscribe(data => {
+      if (data.success) {
+        setTimeout(() => {
+          this.router.navigate(["/login"]);
+        });
       }
-    })
-    return false
+    });
+    return false;
   }
 
-  ngOnInit() {
-  }
-
+  ngOnInit() {}
 }

@@ -70,6 +70,7 @@ export class ChatroomComponent implements OnInit {
   formMessage: FormGroup;
   formContact: FormGroup;
   formAvatar: FormGroup;
+  formCreateGroup: FormGroup;
 
   private socket;
 
@@ -90,6 +91,12 @@ export class ChatroomComponent implements OnInit {
       this.formMessage = this.formBuilder.group({ message: "" });
       this.formContact = this.formBuilder.group({ username: "" });
       this.formAvatar = this.formBuilder.group({ avatar: "" });
+      this.formCreateGroup = this.formBuilder.group({
+        groupName: "",
+        groupInfo: "",
+        groupAvatar: "",
+        groupMember: ""
+      });
     })();
   }
 

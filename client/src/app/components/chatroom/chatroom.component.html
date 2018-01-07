@@ -51,7 +51,11 @@
                     <input type="file" accept=".jpg, .jpeg, .png" class="form-control-file" id="inputAvatar" aria-describedby="fileHelp" name="inputAvatar"
                       formControlName="avatar">
                   </div>
-                  <div id="chosen-image-result"></div>
+                  <div id="chosen-image-result">
+                    <img [attr.src]="(chosenAvatar?.url)?(chosenAvatar?.url) : './assets/images/'+currentUser?.avatar" 
+                    [ngStyle]="{'object-fit': (chosenAvatar?.type) == 'defaultAvatar'? 'contain':'cover'}"
+                    />
+                  </div>
                 </div>
               </div>
               <div class="modal-footer">
@@ -65,7 +69,7 @@
                 <h4>Or choose from examples</h4>
               </div>
               <div id="avatar-example-body">
-                <div id="avatar-example" *ngFor="let image of defaultImages">
+                <div id="avatar-example" *ngFor="let image of defaultImages" (click)="chosenAvatarDefault(image)">
                   <img src="./assets/images/{{image}}">
                 </div>
               </div>

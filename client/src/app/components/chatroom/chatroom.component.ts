@@ -37,7 +37,6 @@ import { UserService } from "../../services/user.service";
   selector: "app-chatroom",
   templateUrl: "./chatroom.component.html",
   styleUrls: ["./chatroom.component.css"]
-  // pipes: [OrderByPipe]
 })
 export class ChatroomComponent implements OnInit {
   currentUser;
@@ -65,6 +64,8 @@ export class ChatroomComponent implements OnInit {
     "Asset15.svg",
     "Asset16.svg"
   ];
+  chosenAvatar: { type: "userAvatar" | "defaultAvatar"; url: string };
+  statusAvatar: { success: boolean; message: string };
 
   formMessage: FormGroup;
   formContact: FormGroup;
@@ -97,8 +98,6 @@ export class ChatroomComponent implements OnInit {
       `http://localhost:8080?token=${localStorage.getItem("token")}`
     );
     this.store.dispatch(new LoadCurrentUser());
-    // this.store.dispatch(new LoadMessageThread());
-    // this.store.dispatch(new LoadContactThread());
     this.messageThread$ = this.store.select(getMessageThread);
     this.contactThread$ = this.store.select(getContactThread);
     this.messages$ = this.store.select(getMessage);
@@ -115,15 +114,7 @@ export class ChatroomComponent implements OnInit {
     this.store.select(getMessage).subscribe(messages => {
       console.log("messages", messages);
     });
-    // this.store.select(getContactThreadState).subscribe(contactThread => {
-    //   console.log("contact thread state", contactThread);
-    // });
-    // console.log("message thread", this.messageThread$)
-    // this.store.dispatch(new fromStore.LoadChosenUser());
-    // this.userService.pageInit().subscribe(userData => {
-    //   this.profile = userData;
-    //   console.log(this.profile);
-    // });
+
     this.socket.on("connect", () => {
       this.socket.emit("room", localStorage.getItem("token"));
       this.socket.emit("give me online users");
@@ -162,35 +153,19 @@ export class ChatroomComponent implements OnInit {
     });
     // ------------------- Files ---------------------
     const handleFileSelect = evt => {
-      // console.log("Evt", evt);
+      let that = this;
       var files = evt.target.files;
-      // console.log("files length", files.length);
-
       for (var i = 0, f; (f = files[i]); i++) {
         if (!f.type.match("image.*")) {
           return false;
         } else {
           var reader = new FileReader();
-
           reader.onload = (function(theFile) {
             return function(e) {
-              // Render thumbnail.
-              var span = document.createElement("span");
-              span.innerHTML = [
-                '<img id="avatar-thumb" style="width: 180px; height: 200px; object-fit: cover" src="',
-                e.target.result,
-                '" title="',
-                decodeURI(theFile.name),
-                '"/>'
-              ].join("");
-              document
-                .getElementById("chosen-image-result")
-                .insertBefore(span, null);
+              that.chosenAvatar = { type: "userAvatar", url: e.target.result };
             };
           })(f);
-
           reader.readAsDataURL(f);
-          // console.log("reader", reader);
         }
       }
     };
@@ -243,14 +218,6 @@ export class ChatroomComponent implements OnInit {
         currentUser: this.currentUser.data
       })
     );
-    // console.log(user);
-    // this.chosenUser$ = this.store
-    //   .select(fromStore.getChosenUser)
-    // this.store.select(fromStore.getChosenUser).subscribe(state=>{
-    //   // this.chosenUser$ = state;
-    //   console.log(state);
-    // })
-    // console.log(this.chosenUser$);
   }
   chooseUserFromContactThread(user) {
     if (user.messageThread.length > 0) {
@@ -280,16 +247,7 @@ export class ChatroomComponent implements OnInit {
     }
   }
 
-  // sendMessage() {
-  //   this.socket.emit("sendMessage", {
-  //     token: localStorage.getItem("token"),
-  //     reciever: this.chosenUser,
-  //     message: this.formMessage.get("message").value
-  //   });
-  // }
-
   sendMessage() {
-    // this.tempMessage = { message: this.formChat.get('message').value, sentAt: new Date()}
     this.socket.emit("sendMessage", {
       token: localStorage.getItem("token"),
       reciever: this.chosenUser.user,
@@ -329,18 +287,6 @@ export class ChatroomComponent implements OnInit {
       this.addContactToContactsMessage = "Please enter a username";
       this.addContactToContactsStatus = false;
     }
-    // this.contactService.addContact(user).subscribe(data => {
-    //   if (!data.success) {
-    //     this.enableForm();
-    //   } else {
-    //     // console.log("data", data);
-    //     setTimeout(() => {
-    //       $("#contactModal").modal("hide");
-    //       this.enableForm();
-    //       this.formContact.reset();
-    //     }, 2000);
-    //   }
-    // });
   }
 
   disableForm() {
@@ -355,10 +301,13 @@ export class ChatroomComponent implements OnInit {
     this.formContact.reset();
     this.addContactToContactsMessage = "";
   }
-  avatarFormSubmitted(event){
-    let inputEvent = event.target[0]
+  avatarFormSubmitted(event) {
+    let inputEvent = event.target[0];
     this.userService.changeAvatar(inputEvent).subscribe(data => {
       console.log("data form avatar", data);
     });
+  }
+  chosenAvatarDefault(imageName){
+    this.chosenAvatar = { type: "defaultAvatar", url: "./assets/images/" + imageName };
   }
 }

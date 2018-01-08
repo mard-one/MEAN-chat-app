@@ -24,15 +24,13 @@ export function messageThreadReducer(
     case fromMessageThread.LOAD_MESSAGE_THREAD: {
       console.log("load message thread payload", action.payload);
       console.log("load message thread state", state);
-      return { ...state, loading: false, loaded: action.payload.success, data: { messageThread: action.payload.userData.messageThread} };
+      return {
+        ...state,
+        loading: false,
+        loaded: action.payload.success,
+        data: { messageThread: action.payload.userData.messageThread }
+      };
     }
-    // case fromMessageThread.LOAD_MESSAGE_THREAD_SUCCESS: {
-    //   const data = action.payload;
-    //   return { ...state, loading: false, loaded: true, data };
-    // }
-    // case fromMessageThread.LOAD_MESSAGE_THREAD_FAIL: {
-    //   return { ...state, loading: false, loaded: false };
-    // }
     case fromMessageThread.ADD_NEW_MESSAGE_TO_MESSAGE_THREAD: {
       console.log("add new message to message thread payload", action.payload);
       console.log("add new message to message thread state", state);
@@ -67,7 +65,17 @@ export function messageThreadReducer(
           //   "proper message thread payload",
           //   properMessageThreadPayload
           // );
-          return { ...state, loading: false, loaded: true, data: { messageThread: [...filteredStateWithoutNewMessageThread, ...action.payload.messageThread] } };
+          return {
+            ...state,
+            loading: false,
+            loaded: true,
+            data: {
+              messageThread: [
+                ...filteredStateWithoutNewMessageThread,
+                ...action.payload.messageThread
+              ]
+            }
+          };
         } else {
           return {
             ...state,
@@ -92,7 +100,10 @@ export function messageThreadReducer(
       }
     }
     case fromMessageThread.COUNT_UNREAD_MESSAGE_IN_MESSAGE_THREAD: {
-      console.log("count unread message in message thread payload", action.payload);
+      console.log(
+        "count unread message in message thread payload",
+        action.payload
+      );
       console.log("count unread message in message thread state", state);
       if (state.data.messageThread.length) {
         let messageThreadWithNumberOfUnreadMessages = state.data.messageThread.map(
@@ -101,7 +112,10 @@ export function messageThreadReducer(
             var numUnread = 0;
             element.messages.map(innerElement => {
               // console.log("inner element", innerElement);
-              if (!innerElement.isRead && (innerElement.reciever == action.payload.userData._id)) {
+              if (
+                !innerElement.isRead &&
+                innerElement.reciever == action.payload.userData._id
+              ) {
                 return numUnread++;
               } else {
                 return numUnread;
@@ -148,7 +162,10 @@ export function messageThreadReducer(
               thread.messages.map(innerElement => {
                 // console.log("inner thread", innerElement);
                 // console.log("logic", (innerElement.isRead && innerElement.reciever == action.payload.currentUser._id));
-                if (!innerElement.isRead && (innerElement.reciever == action.payload.currentUser._id)) {
+                if (
+                  !innerElement.isRead &&
+                  innerElement.reciever == action.payload.currentUser._id
+                ) {
                   return numUnread++;
                 } else {
                   return numUnread;
@@ -174,16 +191,22 @@ export function messageThreadReducer(
             }
           };
         } else {
-          return { ...state, loaded: true };;
+          return { ...state, loaded: true };
         }
       } else {
         return { ...state, loaded: true };
       }
     }
     case fromMessageThread.REMOVE_UNREAD_MESSAGE_FROM_MESSAGE_THREAD: {
-      console.log("remove unread message from message thread payload", action.payload);
-      console.log("remove unread message from message thread state", state.data.messageThread);
-      if(action.payload.messageThread.unreadMessages){
+      console.log(
+        "remove unread message from message thread payload",
+        action.payload
+      );
+      console.log(
+        "remove unread message from message thread state",
+        state.data.messageThread
+      );
+      if (action.payload.messageThread.unreadMessages) {
         let filteredState = state.data.messageThread.map(thread => {
           // console.log("thread", thread);
           // console.log("thread._id == action.payload.messageThread._id", thread._id == action.payload.messageThread._id);
@@ -197,9 +220,14 @@ export function messageThreadReducer(
 
         return { ...state, data: { messageThread: [...filteredState] } };
       } else {
-        return state
+        return state;
       }
-      
+    }
+    case fromMessageThread.ADD_NEW_GROUP_TO_MESSAGE_THREAD: {
+      console.log("add new group to message thread payload", action.payload);
+      console.log("add new group to message thread state", state);
+      let newMessageThread = { ...action.payload, chatBetween: [{ avatar: action.payload.avatar, username: action.payload.name }] };
+      return { ...state, data: { ...state.data, messageThread: [...state.data.messageThread, newMessageThread] } };
     }
   }
   return state;

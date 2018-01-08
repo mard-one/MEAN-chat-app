@@ -3,18 +3,16 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const config = require("../config");
 
-const User = require("../models/user");
-const Message = require("../models/message");
-const MessageThread = require("../models/messageThread");
-const ContactThread = require("../models/contactThread");
-
 const Verify = require("./middleware/authentication");
+const customModelsModules = require("../models");
+
 
 router.post("/addContact", Verify, function(req, res) {
-  User.findOne({ username: req.body.username }, "username messageThread avatar")
+  customModelsModules.User
+    .findOne({ username: req.body.username }, "username messageThread avatar")
     .populate({
       path: "messageThread",
-      populate: [{ path: "chatBetween" }, {path: "messages"}]
+      populate: [{ path: "chatBetween" }, { path: "messages" }]
     })
     .exec((err, newUser) => {
       console.log("newUser", newUser);
@@ -30,7 +28,7 @@ router.post("/addContact", Verify, function(req, res) {
           if (newUser._id == req.decoded.user_id) {
             res.json({ success: false, message: "You cannot add yourself" });
           } else {
-            User.findById(req.decoded.user_id)
+            customModelsModules.User.findById(req.decoded.user_id)
               .populate({ path: "contactThread" })
               .exec((err, foundUser) => {
                 if (err) {
@@ -54,16 +52,18 @@ router.post("/addContact", Verify, function(req, res) {
                         message: "The user exists in your contacts"
                       });
                     } else {
-                      ContactThread.findOneAndUpdate({ threadOwner: req.decoded.user_id }, { $addToSet: { contacts: newUser._id } }, { sort: "contacts", new: true })
+                      customModelsModules.ContactThread.findOneAndUpdate({ threadOwner: req.decoded.user_id }, { $addToSet: { contacts: newUser._id } }, { sort: "contacts", new: true })
                         .populate({
                           path: "contacts",
-                          select: "-password -contactThread"
+                          select:
+                            "-password -contactThread"
                         })
                         .exec(function(err, data) {
                           if (err) {
                             res.json({
                               success: false,
-                              message: "Something wrong with contact thread"
+                              message:
+                                "Something wrong with contact thread"
                             });
                           }
                           res.json({
@@ -83,7 +83,7 @@ router.post("/addContact", Verify, function(req, res) {
 });
 
 router.get("/getAllContacts", Verify, function(req, res) {
-  User.findOne({ _id: req.decoded.user_id })
+  customModelsModules.User.findOne({ _id: req.decoded.user_id })
     .populate({
       path: "contactThread",
       populate: {

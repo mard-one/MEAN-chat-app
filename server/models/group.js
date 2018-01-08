@@ -4,10 +4,11 @@ const Schema = mongoose.Schema;
 const User = require("./user");
 const Message = require("./message");
 
-var messageSchema = new Schema({
+var groupSchema = new Schema({
   name: String,
   avatar: String,
   messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
+  lastMessage: String,
   members: [{ type: Schema.Types.ObjectId, ref: "User" }],
   admins: [{ type: Schema.Types.ObjectId, ref: "User" }],
   creator: { type: Schema.Types.ObjectId, ref: "User" },
@@ -15,4 +16,4 @@ var messageSchema = new Schema({
   description: String
 });
 
-module.exports = mongoose.model("Message", messageSchema);
+module.exports = mongoose.model("Group", groupSchema);

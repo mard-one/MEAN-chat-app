@@ -7,32 +7,10 @@ import { Store } from "@ngrx/store";
 import { Observable } from "rxjs/Observable";
 
 import * as fromStore from "../../store";
-import {
-  LoadContactThread,
-  LoadMessageThread,
-  getMessage,
-  getMessageState,
-  getMessageThread,
-  getContactThread,
-  getContactThreadState,
-  AddNewMessageSuccess,
-  AddContactToContactThread,
-  ChooseMessageFromMessageThread,
-  RemoveUnreadMessageFromMessageThread,
-  AddUnreadMessageToMessageThread,
-  LoadCurrentUser,
-  getUser,
-  getUserState
-} from "../../store";
-
-import { User } from "../../models/user.model";
-
-import { ContactService } from "../../services/contact.service";
-import { AuthService } from "../../services/auth.service";
-import { ThreadService } from "../../services/thread.service";
-import { MessageService } from "../../services/message.service";
-import { UserService } from "../../services/user.service";
-import { GroupService } from "../../services/group.service";
+import * as fromService from "../../services";
+import * as fromModel from "../../models";
+import * as fromStoreSelector from "../../store/selectors";
+import * as fromStoreActions from "../../store/actions";
 
 @Component({
   selector: "app-chatroom",
@@ -46,6 +24,8 @@ export class ChatroomComponent implements OnInit {
   messages$: Observable<any>;
   messageThread$: Observable<any>;
   contactThread$: Observable<any>;
+  addContactToContactsMessage: string;
+  addContactToContactsStatus: boolean;
   order: string = "username";
   defaultImages = [
     "Asset1.svg",
@@ -87,17 +67,14 @@ export class ChatroomComponent implements OnInit {
 
   private socket;
 
-  addContactToContactsMessage: string;
-  addContactToContactsStatus: boolean;
-
   constructor(
-    private userService: UserService,
     private formBuilder: FormBuilder,
-    private contactService: ContactService,
-    private authService: AuthService,
-    private threadService: ThreadService,
-    private messageService: MessageService,
-    private groupService: GroupService,
+    private userService: fromService.UserService,
+    private contactService: fromService.ContactService,
+    private authService: fromService.AuthService,
+    private threadService: fromService.ThreadService,
+    private messageService: fromService.MessageService,
+    private groupService: fromService.GroupService,
     private router: Router,
     private store: Store<fromStore.ChatState>
   ) {
@@ -118,11 +95,11 @@ export class ChatroomComponent implements OnInit {
     this.socket = io.connect(
       `http://localhost:8080?token=${localStorage.getItem("token")}`
     );
-    this.store.dispatch(new LoadCurrentUser());
-    this.messageThread$ = this.store.select(getMessageThread);
-    this.contactThread$ = this.store.select(getContactThread);
-    this.messages$ = this.store.select(getMessage);
-    this.store.select(getUserState).subscribe(user => {
+    this.store.dispatch(new fromStoreActions.LoadCurrentUser());
+    this.messageThread$ = this.store.select(fromStoreSelector.getMessageThread);
+    this.contactThread$ = this.store.select(fromStoreSelector.getContactThread);
+    this.messages$ = this.store.select(fromStoreSelector.getMessage);
+    this.store.select(fromStoreSelector.getUserState).subscribe(user => {
       this.currentUser = {
         user: user.data,
         loaded: user.loaded,
@@ -131,15 +108,20 @@ export class ChatroomComponent implements OnInit {
       };
       console.log("user", user);
     });
-    this.store.select(getMessageThread).subscribe(messageThread => {
-      console.log("message thread", messageThread);
-    });
-    this.store.select(getContactThread).subscribe(contactThread => {
-      console.log("contact thread", contactThread);
-    });
-    this.store.select(getMessage).subscribe(messages => {
+    this.store
+      .select(fromStoreSelector.getMessageThread)
+      .subscribe(messageThread => {
+        console.log("message thread", messageThread);
+      });
+    this.store
+      .select(fromStoreSelector.getContactThread)
+      .subscribe(contactThread => {
+        console.log("contact thread", contactThread);
+      });
+    this.store.select(fromStoreSelector.getMessage).subscribe(messages => {
       console.log("messages", messages);
     });
+    // ------------------------ Socket.io -------------------------------
 
     this.socket.on("connect", () => {
       this.socket.emit("room", localStorage.getItem("token"));
@@ -152,7 +134,7 @@ export class ChatroomComponent implements OnInit {
     this.socket.on("successfully recieved", data => {
       console.log("socket message", data);
       this.store.dispatch(
-        new AddNewMessageSuccess({
+        new fromStoreActions.AddNewMessageSuccess({
           message: data.messageSent,
           messageThread: data.messageThread
         })
@@ -161,17 +143,25 @@ export class ChatroomComponent implements OnInit {
     this.socket.on("successfully sent", data => {
       console.log("socket message", data);
       this.store.dispatch(
-        new AddNewMessageSuccess({
+        new fromStoreActions.AddNewMessageSuccess({
           message: data.messageSent,
           messageThread: data.messageThread
         })
       );
       this.store.dispatch(
-        new AddUnreadMessageToMessageThread({
+        new fromStoreActions.AddUnreadMessageToMessageThread({
           message: data.messageSent,
           messageThread: data.messageThread,
           currentUser: this.currentUser.user
         })
+      );
+    });
+    this.socket.on("new group success", data => {
+      console.log("socket io recieved group", data);
+      this.store.dispatch(
+        new fromStoreActions.NewGroup(
+          data.group
+        )
       );
     });
     this.socket.on("exception", data => {
@@ -237,10 +227,12 @@ export class ChatroomComponent implements OnInit {
     };
     console.log("message thead chosen user", this.chosenUser);
     this.store.dispatch(
-      new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
+      new fromStoreActions.ChooseMessageFromMessageThread(
+        this.chosenUser.messageThread
+      )
     );
     this.store.dispatch(
-      new RemoveUnreadMessageFromMessageThread({
+      new fromStoreActions.RemoveUnreadMessageFromMessageThread({
         messageThread: this.chosenUser.messageThread,
         currentUser: this.currentUser.user
       })
@@ -261,7 +253,9 @@ export class ChatroomComponent implements OnInit {
         this.chosenUser = { user: user, messageThread: ourMessageThread[0] };
         console.log("contact chosen user", this.chosenUser);
         this.store.dispatch(
-          new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
+          new fromStoreActions.ChooseMessageFromMessageThread(
+            this.chosenUser.messageThread
+          )
         );
       } else {
         console.log("you do not have shared message thread with this user");
@@ -269,7 +263,9 @@ export class ChatroomComponent implements OnInit {
     } else {
       this.chosenUser = { user: user, messageThread: undefined };
       this.store.dispatch(
-        new ChooseMessageFromMessageThread(this.chosenUser.messageThread)
+        new fromStoreActions.ChooseMessageFromMessageThread(
+          this.chosenUser.messageThread
+        )
       );
     }
   }
@@ -288,28 +284,30 @@ export class ChatroomComponent implements OnInit {
       username: this.formContact.get("username").value
     };
     if (user.username) {
-      this.store.dispatch(new AddContactToContactThread(user));
-      this.store.select(getContactThreadState).subscribe(state => {
-        console.log("contact thread state", state);
-        if (state.loading) {
-          this.disableForm();
-        } else {
-          if (state.loaded) {
-            this.addContactToContactsMessage = state.message;
-            this.addContactToContactsStatus = state.loaded;
-            setTimeout(() => {
-              this.enableForm();
-              this.formContact.reset();
-              this.addContactToContactsMessage = "";
-              $("#contactModal").modal("hide");
-            }, 500);
+      this.store.dispatch(new fromStoreActions.AddContactToContactThread(user));
+      this.store
+        .select(fromStoreSelector.getContactThreadState)
+        .subscribe(state => {
+          console.log("contact thread state", state);
+          if (state.loading) {
+            this.disableForm();
           } else {
-            this.addContactToContactsMessage = state.message;
-            this.addContactToContactsStatus = state.loaded;
-            this.enableForm();
+            if (state.loaded) {
+              this.addContactToContactsMessage = state.message;
+              this.addContactToContactsStatus = state.loaded;
+              setTimeout(() => {
+                this.enableForm();
+                this.formContact.reset();
+                this.addContactToContactsMessage = "";
+                $("#contactModal").modal("hide");
+              }, 500);
+            } else {
+              this.addContactToContactsMessage = state.message;
+              this.addContactToContactsStatus = state.loaded;
+              this.enableForm();
+            }
           }
-        }
-      });
+        });
     } else {
       this.addContactToContactsMessage = "Please enter a username";
       this.addContactToContactsStatus = false;
@@ -447,6 +445,7 @@ export class ChatroomComponent implements OnInit {
   }
   addUsernameToMembers() {
     let userToAddToGroup = this.formCreateGroup.get("groupMember").value;
+    this.formCreateGroup.get("groupMember").reset();
     let hasMember = this.chosenMembersOfGroup
       .map(member => {
         return member.username == userToAddToGroup;
@@ -459,7 +458,6 @@ export class ChatroomComponent implements OnInit {
         this.groupMessage = data.message;
         if (data.success) {
           this.chosenMembersOfGroup.push(data.user);
-          this.formCreateGroup.get("groupMember").reset();
         }
       });
     }
@@ -494,7 +492,13 @@ export class ChatroomComponent implements OnInit {
       this.formGroupMessage = "Name of group is required";
     } else {
       this.groupService.newGroup(groupFormData).subscribe(data => {
-        console.log("response", data);
+        this.formGroupMessage = data.message;
+        if (data.success) {
+          this.socket.emit("new group", { group: data.group });
+          setTimeout(() => {
+            $("#createGroupModal").modal("hide");
+          }, 500);
+        }
       });
     }
   }

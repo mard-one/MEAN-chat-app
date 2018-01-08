@@ -1,13 +1,9 @@
 const router = require("express").Router();
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const config = require("../config");
 const multer = require("multer");
 
-const User = require("../models/user");
-
 const Verify = require("./middleware/authentication");
-
+const customModelsModules = require("../models");
 
 var Storage = multer.diskStorage({
   destination: function(req, file, callback) {
@@ -19,10 +15,34 @@ var Storage = multer.diskStorage({
 });
 var upload = multer({ storage: Storage }).single("groupAvatar");
 
-router.post("/newGroup", upload, (req, res) => {
-  console.log("req.body", req.body);
-  console.log("req.file", req.file);
+router.post("/newGroup", Verify, upload, function(req, res) {
+  var membersId = JSON.parse(req.body.members).map(member => member._id);
+  membersId.push(req.decoded.user_id);
+  let group = new customModelsModules.Group({
+    _id: new mongoose.Types.ObjectId(),
+    name: req.body.name,
+    avatar: req.file.filename,
+    members: membersId,
+    admins: req.decoded.user_id,
+    creator: req.decoded.user_id,
+    description: req.body.description
+  });
+  group.save(function(err, newGroup) {
+    console.log("newGroup.members", newGroup.members);
+    console.log("membersId", membersId);
+    customModelsModules.User.update(
+      { _id: { $in: newGroup.members } },
+      { $addToSet: { groups: newGroup._id } },
+      { multi: true }
+    ).exec((err, addedGroupUser) => {
+      console.log("Group added to user", addedGroupUser);
+      res.json({
+        success: true,
+        message: "Group was created and added to Users",
+        group: newGroup
+      });
+    });
+  });
 });
-
 
 module.exports = router;

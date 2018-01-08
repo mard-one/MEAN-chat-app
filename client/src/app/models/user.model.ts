@@ -1,9 +1,10 @@
-import { MessageThread } from "./messageThread.model"
+import * as fromModels from "./index"
 
 export interface User {
   _id?: string;
   username?: string;
   avatar?: string;
-  messageThread?: MessageThread[];
-  //   contactThread?: { type: Schema.Types.ObjectId; ref: "ContactThread" };
+  messageThread?: fromModels.MessageThread[];
+  contactThread?: fromModels.ContactThread;
+  groups: fromModels.Group[];
 }

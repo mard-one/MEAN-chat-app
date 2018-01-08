@@ -11,10 +11,12 @@ export const ADD_UNREAD_MESSAGE_TO_MESSAGE_THREAD =
   "Add Unread Message To Message Thread";
 export const REMOVE_UNREAD_MESSAGE_FROM_MESSAGE_THREAD =
   "Remove Unread Message From Message Thread";
+export const ADD_NEW_GROUP_TO_MESSAGE_THREAD =
+  "Add New Group To Message Thread";
 
 export class LoadMessageThread implements Action {
   readonly type = LOAD_MESSAGE_THREAD;
-  constructor(public payload: any){}
+  constructor(public payload: any) {}
 }
 export class LoadMessageThreadFail implements Action {
   readonly type = LOAD_MESSAGE_THREAD_FAIL;
@@ -30,7 +32,7 @@ export class AddNewMessageToMessageThread implements Action {
 }
 export class CountUnreadMessageInMessageThread implements Action {
   readonly type = COUNT_UNREAD_MESSAGE_IN_MESSAGE_THREAD;
-  constructor(public payload: any){}
+  constructor(public payload: any) {}
 }
 export class AddUnreadMessageToMessageThread implements Action {
   readonly type = ADD_UNREAD_MESSAGE_TO_MESSAGE_THREAD;
@@ -38,6 +40,10 @@ export class AddUnreadMessageToMessageThread implements Action {
 }
 export class RemoveUnreadMessageFromMessageThread implements Action {
   readonly type = REMOVE_UNREAD_MESSAGE_FROM_MESSAGE_THREAD;
+  constructor(public payload: any) {}
+}
+export class AddNewGroupToMessageThread implements Action {
+  readonly type = ADD_NEW_GROUP_TO_MESSAGE_THREAD;
   constructor(public payload: any) {}
 }
 
@@ -48,4 +54,5 @@ export type MessageThreadAction =
   | AddNewMessageToMessageThread
   | CountUnreadMessageInMessageThread
   | AddUnreadMessageToMessageThread
-  | RemoveUnreadMessageFromMessageThread;
+  | RemoveUnreadMessageFromMessageThread
+  | AddNewGroupToMessageThread;

@@ -5,10 +5,7 @@ const config = require("../config");
 
 const Verify = require("./middleware/authentication");
 
-const User = require("../models/user");
-const Message = require("../models/message");
-const MessageThread = require("../models/messageThread");
-const ContactThread = require("../models/contactThread");
+const customModelsModules = require("../models");
 
 // router.use(function(req, res, next) {
 //   console.log(
@@ -72,7 +69,8 @@ const ContactThread = require("../models/contactThread");
 
 router.get("/getAllMessageThread", Verify, function(req, res) {
   // console.log("getAllMessageThread works");
-  User.findById(req.decoded.user_id)
+  customModelsModules.User
+    .findById(req.decoded.user_id)
     .populate({
       path: "messageThread", // select: "-password -contactThread",
       populate: [
@@ -85,9 +83,7 @@ router.get("/getAllMessageThread", Verify, function(req, res) {
       ]
     })
     .exec(function(err, data) {
-      res.json({
-        messageThread: data.messageThread
-      });
+      res.json({ messageThread: data.messageThread });
     });
 });
 
@@ -99,9 +95,15 @@ router.post("/removeUnreadMessage", function(req, res) {
       return message._id
     })
     console.log("messageIds", messageIds);
-    Message.update({ _id: {$in: messageIds }, reciever: req.body.currentUser._id }, {$set: {isRead: true}}, {multi: true}).exec((err,updatedMessage)=>{
-      console.log("updatedMessage", updatedMessage);
-    });
+    customModelsModules.Message
+      .update(
+        { _id: { $in: messageIds }, reciever: req.body.currentUser._id },
+        { $set: { isRead: true } },
+        { multi: true }
+      )
+      .exec((err, updatedMessage) => {
+        console.log("updatedMessage", updatedMessage);
+      });
 });
 
 module.exports = router;

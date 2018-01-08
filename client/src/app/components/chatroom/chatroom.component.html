@@ -247,9 +247,10 @@
           </div>
         </div>
       </div>
+       <!-- (chosenUser.messageThread.creator && (message.reciever != currentUser.user._id)) || -->
       <div id="chat-box" *ngIf="((messages$ | async) && chosenUser?.user)">
         <ng-container *ngFor="let message of (messages$ | async)">
-          <div *ngIf="message.sender == chosenUser.user._id" class="message" id="friend-message">
+          <div *ngIf=" (message.sender == chosenUser.user._id) && !chosenUser.messageThread.creator" class="message" id="friend-message">
             <div class="message-icon">
               <div class="icon-wrap">
                 <img src="./assets/images{{chosenUser?.user && chosenUser.user?.avatar}}" alt="" class="icon">
@@ -260,7 +261,7 @@
               <div id="recieved-time">{{message.sentAt | date : "H:mm"}}</div>
             </div>
           </div>
-          <div *ngIf="message.sender != chosenUser.user._id" class="message" id="my-message">
+          <div *ngIf="(message.sender != chosenUser.user._id) && !chosenUser.messageThread.creator" class="message" id="my-message">
             <div id="message-by-me" >
               <div id="text">{{message.text}}</div>
               <div id="sent-time">{{message.sentAt | date : "H:mm"}}</div>
@@ -273,7 +274,29 @@
             </div>
           </div>
           
-          
+          <div *ngIf=" (message.sender != currentUser.user._id) && chosenUser.messageThread.creator" class="message" id="friend-message">
+            <div class="message-icon">
+              <div class="icon-wrap">
+                <img src="./assets/images{{chosenUser?.user && chosenUser.user?.avatar}}" alt="" class="icon">
+              </div>
+            </div>
+            <div id="message-by-friend">
+              <div id="text">{{message.text}}</div>
+              <div id="recieved-time">{{message.sentAt | date : "H:mm"}}</div>
+            </div>
+          </div>
+          <div *ngIf="(message.sender == currentUser.user._id) && chosenUser.messageThread.creator" class="message" id="my-message">
+            <div id="message-by-me">
+              <div id="text">{{message.text}}</div>
+              <div id="sent-time">{{message.sentAt | date : "H:mm"}}</div>
+            </div>
+            <div class="message-icon">
+              <div class="icon-wrap">
+                <img [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
+                  [ngStyle]="{'object-fit': (chosenProfileAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
+              </div>
+            </div>
+          </div>
         </ng-container>
       </div>
       <div id="message-bar" *ngIf="((messages$ | async) && chosenUser?.user)">

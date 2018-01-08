@@ -4,22 +4,57 @@ const mongoose = require("mongoose");
 const Verify = require("./../authentication");
 const customModelsModules = require("../../models");
 
+module.exports = function sendMessage(socket, io, currentUser) {
+  socket.on("sendMessage", function(data) {
+    if (!data.reciever) {
+      // console.log("Hi buddy")
+      socket.emit("exception", {
+        message: "Please choose a user to send message"
+      });
+    } else {
+      var user = Verify(data.token, config.secret);
 
-module.exports = function sendMessage (socket, io, currentUser) {
-    socket.on("sendMessage", function(data) {
-      if (!data.reciever) {
-        // console.log("Hi buddy")
-        socket.emit("exception", {
-          message: "Please choose a user to send message"
-        });
+      if (user.type == "exception") {
+        socket.emit("exception", user.data);
       } else {
-        var result = Verify(data.token, config.secret);
-        if (result.type == "exception") {
-          socket.emit("exception", result.data);
+        let senderId = user.data.user_id;
+        let recieverId = data.reciever._id;
+        let messageSend = data.message;
+        console.log("data.reciever.creator", data.reciever.creator);
+        if (data.reciever.creator) {
+          var message = new customModelsModules.Message({
+            _id: new mongoose.Types.ObjectId(),
+            sender: senderId,
+            reciever: recieverId,
+            text: messageSend
+          });
+          message.save(function(err, newMessage) {
+            if (err) throw err;
+            // customModelsModules.Message.findById(newMessage._id)
+            //   // .populate({path: "sender reciever", select:"-password -contactThread"})
+            //   .exec((err, foundMessage) => {
+            customModelsModules.Group.findByIdAndUpdate(
+              recieverId,
+              {
+                $addToSet: { messages: newMessage._id },
+                $set: { lastMessage: newMessage.text }
+              },
+              { new: true }
+            ).populate({path: "messages"})
+            .exec((err, updatedGroup) => {
+              console.log("updatedGroup", updatedGroup);
+              updatedGroup.members.forEach(member => {
+                console.log("member", member);
+                io.to(member).emit("successfully sent", {
+                  message: "Message was sent",
+                  messageSent: newMessage,
+                  messageThread: updatedGroup
+                });
+              });
+            });
+          });
+          // console.log("foundMEssage", foundMessage);
         } else {
-          let senderId = result.data.user_id;
-          let recieverId = data.reciever._id;
-          let messageSend = data.message;
           // console.log("senderId", senderId)
           // console.log("recieverId", recieverId)
           // console.log("messageSend", messageSend)
@@ -35,8 +70,14 @@ module.exports = function sendMessage (socket, io, currentUser) {
               // .populate({path: "sender reciever", select:"-password -contactThread"})
               .exec((err, foundMessage) => {
                 // console.log("foundMEssage", foundMessage);
-                customModelsModules.MessageThread
-                  .findOneAndUpdate({ chatBetween: { $all: [senderId, recieverId] } }, { $addToSet: { messages: message._id }, $set: { lastMessage: message.text } }, { new: true })
+                customModelsModules.MessageThread.findOneAndUpdate(
+                  { chatBetween: { $all: [senderId, recieverId] } },
+                  {
+                    $addToSet: { messages: message._id },
+                    $set: { lastMessage: message.text }
+                  },
+                  { new: true }
+                )
                   .populate([
                     {
                       path: "chatBetween",
@@ -65,28 +106,24 @@ module.exports = function sendMessage (socket, io, currentUser) {
                           {
                             _id: new mongoose.Types.ObjectId(),
                             chatBetween: [
-                              mongoose.Types.ObjectId(
-                                senderId
-                              ),
-                              mongoose.Types.ObjectId(
-                                recieverId
-                              )
+                              mongoose.Types.ObjectId(senderId),
+                              mongoose.Types.ObjectId(recieverId)
                             ],
                             messages: [message._id]
                           }
                         );
-                        messageThread.save(function(
-                          err,
-                          newMessageThread
-                        ) {
-                          customModelsModules.MessageThread.findByIdAndUpdate(newMessageThread._id, { lastMessage: message.text }, { new: true })
+                        messageThread.save(function(err, newMessageThread) {
+                          customModelsModules.MessageThread.findByIdAndUpdate(
+                            newMessageThread._id,
+                            { lastMessage: message.text },
+                            { new: true }
+                          )
                             .populate([
                               {
                                 path: "chatBetween", // match: {
                                 //   _id: { $ne: senderId }
                                 // },
-                                select:
-                                  "username avatar"
+                                select: "username avatar"
                               },
                               { path: "messages" }
                             ])
@@ -94,108 +131,85 @@ module.exports = function sendMessage (socket, io, currentUser) {
                             //   path: "reciever sender",
                             //   select: "username"
                             // }
-                            .exec(function(
-                              err,
-                              updatedMessageThread
-                            ) {
+                            .exec(function(err, updatedMessageThread) {
                               if (err) {
-                                socket.emit(
-                                  "exception",
-                                  {
-                                    message:
-                                      "error occured",
-                                    err: err
-                                  }
-                                );
+                                socket.emit("exception", {
+                                  message: "error occured",
+                                  err: err
+                                });
                               } else {
                                 // console.log("User find senderId", senderId)
                                 // console.log("User find recieverId", recieverId)
-                                customModelsModules.User.update({ _id: { $in: [senderId, recieverId] } }, { $addToSet: { messageThread: updatedMessageThread._id } }, { select: "username messageThread", multi: true })
-                                  // .populate({path: "_id"})
-                                  .exec(
-                                    function(
-                                      err,
-                                      updatedUser
-                                    ) {
-                                      console.log(
-                                        "updatedMessageThread",
-                                        updatedMessageThread
-                                      );
-                                      // console.log("updatedUser", updatedUser);
-                                      // console.log("rooms", socket.rooms);
-                                      function filteredFor(
-                                        anId
-                                      ) {
-                                        return {
-                                          _id:
-                                            updatedMessageThread._id,
-                                          lastMessage:
-                                            updatedMessageThread.lastMessage,
-                                          messages:
-                                            updatedMessageThread.messages,
-                                          chatBetween: updatedMessageThread.chatBetween.filter(
-                                            element => {
-                                              return (
-                                                element._id !=
-                                                anId
-                                              );
-                                            }
-                                          )
-                                        };
-                                      }
-
-                                      io
-                                        .to(
-                                          recieverId
-                                        )
-                                        .emit(
-                                          "successfully sent",
-                                          {
-                                            message:
-                                              "Message thread was created and message was sent",
-                                            messageSent: message,
-                                            messageThread: filteredFor(
-                                              recieverId
-                                            )
-                                          }
-                                        );
-                                      io
-                                        .to(
-                                          senderId
-                                        )
-                                        .emit(
-                                          "successfully recieved",
-                                          {
-                                            message:
-                                              "Message thread was created and message was sent",
-                                            messageSent: message,
-                                            messageThread: filteredFor(
-                                              senderId
-                                            )
-                                          }
-                                        );
+                                customModelsModules.User.update(
+                                  { _id: { $in: [senderId, recieverId] } },
+                                  {
+                                    $addToSet: {
+                                      messageThread: updatedMessageThread._id
                                     }
-                                  );
+                                  },
+                                  {
+                                    select: "username messageThread",
+                                    multi: true
+                                  }
+                                )
+                                  // .populate({path: "_id"})
+                                  .exec(function(err, updatedUser) {
+                                    console.log(
+                                      "updatedMessageThread",
+                                      updatedMessageThread
+                                    );
+                                    // console.log("updatedUser", updatedUser);
+                                    // console.log("rooms", socket.rooms);
+                                    function filteredFor(anId) {
+                                      return {
+                                        _id: updatedMessageThread._id,
+                                        lastMessage:
+                                          updatedMessageThread.lastMessage,
+                                        messages: updatedMessageThread.messages,
+                                        chatBetween: updatedMessageThread.chatBetween.filter(
+                                          element => {
+                                            return element._id != anId;
+                                          }
+                                        )
+                                      };
+                                    }
+
+                                    io
+                                      .to(recieverId)
+                                      .emit("successfully sent", {
+                                        message:
+                                          "Message thread was created and message was sent",
+                                        messageSent: message,
+                                        messageThread: filteredFor(recieverId)
+                                      });
+                                    io
+                                      .to(senderId)
+                                      .emit("successfully recieved", {
+                                        message:
+                                          "Message thread was created and message was sent",
+                                        messageSent: message,
+                                        messageThread: filteredFor(senderId)
+                                      });
+                                  });
                               }
                             });
                         });
                       } else {
                         // console.log("rooms", socket.rooms);
-                        console.log("foundMessageThread", foundMessageThread._id);
-                        io
-                          .to(recieverId)
-                          .emit("successfully sent", {
-                            message: "Message was sent",
-                            messageSent: message,
-                            messageThread: foundMessageThread
-                          });
-                        io
-                          .to(senderId)
-                          .emit("successfully recieved", {
-                            message: "Message was sent",
-                            messageSent: message,
-                            messageThread: foundMessageThread
-                          });
+                        console.log(
+                          "foundMessageThread",
+                          foundMessageThread._id
+                        );
+                        io.to(recieverId).emit("successfully sent", {
+                          message: "Message was sent",
+                          messageSent: message,
+                          messageThread: foundMessageThread
+                        });
+                        io.to(senderId).emit("successfully recieved", {
+                          message: "Message was sent",
+                          messageSent: message,
+                          messageThread: foundMessageThread
+                        });
                       }
                     }
                   });
@@ -203,5 +217,6 @@ module.exports = function sendMessage (socket, io, currentUser) {
           });
         }
       }
-    });
-}
+    }
+  });
+};

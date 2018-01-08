@@ -45,7 +45,10 @@ export function messageReducer(
       console.log("Add new message to messages payload", action.payload);
       console.log("Add new message to messages state", state);
       if(state.data.length){
-        const isInclude = function(data) {
+        if(action.payload.messageThread.creator){
+          return { ...state, data: [...state.data, action.payload.message] }
+        }else{
+          const isInclude = function(data) {
           return action.payload.messageThread.chatBetween
             .map(element => {
               return element._id == data;
@@ -59,6 +62,8 @@ export function messageReducer(
         } else {
           return state;
         }
+        }
+        
       }else{
         return { ...state, data: [action.payload.message] };
       }

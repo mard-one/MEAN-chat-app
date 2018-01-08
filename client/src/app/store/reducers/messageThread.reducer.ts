@@ -49,22 +49,6 @@ export function messageThreadReducer(
             "filtered state without new message thread",
             filteredStateWithoutNewMessageThread
           );
-          // let properMessageThreadPayload = {
-          //   messageThread: {
-          //     ...action.payload.messageThread,
-          //     chatBetween: action.payload.messageThread.chatBetween.filter(
-          //       userInMessageThread => {
-          //         return (
-          //           foundMessageThread[0].chatBetween[0]._id == userInMessageThread._id
-          //         );
-          //       }
-          //     )
-          //   }
-          // };
-          // console.log(
-          //   "proper message thread payload",
-          //   properMessageThreadPayload
-          // );
           return {
             ...state,
             loading: false,
@@ -155,6 +139,7 @@ export function messageThreadReducer(
               return action.payload.messageThread._id != thread._id;
             })
           ];
+          console.log("filteredStateWithoutNewMessageThread", filteredStateWithoutNewMessageThread);
           let messageThreadWithNumberOfUnreadMessages = foundMessageThread.map(
             thread => {
               // console.log("thread", thread);
@@ -179,17 +164,42 @@ export function messageThreadReducer(
             "messageThreadWithNumberOfUnreadMessages",
             messageThreadWithNumberOfUnreadMessages
           );
-
-          return {
-            ...state,
-            loaded: true,
-            data: {
-              messageThread: [
-                ...filteredStateWithoutNewMessageThread,
-                ...messageThreadWithNumberOfUnreadMessages
+          if (foundMessageThread[0].creator) {
+            console.log("group thread");
+            let slightlyChangedGroupMessageThread = {
+              ...messageThreadWithNumberOfUnreadMessages[0],
+              chatBetween: [
+                {
+                  avatar: action.payload.messageThread.avatar,
+                  username: action.payload.messageThread.name,
+                  _id: action.payload.messageThread._id,
+                  creator: action.payload.messageThread.creator
+                }
               ]
-            }
-          };
+            };
+            console.log("slightlyChangedGroupMessageThread", slightlyChangedGroupMessageThread);
+            return {
+              ...state,
+              loaded: true,
+              data: {
+                messageThread: [
+                  ...filteredStateWithoutNewMessageThread,
+                  slightlyChangedGroupMessageThread
+                ]
+              }
+            };
+          } else {
+            return {
+              ...state,
+              loaded: true,
+              data: {
+                messageThread: [
+                  ...filteredStateWithoutNewMessageThread,
+                  ...messageThreadWithNumberOfUnreadMessages
+                ]
+              }
+            };
+          }
         } else {
           return { ...state, loaded: true };
         }
@@ -226,8 +236,24 @@ export function messageThreadReducer(
     case fromMessageThread.ADD_NEW_GROUP_TO_MESSAGE_THREAD: {
       console.log("add new group to message thread payload", action.payload);
       console.log("add new group to message thread state", state);
-      let newMessageThread = { ...action.payload, chatBetween: [{ avatar: action.payload.avatar, username: action.payload.name }] };
-      return { ...state, data: { ...state.data, messageThread: [...state.data.messageThread, newMessageThread] } };
+      let newMessageThread = {
+        ...action.payload,
+        chatBetween: [
+          {
+            avatar: action.payload.avatar,
+            username: action.payload.name,
+            _id: action.payload._id,
+            creator: action.payload.creator
+          }
+        ]
+      };
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          messageThread: [...state.data.messageThread, newMessageThread]
+        }
+      };
     }
   }
   return state;

@@ -6,5 +6,5 @@ export interface User {
   avatar?: string;
   messageThread?: fromModels.MessageThread[];
   contactThread?: fromModels.ContactThread;
-  groups: fromModels.Group[];
+  groups?: fromModels.Group[];
 }

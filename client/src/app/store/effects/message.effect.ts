@@ -22,7 +22,7 @@ export class MessageEffects {
     .ofType(messageActions.ADD_NEW_MESSAGE_SUCCESS)
     .mergeMap((action: any) => {
       // new contactThreadActions.AddNewMessageToContactThread(action.payload);
-      // console.log("effect newMessageToContactThread", newMessageToContactThread);
+      console.log("add new message success effect payload", action.payload);
       // console.log("effect newMessageToMessageThread", newMessageToMessageThread);
       console.log("message effect payload", action.payload);
       return [

@@ -8,5 +8,6 @@ export interface MessageThread {
   messages?: Message[];
   lastMessage?: string;
   unreadMessages?: number;
+  creator?: string;
 }
 

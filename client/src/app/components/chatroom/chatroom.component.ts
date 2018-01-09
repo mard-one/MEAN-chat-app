@@ -252,12 +252,7 @@ export class ChatroomComponent implements OnInit {
           this.chosenGroup.group
         )
       );
-      this.store.dispatch(
-        new fromStoreActions.RemoveUnreadMessageFromMessageThread({
-          group: this.chosenGroup.group,
-          currentUser: this.currentUser.user
-        })
-      );
+      this.store.dispatch(new fromStoreActions.RemoveUnreadMessageFromMessageThread(this.chosenGroup));
     } else {
       this.chosenGroup = null;
       let chosenUserFromMessageThread = user.chatBetween.filter(

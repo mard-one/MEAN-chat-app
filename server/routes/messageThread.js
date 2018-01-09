@@ -96,9 +96,11 @@ router.post("/removeUnreadMessage", function(req, res) {
       return message._id;
     });
     console.log("messageIds", messageIds);
-    customModelsModules.Message.update({ _id: { $in: messageIds }, reciever: req.body.currentUser._id }, { $set: { isRead: true } }, { multi: true }).exec(
+    console.log("req.body.currentUser._id", req.body.currentUser._id);
+    customModelsModules.Message.update({ _id: { $in: messageIds }, sender: {$ne: req.body.currentUser._id} }, { $set: { isRead: true } }, { multi: true }).exec(
       (err, updatedMessage) => {
-        console.log("updatedMessage", updatedMessage);
+        console.log("remove unread messages updatedMessage", updatedMessage);
+        res.json({success: true, message: "Unread messages removed"})          
       }
     );
   }else{
@@ -108,7 +110,8 @@ router.post("/removeUnreadMessage", function(req, res) {
      console.log("messageIds", messageIds);
      customModelsModules.Message.update({ _id: { $in: messageIds }, reciever: req.body.currentUser._id }, { $set: { isRead: true } }, { multi: true }).exec(
        (err, updatedMessage) => {
-         console.log("updatedMessage", updatedMessage);
+        console.log("remove unread messages updatedMessage", updatedMessage);
+        res.json({success: true, message: "Unread messages removed"})             
        }
      );
   }

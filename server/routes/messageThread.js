@@ -89,8 +89,6 @@ router.get("/getAllMessageThread", Verify, function(req, res) {
 
 
 router.post("/removeUnreadMessage", function(req, res) {
-  // console.log("MessageThread");
-  // console.log("req.body", req.body);
   if(req.body.group){
     var messageIds = req.body.group.messages.map(message => {
       return message._id;

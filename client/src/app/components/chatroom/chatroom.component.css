@@ -434,7 +434,7 @@
   overflow-y: auto
 }
 
-/* ----------------------- Add members from contact -----------------------*/
+/* ----------------------- Add members from contact Modal-----------------------*/
 
 #addMemberToModal .modal-body #user-in-contact{
   border-bottom: 0.1vh solid #ccc;
@@ -451,4 +451,29 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+/* ------------------------ Chosen user or group Modal ---------------------*/
+
+/* #chosenUserModal .modal-body{
+  
+} */
+#chosenUser-info{
+  display: flex;
+}
+#chosenUser-image{
+  width: 20%;
+}
+#chosenUserModal #chosenUser-name-avatar {
+
+  padding: 0 1%;
+  width: 30%;
+}
+#chosenUserModal #group-members{
+  padding-right: 1%;
+  border: 0.3px solid#ccc;
+  width: 50%;
+  height: 70vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }

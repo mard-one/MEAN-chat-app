@@ -47,25 +47,33 @@ export class ChatroomComponent implements OnInit {
     "Asset15.svg",
     "Asset16.svg"
   ];
+  statusProfileAvatar: { success: boolean; message: string };
   chosenProfileAvatar: {
     type: "userAvatar" | "defaultAvatar";
     url: string;
     submitted: boolean;
   };
-  statusProfileAvatar: { success: boolean; message: string };
   chosenGroupAvatar: {
     type: "userAvatar" | "defaultAvatar";
     url: string;
     submitted: boolean;
   };
+  editGroupAvatar: {
+    type: "userAvatar" | "defaultAvatar";
+    url: string;
+    submitted: boolean;
+  };
   chosenMembersOfGroup = new Array();
+  chosenMembersOfExistingGroup = new Array();
   groupMessage;
   formGroupMessage;
+  formEditGroupMessage;
 
   formMessage: FormGroup;
   formContact: FormGroup;
   formAvatar: FormGroup;
   formCreateGroup: FormGroup;
+  formEditGroup: FormGroup;
 
   private socket;
 
@@ -90,6 +98,7 @@ export class ChatroomComponent implements OnInit {
         groupAvatar: "",
         groupMember: ""
       });
+      this.formEditGroup = this.formBuilder.group({ editGroupForm: "" });
     })();
   }
 
@@ -127,6 +136,7 @@ export class ChatroomComponent implements OnInit {
     this.store.select(fromStoreSelector.getGroup).subscribe(groups => {
       console.log("groups", groups);
     });
+
     // ------------------------ Socket.io -------------------------------
 
     this.socket.on("connect", () => {
@@ -194,51 +204,58 @@ export class ChatroomComponent implements OnInit {
     this.socket.on("exception", data => {
       console.log(data);
     });
-    // ------------------- Files ---------------------
-    const handleAvatarFileSelect = evt => {
-      let that = this;
-      var files = evt.target.files;
-      for (var i = 0, f; (f = files[i]); i++) {
-        if (!f.type.match("image.*")) {
-          return false;
-        } else {
-          var reader = new FileReader();
-          reader.readAsDataURL(f);
-          setTimeout(() => {
-            that.chosenProfileAvatar = {
-              type: "userAvatar",
-              url: reader.result,
-              submitted: false
-            };
-          }, 100);
-        }
+  }
+  // ------------------- Files ---------------------
+  handleAvatarFileSelect = function(evt, callback) {
+    console.log("evt inside", evt);
+    var files = evt.target.files;
+    for (var i = 0, f; (f = files[i]); i++) {
+      if (!f.type.match("image.*")) {
+        return false;
+      } else {
+        var reader = new FileReader();
+        reader.readAsDataURL(f);
+        setTimeout(() => {
+          callback(reader.result);
+        }, 100);
       }
-    };
-    const handleGroupFileSelect = evt => {
-      let that = this;
-      var files = evt.target.files;
-      for (var i = 0, f; (f = files[i]); i++) {
-        if (!f.type.match("image.*")) {
-          return false;
-        } else {
-          var reader = new FileReader();
-          reader.readAsDataURL(f);
-          setTimeout(() => {
-            that.chosenGroupAvatar = {
-              type: "userAvatar",
-              url: reader.result,
-              submitted: false
-            };
-          }, 100);
-        }
-      }
-    };
-    document
-      .getElementById("profileAvatar")
-      .addEventListener("change", handleAvatarFileSelect, false);
-    document
-      .getElementById("groupAvatar")
-      .addEventListener("change", handleGroupFileSelect, false);
+    }
+  };
+  chosenGroupModalInputChange(event) {
+    var that = this;
+    console.log("event", event);
+    this.handleAvatarFileSelect(event, function(result) {
+      that.editGroupAvatar = {
+        type: "userAvatar",
+        url: result,
+        submitted: false
+      };
+    });
+    // console.log("this.editGroupAvatar", this.chosenProfileAvatar);
+  }
+  avatarModalChange(event) {
+    var that = this;
+    console.log("event", event);
+    this.handleAvatarFileSelect(event, function(result) {
+      that.chosenProfileAvatar = {
+        type: "userAvatar",
+        url: result,
+        submitted: false
+      };
+    });
+    // console.log("this.editGroupAvatar", this.chosenProfileAvatar);
+  }
+  createGroupModalChange(event) {
+    var that = this;
+    console.log("event", event);
+    this.handleAvatarFileSelect(event, function(result) {
+      that.chosenGroupAvatar = {
+        type: "userAvatar",
+        url: result,
+        submitted: false
+      };
+    });
+    // console.log("this.editGroupAvatar", this.chosenProfileAvatar);
   }
 
   chooseUserFromMessageThread(user) {
@@ -246,13 +263,17 @@ export class ChatroomComponent implements OnInit {
       this.chosenUser = null;
       console.log("group thead user", user);
       this.chosenGroup = { group: user, currentUser: this.currentUser.user };
-      console.log("group thead chosen user", this.chosenUser);
+      console.log("group thead chosen group", this.chosenGroup);
       this.store.dispatch(
         new fromStoreActions.ChooseMessageFromMessageThread(
           this.chosenGroup.group
         )
       );
-      this.store.dispatch(new fromStoreActions.RemoveUnreadMessageFromMessageThread(this.chosenGroup));
+      this.store.dispatch(
+        new fromStoreActions.RemoveUnreadMessageFromMessageThread(
+          this.chosenGroup
+        )
+      );
     } else {
       this.chosenGroup = null;
       let chosenUserFromMessageThread = user.chatBetween.filter(
@@ -280,6 +301,7 @@ export class ChatroomComponent implements OnInit {
     }
   }
   chooseUserFromContactThread(user) {
+    this.chosenGroup = null;
     if (user.messageThread.length > 0) {
       let ourMessageThread = user.messageThread.filter(thread => {
         return this.currentUser.user.messageThread
@@ -445,7 +467,7 @@ export class ChatroomComponent implements OnInit {
     this.clearAvatarPageAndBackToProfile();
   }
   changeAvatarModal() {
-    $("#profileModal").modal("hide");
+    // $("#profileModal").modal("hide");
     $("#avatarModal").modal("show");
   }
   addContactsToMembers() {
@@ -480,17 +502,36 @@ export class ChatroomComponent implements OnInit {
     }
   }
   isChosen(contact) {
-    const hasContact = contact => {
-      return this.chosenMembersOfGroup
-        .map(contactInList => {
-          return contactInList._id == contact._id;
-        })
-        .includes(true);
-    };
-    if (hasContact(contact)) {
-      return true;
+    if (this.chosenMembersOfExistingGroup.length) {
+      const hasContact = contact => {
+        return this.chosenMembersOfExistingGroup
+          .map(contactInList => {
+            return contactInList._id == contact._id;
+          })
+          .includes(true);
+      };
+      // console.log("hasContact(contact) existing", hasContact(contact));
+      if (hasContact(contact)) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
-      return false;
+      if (this.chosenMembersOfGroup.length) {
+        const hasContact = contact => {
+          return this.chosenMembersOfGroup
+            .map(contactInList => {
+              return contactInList._id == contact._id;
+            })
+            .includes(true);
+        };
+        // console.log("hasContact(contact)", hasContact(contact));
+        if (hasContact(contact)) {
+          return true;
+        } else {
+          return false;
+        }
+      }
     }
   }
   addUsernameToMembers() {
@@ -551,5 +592,125 @@ export class ChatroomComponent implements OnInit {
         }
       });
     }
+  }
+  addMemberToExistingGroup() {
+    $("#chosenUserModal").modal("hide");
+    $("#userToGroup").modal("show");
+  }
+  chooseMemberToExistingGroup(chosenMember) {
+    console.log("chosen member", chosenMember);
+    let hasMember = this.chosenMembersOfExistingGroup
+      .map(member => {
+        return member._id == chosenMember._id;
+      })
+      .includes(true);
+    if (hasMember) {
+      this.chosenMembersOfExistingGroup.splice(
+        this.chosenMembersOfExistingGroup.indexOf(chosenMember),
+        1
+      );
+      console.log(
+        "chosen members of existing group",
+        this.chosenMembersOfExistingGroup
+      );
+    } else {
+      this.chosenMembersOfExistingGroup.push(chosenMember);
+      console.log(
+        "chosen members of existing group",
+        this.chosenMembersOfExistingGroup
+      );
+    }
+  }
+  chooseMemberToExistingGroupChoose(currentGroup) {
+    console.log("current group", currentGroup);
+    console.log(
+      "chosen members of existing group",
+      this.chosenMembersOfExistingGroup
+    );
+    let memberToAdd = this.chosenMembersOfExistingGroup.filter(member => {
+      console.log("member", member);
+      let toAdd = !currentGroup.members
+        .map(memberOfGroup => {
+          console.log("member of group", memberOfGroup);
+          console.log(
+            "member._id != memberOfGroup._id",
+            member._id != memberOfGroup._id
+          );
+          return member._id != memberOfGroup._id;
+        })
+        .includes(false);
+      console.log("toAdd", toAdd);
+      return toAdd;
+    });
+    console.log("memberToAdd", memberToAdd);
+    if (memberToAdd.length) {
+      currentGroup.members.push(...memberToAdd);
+      this.chosenMembersOfExistingGroup = [...memberToAdd];
+    } else {
+      console.log("memberToAdd", memberToAdd);
+      this.chosenMembersOfExistingGroup = [...memberToAdd];
+      console.log(
+        "chosenMembersOfExistingGroup after",
+        this.chosenMembersOfExistingGroup
+      );
+    }
+
+    $("#userToGroup").modal("hide");
+    $("#chosenUserModal").modal("show");
+  }
+  formGroupInfoSubmitted(event, currentGroup) {
+    console.log("event", event);
+    console.log("currentGroup", currentGroup);
+    let formEditAvatar = event.target[0].files[0];
+    let formEditMembers = this.chosenMembersOfExistingGroup;
+    console.log("formEditAvatar", formEditAvatar);
+    console.log("formEditMembers", formEditMembers);
+    if (formEditAvatar || formEditMembers.length) {
+      if (formEditAvatar) {
+        console.log("formEditAvatar", formEditAvatar);
+        console.log("formEditMembers", formEditMembers);
+        let formEditGroup = {
+          avatar: formEditAvatar,
+          members: formEditMembers,
+          currentGroupId: currentGroup._id
+        };
+        this.groupService.editGroup(formEditGroup).subscribe(data => {
+          console.log("data", data);
+          this.formEditGroupMessage = data.message;
+          if (data.success) {
+            this.socket.emit("new group", {
+              group: data.group,
+              addedUser: formEditGroup.members
+            });
+            setTimeout(() => {
+              $("#chosenUserModal").modal("hide");
+            }, 500);
+          }
+        });
+      } else {
+        let formEditGroup = {
+          members: formEditMembers,
+          currentGroupId: currentGroup._id
+        };
+        this.groupService.editGroup(formEditGroup).subscribe(data => {
+          console.log("data", data);
+          this.formEditGroupMessage = data.message;
+          if (data.success) {
+            this.socket.emit("new group", {
+              group: data.group,
+              addedUser: formEditGroup.members
+            });
+            setTimeout(() => {
+              $("#chosenUserModal").modal("hide");
+            }, 500);
+          }
+        });
+      }
+    } else {
+      this.formEditGroupMessage = "Nothing was edited";
+    }
+  }
+  chooseMemberToExistingGroupBack() {
+    this.chosenMembersOfExistingGroup = [];
   }
 }

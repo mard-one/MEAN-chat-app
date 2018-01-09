@@ -135,20 +135,31 @@ export function messageThreadReducer(
       if (state.data.messageThread.length) {
         let messageThreadWithNumberOfUnreadMessages = state.data.messageThread.map(
           element => {
-            // console.log("element", element);
             var numUnread = 0;
-            element.messages.map(innerElement => {
-              // console.log("inner element", innerElement);
-              if (
-                !innerElement.isRead &&
-                innerElement.reciever == action.payload.userData._id
-              ) {
-                return numUnread++;
-              } else {
-                return numUnread;
-              }
-            });
-            console.log("number of unread messages", numUnread);
+            if (element.creator) {
+              element.messages.map(innerElement => {
+                // console.log("inner element", innerElement);
+                if (!innerElement.isRead && innerElement.sender != action.payload.userData._id) {
+                  return numUnread++;
+                } else {
+                  return numUnread;
+                }
+              });
+            } else {
+              // console.log("element", element);
+              element.messages.map(innerElement => {
+                // console.log("inner element", innerElement);
+                if (
+                  !innerElement.isRead &&
+                  innerElement.reciever == action.payload.userData._id
+                ) {
+                  return numUnread++;
+                } else {
+                  return numUnread;
+                }
+              });
+              console.log("number of unread messages", numUnread);
+            }
             return { ...element, unreadMessages: numUnread };
           }
         );
@@ -197,7 +208,11 @@ export function messageThreadReducer(
                 // console.log("innerElement.sender != action.payload.currentUser._id", innerElement.sender != action.payload.currentUser._id);
                 // console.log("!innerElement.isRead", !innerElement.isRead);
                 // console.log("logic", !innerElement.isRead && innerElement.reciever == action.payload.group._id && innerElement.sender != action.payload.currentUser._id);
-                if (!innerElement.isRead && innerElement.reciever == action.payload.group._id && innerElement.sender != action.payload.currentUser._id) {
+                if (
+                  !innerElement.isRead &&
+                  innerElement.reciever == action.payload.group._id &&
+                  innerElement.sender != action.payload.currentUser._id
+                ) {
                   return numUnread++;
                 } else {
                   return numUnread;
@@ -365,10 +380,23 @@ export function messageThreadReducer(
     case fromMessageThread.ADD_NEW_GROUP_TO_MESSAGE_THREAD: {
       console.log("add new group to message thread payload", action.payload);
       console.log("add new group to message thread state", state);
-      if(action.payload.userData){
-        return { ...state, data: { messageThread: [...state.data.messageThread, ...action.payload.userData.groups] } };
+      if (action.payload.userData) {
+        return {
+          ...state,
+          data: {
+            messageThread: [
+              ...state.data.messageThread,
+              ...action.payload.userData.groups
+            ]
+          }
+        };
       } else {
-        return { ...state, data: { messageThread: [...state.data.messageThread, ...action.payload] } };
+        return {
+          ...state,
+          data: {
+            messageThread: [...state.data.messageThread, ...action.payload]
+          }
+        };
       }
       // let newMessageThread = {
       //   ...action.payload,
@@ -381,7 +409,6 @@ export function messageThreadReducer(
       //     }
       //   ]
       // };
-      
     }
   }
   return state;

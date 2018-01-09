@@ -25,10 +25,11 @@ export class GroupEffects {
   @Effect({ dispatch: true })
   loadGroup$ = this.actions$
     .ofType(groupActions.LOAD_GROUP)
-    .map((action: any) => {
+    .mergeMap((action: any) => {
       console.log("load group effect action", action.payload);
-      return new messageThreadActions.AddNewGroupToMessageThread(
-        action.payload
-      );
+      return [
+        new messageThreadActions.AddNewGroupToMessageThread(action.payload),
+        new messageThreadActions.CountUnreadMessageInMessageThread(action.payload)
+      ];
     });
 }

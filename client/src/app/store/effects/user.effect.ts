@@ -33,9 +33,9 @@ export class UserEffects {
     .pipe(
       switchMap((action: any) => {
         return [
+          new fromActions.LoadGroup(action.payload),
           new fromActions.LoadMessageThread(action.payload),
-          new fromActions.LoadContactThread(action.payload),
-          new fromActions.LoadGroup(action.payload)
+          new fromActions.LoadContactThread(action.payload)
         ];
       })
     );

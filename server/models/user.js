@@ -70,7 +70,7 @@ const Group = require('./group');
 var userSchema = new Schema({
   username: { type: String },
   password: { type: String },
-  avatar: String,
+  avatar: { type: String, default: "defaultUser.svg" },
   messageThread: [{ type: Schema.Types.ObjectId, ref: "MessageThread" }],
   contactThread: { type: Schema.Types.ObjectId, ref: "ContactThread" },
   groups: [{ type: Schema.Types.ObjectId, ref: "Group" }]

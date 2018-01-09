@@ -4,14 +4,12 @@ const jwt = require("jsonwebtoken");
 const config = require("../config");
 const multer = require("multer");
 
-
 const customModelsModules = require("../models");
 const Verify = require("./middleware/authentication");
 
 router.get("/currentUser", Verify, (req, res) => {
   // console.log("req", req.body);
-  customModelsModules.User
-    .findById(req.decoded.user_id, "-password")
+  customModelsModules.User.findById(req.decoded.user_id, "-password")
     .populate([
       {
         path: "contactThread",
@@ -38,6 +36,15 @@ router.get("/currentUser", Verify, (req, res) => {
           { path: "messages" },
           { path: "chatBetween", select: "-password" }
         ]
+      },
+      {
+        path: "groups",
+        populate: [
+          { path: "messages" },
+          { path: "members", select: "-password -contactThread" },
+          { path: "admins", select: "-password -contactThread" },
+          { path: "creator", select: "-password -contactThread" }
+        ]
       }
     ])
     .exec((err, user) => {
@@ -60,7 +67,7 @@ var Storage = multer.diskStorage({
 var upload = multer({ storage: Storage }).single("profileAvatar");
 
 router.post("/changeAvatar", Verify, (req, res) => {
-  if(req.body && req.body.avatarName ){
+  if (req.body && req.body.avatarName) {
     customModelsModules.User.findByIdAndUpdate(req.decoded.user_id, {
       $set: { avatar: req.body.avatarName }
     }).exec((err, updatedUser) => {
@@ -74,58 +81,52 @@ router.post("/changeAvatar", Verify, (req, res) => {
           message: "Something went wrong!" + err
         });
       } else {
-        customModelsModules.User.findByIdAndUpdate(
-          req.decoded.user_id,
-          {
-            $set: { avatar: req.file.filename }
-          }
-        ).exec((err, updatedUser) => {
+        customModelsModules.User.findByIdAndUpdate(req.decoded.user_id, {
+          $set: { avatar: req.file.filename }
+        }).exec((err, updatedUser) => {
           res.json({
             success: true,
             message: "File uploaded sucessfully!"
           });
         });
       }
-    }); 
+    });
   }
 });
 router.post("/userExist", Verify, (req, res) => {
   customModelsModules.User.findById(req.decoded.user_id).exec(
     (err, currentUser) => {
-      customModelsModules.User.findOne({ username: req.body.username }, "-password -contactThread").exec(
-        (err, foundUser) => {
-          if (err) {
-            res.json({ success: false, message: "Error occured " + err });
+      customModelsModules.User.findOne(
+        { username: req.body.username },
+        "-password -contactThread"
+      ).exec((err, foundUser) => {
+        if (err) {
+          res.json({ success: false, message: "Error occured " + err });
+        } else {
+          if (!foundUser) {
+            res.json({ success: false, message: "User not exists" });
           } else {
-            if (!foundUser) {
-              res.json({ success: false, message: "User not exists" });
+            console.log("currentUser._id", currentUser._id);
+            console.log("foundUser._id", foundUser._id);
+            if (currentUser._id.toString() == foundUser._id.toString()) {
+              console.log("add yourself");
+              res.json({
+                success: false,
+                message:
+                  "Don't need to add yourself. You will be automatically added"
+              });
             } else {
-              console.log("currentUser._id", currentUser._id);
-              console.log("foundUser._id", foundUser._id);
-              if (
-                currentUser._id.toString() == foundUser._id.toString()
-              ) {
-                console.log("add yourself");
-                res.json({
-                  success: false,
-                  message:
-                    "Don't need to add yourself. You will be automatically added"
-                });
-              } else {
-                res.json({
-                  success: true,
-                  message: "User added",
-                  user: foundUser
-                });
-              }
+              res.json({
+                success: true,
+                message: "User added",
+                user: foundUser
+              });
             }
           }
         }
-      );
+      });
     }
-  );  
+  );
 });
-
-
 
 module.exports = router;

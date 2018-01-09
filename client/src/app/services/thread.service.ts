@@ -32,12 +32,12 @@ export class ThreadService {
       )
       .map(res => res.json());
   }
-  removeUnreadMessage(messageThread) {
-    // console.log("messageThread", messageThread);
+  removeUnreadMessage(thread) {
+    // console.log("thread", thread);
     return this.http
       .post(
         this.domain + "/thread/removeUnreadMessage",
-        messageThread
+        thread
       )
       .map(res => res.json());
   }

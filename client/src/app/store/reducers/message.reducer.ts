@@ -20,51 +20,49 @@ export function messageReducer(
   action: fromMessage.MessageAction
 ): MessageState {
   switch (action.type) {
-    case fromMessage.ADD_NEW_MESSAGE_SUCCESS: {
-      return { ...state, loading: false, loaded: true };
-    }
-    case fromMessage.ADD_NEW_MESSAGE_FAIL: {
-      return { ...state, loading: false, loaded: false };
-    }
     case fromMessage.CHOOSE_MESSAGE_FROM_MESSAGE_THREAD: {
       console.log("choose message payload", action.payload);
       console.log("choose message state", state);
-      if(action.payload){
-        return {
-          ...state,
-          loading: false,
-          loaded: true,
-          data: [...action.payload.messages]
-        };
+
+      if (action.payload) {
+        if (action.payload.creator) {
+          return { ...state, loading: false, loaded: true, data: [...action.payload.messages]}
+        } else {
+          return {
+            ...state,
+            loading: false,
+            loaded: true,
+            data: [...action.payload.messages]
+          };
+        }
       } else {
-        return state = initialState
+        return (state = initialState);
       }
-      
     }
     case fromMessage.ADD_NEW_MESSAGE_TO_MESSAGES: {
       console.log("Add new message to messages payload", action.payload);
       console.log("Add new message to messages state", state);
-      if(state.data.length){
-        if(action.payload.messageThread.creator){
-          return { ...state, data: [...state.data, action.payload.message] }
-        }else{
-          const isInclude = function(data) {
-          return action.payload.messageThread.chatBetween
-            .map(element => {
-              return element._id == data;
-            })
-            .includes(true);
-        };
-        console.log("new message payload", action.payload);
-        console.log("new message state", state);
-        if (isInclude(state.data[0].reciever) && isInclude(state.data[0].sender)) {
+      
+      if (state.data.length) {
+        if (action.payload.group) {
           return { ...state, data: [...state.data, action.payload.message] };
         } else {
-          return state;
+            // const isInclude = function(data) {
+            //   return action.payload.messageThread.chatBetween
+            //     .map(element => {
+            //       return element._id == data;
+            //     })
+            //     .includes(true);
+            // };
+            // console.log("new message payload", action.payload);
+            // console.log("new message state", state);
+            // if (isInclude(state.data[0].reciever) && isInclude(state.data[0].sender)) {
+              return { ...state, data: [...state.data, action.payload.message] };
+            // } else {
+            //   return state;
+            // }
         }
-        }
-        
-      }else{
+      } else {
         return { ...state, data: [action.payload.message] };
       }
     }

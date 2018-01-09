@@ -6,7 +6,7 @@ const Message = require("./message");
 
 var groupSchema = new Schema({
   name: String,
-  avatar: String,
+  avatar: { type: String, default: "defaultGroup.svg" },
   messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
   lastMessage: String,
   members: [{ type: Schema.Types.ObjectId, ref: "User" }],

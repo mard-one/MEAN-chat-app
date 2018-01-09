@@ -20,10 +20,12 @@ import * as fromStoreActions from "../../store/actions";
 export class ChatroomComponent implements OnInit {
   currentUser: { user: any; loaded: any; loading: any; message: any };
   chosenUser: { user: any; messageThread: { any } };
+  chosenGroup: { group: any; currentUser: any };
   onlineUsers: string[];
   messages$: Observable<any>;
   messageThread$: Observable<any>;
   contactThread$: Observable<any>;
+  groups$: Observable<any>;
   addContactToContactsMessage: string;
   addContactToContactsStatus: boolean;
   order: string = "username";
@@ -99,6 +101,7 @@ export class ChatroomComponent implements OnInit {
     this.messageThread$ = this.store.select(fromStoreSelector.getMessageThread);
     this.contactThread$ = this.store.select(fromStoreSelector.getContactThread);
     this.messages$ = this.store.select(fromStoreSelector.getMessage);
+    // this.groups$ = this.store.select(fromStoreSelector.getGroup);
     this.store.select(fromStoreSelector.getUserState).subscribe(user => {
       this.currentUser = {
         user: user.data,
@@ -121,6 +124,9 @@ export class ChatroomComponent implements OnInit {
     this.store.select(fromStoreSelector.getMessage).subscribe(messages => {
       console.log("messages", messages);
     });
+    this.store.select(fromStoreSelector.getGroup).subscribe(groups => {
+      console.log("groups", groups);
+    });
     // ------------------------ Socket.io -------------------------------
 
     this.socket.on("connect", () => {
@@ -131,19 +137,19 @@ export class ChatroomComponent implements OnInit {
       });
     });
 
-    this.socket.on("successfully recieved", data => {
+    this.socket.on("successfully recieved from message thread", data => {
       console.log("socket message", data);
       this.store.dispatch(
-        new fromStoreActions.AddNewMessageSuccess({
+        new fromStoreActions.AddNewMessageToMessages({
           message: data.messageSent,
           messageThread: data.messageThread
         })
       );
     });
-    this.socket.on("successfully sent", data => {
+    this.socket.on("successfully sent from message thread", data => {
       console.log("socket message", data);
       this.store.dispatch(
-        new fromStoreActions.AddNewMessageSuccess({
+        new fromStoreActions.AddNewMessageToMessages({
           message: data.messageSent,
           messageThread: data.messageThread
         })
@@ -156,13 +162,34 @@ export class ChatroomComponent implements OnInit {
         })
       );
     });
+    this.socket.on("successfully recieved from group", data => {
+      console.log("socket message", data);
+      this.store.dispatch(
+        new fromStoreActions.AddNewMessageToMessages({
+          message: data.messageSent,
+          group: data.group
+        })
+      );
+    });
+    this.socket.on("successfully sent from group", data => {
+      console.log("socket message", data);
+      this.store.dispatch(
+        new fromStoreActions.AddNewMessageToMessages({
+          message: data.messageSent,
+          group: data.group
+        })
+      );
+      this.store.dispatch(
+        new fromStoreActions.AddUnreadMessageToMessageThread({
+          message: data.messageSent,
+          group: data.group,
+          currentUser: this.currentUser.user
+        })
+      );
+    });
     this.socket.on("new group success", data => {
       console.log("socket io recieved group", data);
-      this.store.dispatch(
-        new fromStoreActions.NewGroup(
-          data.group
-        )
-      );
+      this.store.dispatch(new fromStoreActions.NewGroup(data.group));
     });
     this.socket.on("exception", data => {
       console.log(data);
@@ -215,28 +242,47 @@ export class ChatroomComponent implements OnInit {
   }
 
   chooseUserFromMessageThread(user) {
-    let chosenUserFromMessageThread = user.chatBetween.filter(
-      userInChatBetween => {
-        return userInChatBetween._id != this.currentUser.user._id;
-      }
-    );
-    console.log("message thead user", user);
-    this.chosenUser = {
-      user: chosenUserFromMessageThread[0],
-      messageThread: user
-    };
-    console.log("message thead chosen user", this.chosenUser);
-    this.store.dispatch(
-      new fromStoreActions.ChooseMessageFromMessageThread(
-        this.chosenUser.messageThread
-      )
-    );
-    this.store.dispatch(
-      new fromStoreActions.RemoveUnreadMessageFromMessageThread({
-        messageThread: this.chosenUser.messageThread,
-        currentUser: this.currentUser.user
-      })
-    );
+    if (user.creator && user.members) {
+      this.chosenUser = null;
+      console.log("group thead user", user);
+      this.chosenGroup = { group: user, currentUser: this.currentUser.user };
+      console.log("group thead chosen user", this.chosenUser);
+      this.store.dispatch(
+        new fromStoreActions.ChooseMessageFromMessageThread(
+          this.chosenGroup.group
+        )
+      );
+      this.store.dispatch(
+        new fromStoreActions.RemoveUnreadMessageFromMessageThread({
+          group: this.chosenGroup.group,
+          currentUser: this.currentUser.user
+        })
+      );
+    } else {
+      this.chosenGroup = null;
+      let chosenUserFromMessageThread = user.chatBetween.filter(
+        userInChatBetween => {
+          return userInChatBetween._id != this.currentUser.user._id;
+        }
+      );
+      console.log("message thead user", user);
+      this.chosenUser = {
+        user: chosenUserFromMessageThread[0],
+        messageThread: user
+      };
+      console.log("message thead chosen user", this.chosenUser);
+      this.store.dispatch(
+        new fromStoreActions.ChooseMessageFromMessageThread(
+          this.chosenUser.messageThread
+        )
+      );
+      this.store.dispatch(
+        new fromStoreActions.RemoveUnreadMessageFromMessageThread({
+          messageThread: this.chosenUser.messageThread,
+          currentUser: this.currentUser.user
+        })
+      );
+    }
   }
   chooseUserFromContactThread(user) {
     if (user.messageThread.length > 0) {
@@ -271,12 +317,21 @@ export class ChatroomComponent implements OnInit {
   }
 
   sendMessage() {
-    this.socket.emit("sendMessage", {
-      token: localStorage.getItem("token"),
-      reciever: this.chosenUser.user,
-      message: this.formMessage.get("message").value
-    });
-    this.formMessage.reset();
+    if (this.chosenGroup && this.chosenGroup.group) {
+      this.socket.emit("sendMessage", {
+        token: localStorage.getItem("token"),
+        reciever: this.chosenGroup.group,
+        message: this.formMessage.get("message").value
+      });
+      this.formMessage.reset();
+    } else {
+      this.socket.emit("sendMessage", {
+        token: localStorage.getItem("token"),
+        reciever: this.chosenUser.user,
+        message: this.formMessage.get("message").value
+      });
+      this.formMessage.reset();
+    }
   }
 
   addContact() {

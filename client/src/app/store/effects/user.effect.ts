@@ -6,9 +6,8 @@ import { catchError, switchMap, map, mergeMap } from "rxjs/operators";
 import "rxjs/add/observable/from";
 import "rxjs/add/observable/of";
 
-import * as userActions from "../actions/user.action";
-import * as messageThreadActions from "../actions/messageThread.action"
-import * as contactThreadActions from "../actions/contactThread.action"
+import * as fromActions from "../actions";
+
 import * as fromService from "../../services";
 
 @Injectable()
@@ -19,22 +18,25 @@ export class UserEffects {
   ) {}
 
   @Effect({ dispatch: true })
-  loadCurrentUser$ = this.actions$.ofType(userActions.LOAD_CURRENT_USER).pipe(
+  loadCurrentUser$ = this.actions$.ofType(fromActions.LOAD_CURRENT_USER).pipe(
     switchMap(() => {
       return this.userService.currentUser().pipe(
         map(user => {
-          return new userActions.LoadCurrentUserReady(user);
+          return new fromActions.LoadCurrentUserReady(user);
         })
       );
     })
   );
   @Effect({ dispatch: true })
-  loadCurrentUserReady$ = this.actions$.ofType(userActions.LOAD_CURRENT_USER_READY).pipe(
-    switchMap((action: any) => {
-      return [
-        new messageThreadActions.LoadMessageThread(action.payload),
-        new contactThreadActions.LoadContactThread(action.payload)
-      ]
-    })
-  );
+  loadCurrentUserReady$ = this.actions$
+    .ofType(fromActions.LOAD_CURRENT_USER_READY)
+    .pipe(
+      switchMap((action: any) => {
+        return [
+          new fromActions.LoadMessageThread(action.payload),
+          new fromActions.LoadContactThread(action.payload),
+          new fromActions.LoadGroup(action.payload)
+        ];
+      })
+    );
 }

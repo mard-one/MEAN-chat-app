@@ -40,16 +40,29 @@ module.exports = function sendMessage(socket, io, currentUser) {
                 $set: { lastMessage: newMessage.text }
               },
               { new: true }
-            ).populate({path: "messages"})
+            ).populate([{path: "messages"}, {path: 'members'}, {path: 'admins'}, {path: 'creator'}])
             .exec((err, updatedGroup) => {
               console.log("updatedGroup", updatedGroup);
               updatedGroup.members.forEach(member => {
-                console.log("member", member);
-                io.to(member).emit("successfully sent", {
-                  message: "Message was sent",
-                  messageSent: newMessage,
-                  messageThread: updatedGroup
-                });
+                if(member._id == senderId){
+                  io
+                    .to(senderId)
+                    .emit("successfully recieved from group", {
+                      message: "Message was sent",
+                      messageSent: newMessage,
+                      group: updatedGroup
+                    });
+                } else {
+                  io
+                    .to(member._id)
+                    .emit("successfully sent from group", {
+                      message: "Message was sent",
+                      messageSent: newMessage,
+                      group: updatedGroup
+                    });
+                }
+                console.log("member._id", member._id);
+                
               });
             });
           });
@@ -176,7 +189,7 @@ module.exports = function sendMessage(socket, io, currentUser) {
 
                                     io
                                       .to(recieverId)
-                                      .emit("successfully sent", {
+                                      .emit("successfully sent from message thread", {
                                         message:
                                           "Message thread was created and message was sent",
                                         messageSent: message,
@@ -184,7 +197,7 @@ module.exports = function sendMessage(socket, io, currentUser) {
                                       });
                                     io
                                       .to(senderId)
-                                      .emit("successfully recieved", {
+                                      .emit("successfully recieved from message thread", {
                                         message:
                                           "Message thread was created and message was sent",
                                         messageSent: message,
@@ -200,12 +213,12 @@ module.exports = function sendMessage(socket, io, currentUser) {
                           "foundMessageThread",
                           foundMessageThread._id
                         );
-                        io.to(recieverId).emit("successfully sent", {
+                        io.to(recieverId).emit("successfully sent from message thread", {
                           message: "Message was sent",
                           messageSent: message,
                           messageThread: foundMessageThread
                         });
-                        io.to(senderId).emit("successfully recieved", {
+                        io.to(senderId).emit("successfully recieved from message thread", {
                           message: "Message was sent",
                           messageSent: message,
                           messageThread: foundMessageThread

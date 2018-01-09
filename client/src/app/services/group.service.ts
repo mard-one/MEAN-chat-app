@@ -12,19 +12,31 @@ export class GroupService {
 
   newGroup(groupFormData) {
     console.log("groupFormData", groupFormData);
-    this.authService.createFileHeader();
-    let formData = new FormData();
-    // for(let i = 0; i>groupFormData.members.length; i++){}
-    formData.append("name", groupFormData.name);
-    formData.append("description", groupFormData.description);
-    formData.append("groupAvatar", groupFormData.avatar);
-    formData.append("members", JSON.stringify(groupFormData.members));
-    return this.http
-      .post(
-        this.domain + "/group/newGroup",
-        formData,
-        this.authService.optionsFile
-      )
-      .map(res => res.json());
+    
+    if(groupFormData.avatar){
+      this.authService.createFileHeader();
+      let formData = new FormData();
+      // for(let i = 0; i>groupFormData.members.length; i++){}
+      formData.append("name", groupFormData.name);
+      formData.append("description", groupFormData.description);
+      formData.append("groupAvatar", groupFormData.avatar);
+      formData.append("members", JSON.stringify(groupFormData.members));
+      return this.http
+        .post(
+          this.domain + "/group/newGroup",
+          formData,
+          this.authService.optionsFile
+        )
+        .map(res => res.json());
+    }else{
+      this.authService.createAuthenticationHeader()
+      return this.http
+        .post(
+          this.domain + "/group/newGroup",
+          groupFormData,
+          this.authService.options
+        )
+        .map(res => res.json());
+    }
   }
 }

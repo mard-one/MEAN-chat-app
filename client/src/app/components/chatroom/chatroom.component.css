@@ -319,7 +319,8 @@
 #change-avatar a{
   display: inline-block;
   padding: 5px 10px;
-  background-color: #343A40;
+  /* background-color: #343A40; */
+  color: white;
 }
 .modal-body .wrap{
   display: flex;

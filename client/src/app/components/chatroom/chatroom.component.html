@@ -20,7 +20,7 @@
                 <div id="group-modal-data">
                   <div id="group-avatar">
                     <div id="group-avatar-placeholder">
-                      <img [attr.src]="(chosenGroupAvatar?.url)?(chosenGroupAvatar?.url): './assets/images/'+ 'Asset1.svg'" >
+                      <img [attr.src]="(chosenGroupAvatar?.url)?(chosenGroupAvatar?.url): './assets/images/'+ 'defaultGroup.svg'" >
                     </div>
                     <div id="group-avatar-action">
                         <input type="file" name="groupAvatar" id="groupAvatar" formControlName="groupAvatar">
@@ -130,7 +130,7 @@
                     </h3>
                   </div>
                   <div id="change-avatar">
-                    <a id="change-avatar-modal" (click)="changeAvatarModal()" >change profile image</a>
+                    <a id="change-avatar-modal" (click)="changeAvatarModal()" class="btn btn-primary">change profile image</a>
                   </div>
                 </div>
               </div>
@@ -140,7 +140,7 @@
       </div>
       <div class="modal fade" id="avatarModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content">
+          <div class="modal-content ">
             <div class="modal-header">
               <h5 class="modal-title" id="avatarModalLabel">Choose image</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -189,36 +189,58 @@
       </div>
 
       <div id="message-thread-body">
-        <ng-container *ngIf="(messageThread$ | async)">
-          <div id="user-in-message-thread" *ngFor="let thread of (messageThread$ | async).messageThread.reverse()" (click)="chooseUserFromMessageThread(thread)">
-            <div id="message-thread-main">
+        <!-- <div id="user-in-message-thread" *ngFor="let thread of (groups$ | async)?.reverse()" (click)="chooseUserFromMessageThread(thread)">
+          <div id="message-thread-main">
+              <div id="user-image">
+                <img *ngIf="thread.avatar.length == 0" src='./assets/images/Asset3.svg'>
+                <img src='./assets/images/{{thread.avatar}}'>
+              </div>
+              <div class="wrapper">
+                <div id="message-thread-username">{{thread.name}}</div>
+                <div id="last-message">{{thread.lastMessage}}</div>
+              </div>
+          </div>
+            <div id="unread-messages" *ngIf="thread.unreadMessages > 0">
+              <span class="badge badge-info">{{thread.unreadMessages}}</span>
+            </div>
+        </div> -->
+        <div id="user-in-message-thread" *ngFor="let thread of (messageThread$ | async)?.messageThread.reverse()" (click)="chooseUserFromMessageThread(thread)">
+          <div id="message-thread-main">
+            <ng-container *ngIf="!thread.creator">
               <ng-container *ngFor="let user of thread.chatBetween">
                 <div id="user-image" *ngIf="user._id != currentUser.user._id">
-                  <img *ngIf="user.avatar.length == 0" src='./assets/images/Asset3.svg'>
-                  <img *ngIf="user.avatar.length" src='./assets/images/{{user.avatar}}'>
+                  <!-- <img *ngIf="user.avatar.length == 0" src='./assets/images/Asset3.svg'> -->
+                  <img src='./assets/images/{{user.avatar}}'>
                 </div>
                 <div class="wrapper" *ngIf="user._id != currentUser.user._id">
                   <div id="message-thread-username">{{user.username}}</div>
                   <div id="last-message">{{thread.lastMessage}}</div>
                 </div>
               </ng-container>
-            </div>
-            <ng-container>
-              <div id="unread-messages" *ngIf="thread.unreadMessages > 0">
-                <span class="badge badge-info">{{thread.unreadMessages}}</span>
+            </ng-container>
+            <ng-container *ngIf="thread.creator">
+              <div id="user-image">
+                <img src='./assets/images/{{thread.avatar}}'>
+              </div>
+              <div class="wrapper">
+                <div id="message-thread-username">{{thread.name}}</div>
+                <div id="last-message">{{thread.lastMessage}}</div>
               </div>
             </ng-container>
           </div>
-        </ng-container>
-
-
+          <ng-container>
+            <div id="unread-messages" *ngIf="thread.unreadMessages > 0">
+              <span class="badge badge-info">{{thread.unreadMessages}}</span>
+            </div>
+          </ng-container>
+        </div>
       </div>
     </div>
     <div id="central-column">
 
       <nav id="navbar-center" class="navbar navbar-dark bg-dark">
         <a class="navbar-brand" data-toggle="modal" data-target="#chosenUserModal">
-          {{ chosenUser?.user && chosenUser.user?.username }}
+          {{ chosenUser?.user && chosenUser.user?.username || chosenGroup?.group && chosenGroup.group?.name }}
         </a>
       </nav>
       <div class="modal" id="chosenUserModal" tabindex="-1" role="dialog" aria-labelledby="chosenUserModalLabel" aria-hidden="true">
@@ -248,36 +270,12 @@
         </div>
       </div>
        <!-- (chosenUser.messageThread.creator && (message.reciever != currentUser.user._id)) || -->
-      <div id="chat-box" *ngIf="((messages$ | async) && chosenUser?.user)">
+      <div id="chat-box" *ngIf="((messages$ | async) && (chosenUser?.user || chosenGroup?.group))">
         <ng-container *ngFor="let message of (messages$ | async)">
-          <div *ngIf=" (message.sender == chosenUser.user._id) && !chosenUser.messageThread.creator" class="message" id="friend-message">
+          <div *ngIf=" (message.sender != currentUser?.user._id )" class="message" id="friend-message">
             <div class="message-icon">
               <div class="icon-wrap">
-                <img src="./assets/images{{chosenUser?.user && chosenUser.user?.avatar}}" alt="" class="icon">
-              </div>
-            </div>
-            <div id="message-by-friend" >
-              <div id="text">{{message.text}}</div>
-              <div id="recieved-time">{{message.sentAt | date : "H:mm"}}</div>
-            </div>
-          </div>
-          <div *ngIf="(message.sender != chosenUser.user._id) && !chosenUser.messageThread.creator" class="message" id="my-message">
-            <div id="message-by-me" >
-              <div id="text">{{message.text}}</div>
-              <div id="sent-time">{{message.sentAt | date : "H:mm"}}</div>
-            </div>
-            <div class="message-icon">
-              <div class="icon-wrap">
-                <img [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
-                  [ngStyle]="{'object-fit': (chosenProfileAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
-              </div>
-            </div>
-          </div>
-          
-          <div *ngIf=" (message.sender != currentUser.user._id) && chosenUser.messageThread.creator" class="message" id="friend-message">
-            <div class="message-icon">
-              <div class="icon-wrap">
-                <img src="./assets/images{{chosenUser?.user && chosenUser.user?.avatar}}" alt="" class="icon">
+                <img src="./assets/images/{{(chosenUser?.user && chosenUser.user?.avatar) || (chosenGroup?.group && chosenGroup.group?.avatar)}}" class="icon">
               </div>
             </div>
             <div id="message-by-friend">
@@ -285,7 +283,7 @@
               <div id="recieved-time">{{message.sentAt | date : "H:mm"}}</div>
             </div>
           </div>
-          <div *ngIf="(message.sender == currentUser.user._id) && chosenUser.messageThread.creator" class="message" id="my-message">
+          <div *ngIf="(message.sender == currentUser.user._id )" class="message" id="my-message">
             <div id="message-by-me">
               <div id="text">{{message.text}}</div>
               <div id="sent-time">{{message.sentAt | date : "H:mm"}}</div>
@@ -299,7 +297,7 @@
           </div>
         </ng-container>
       </div>
-      <div id="message-bar" *ngIf="((messages$ | async) && chosenUser?.user)">
+      <div id="message-bar" *ngIf="(chosenGroup?.group || chosenUser?.user)">
         <form [formGroup]="formMessage" (submit)="sendMessage()">
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Message..." aria-label="Search for..." autofocus name="message" formControlName="message">

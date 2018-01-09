@@ -91,19 +91,28 @@ router.get("/getAllMessageThread", Verify, function(req, res) {
 router.post("/removeUnreadMessage", function(req, res) {
   // console.log("MessageThread");
   // console.log("req.body", req.body);
-    var messageIds = req.body.messageThread.messages.map(message=>{
-      return message._id
-    })
+  if(req.body.group){
+    var messageIds = req.body.group.messages.map(message => {
+      return message._id;
+    });
     console.log("messageIds", messageIds);
-    customModelsModules.Message
-      .update(
-        { _id: { $in: messageIds }, reciever: req.body.currentUser._id },
-        { $set: { isRead: true } },
-        { multi: true }
-      )
-      .exec((err, updatedMessage) => {
+    customModelsModules.Message.update({ _id: { $in: messageIds }, reciever: req.body.currentUser._id }, { $set: { isRead: true } }, { multi: true }).exec(
+      (err, updatedMessage) => {
         console.log("updatedMessage", updatedMessage);
-      });
+      }
+    );
+  }else{
+     var messageIds = req.body.messageThread.messages.map(message => {
+       return message._id;
+     });
+     console.log("messageIds", messageIds);
+     customModelsModules.Message.update({ _id: { $in: messageIds }, reciever: req.body.currentUser._id }, { $set: { isRead: true } }, { multi: true }).exec(
+       (err, updatedMessage) => {
+         console.log("updatedMessage", updatedMessage);
+       }
+     );
+  }
+   
 });
 
 module.exports = router;

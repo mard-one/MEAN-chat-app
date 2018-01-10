@@ -713,4 +713,10 @@ export class ChatroomComponent implements OnInit {
   chooseMemberToExistingGroupBack() {
     this.chosenMembersOfExistingGroup = [];
   }
+  logout(){
+    localStorage.clear()
+    setTimeout(() => {
+      this.router.navigate(["/login"]);
+    });
+  }
 }

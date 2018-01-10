@@ -44,7 +44,6 @@
                         <button class="btn btn-primary" type="button" (click)="addContactsToMembers()">From contacts</button>
                       </span>
                       <input type="text" name="groupMember" id="groupMember" formControlName="groupMember" class="form-control" placeholder="Member...">
-
                       <span class="input-group-btn">
                         <button class="btn btn-primary" type="button" (click)="addUsernameToMembers()">Add</button>
                       </span>
@@ -370,7 +369,12 @@
     <div id="right-column">
 
       <nav id="navbar-right" class="navbar navbar-dark bg-dark">
-        <a data-toggle="modal" data-target="#contactModal">Add contacts</a>
+        <div id="add-contacts">
+          <a data-toggle="modal" data-target="#contactModal">Add contacts</a>
+        </div>
+        <div id="logout">
+          <a (click)="logout()">Log out</a>
+        </div>
       </nav>
       <div class="modal" id="contactModal" tabindex="-1" role="dialog" aria-labelledby="contactModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">

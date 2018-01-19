@@ -12,34 +12,34 @@ This is a personal project with the purpose of better understanding the client-s
 
 * Register and authenticate users using JSON web tokens.
 
-* When a user is logged in, everyone who has the user in contacts are notified. <br>
+* When a user is logged in, everyone who has the user in contacts are notified. <br><br>
 ![Preview](./preview/app-preview.png)
 
-* Number of unread messages from specific user/group.
+* Number of unread messages from specific user/group.<br><br>
 ![Preview](./preview/unread-messages.png)
 
-* Add new user to contact thread <br>
+* Add new user to contact thread <br><br>
 ![Preview](./preview/add-contact-modal.png)
 
-* Dashboard. ( I know not so much information )<br>
+* Dashboard. ( I know not so much information )<br><br>
 ![Preview](./preview/dashboard.png)
 
 * In dashboard you can change your profile avatar. <br>
-Choose an image from your computer <br>
+Choose an image from your computer <br><br>
 ![Preview](./preview/change-profile-avatar.png) <br>
-or choose default images. <br>
+or choose default images. <br><br>
 ![Preview](./preview/change-profile-avatar-default.png) <br>
 Once you have chosen new avatar it will be replaced everywhere instantly.
 
 * Groups and private chats.
 
-* Choose user to send message just clicking on the user in contact thread or message thread. <br>
+* Choose user to send message just clicking on the user in contact thread or message thread. <br><br>
 ![Preview](./preview/contact-message-thread.png)
 
-* Notifies a reciever when message is sent. (notifies group members when message is sent to group)
+* Notifies a reciever when message is sent. (notifies group members when message is sent to group)<br><br>
 ![Preview](./preview/notification-new-message.png)
 
-* Create new group.<br>
+* Create new group.<br><br>
 ![Preview](./preview/create-group.png)
 
 * Add users to group from contacts or by username.

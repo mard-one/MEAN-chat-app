@@ -28,9 +28,11 @@ router.post("/addContact", Verify, function(req, res) {
           if (newUser._id == req.decoded.user_id) {
             res.json({ success: false, message: "You cannot add yourself" });
           } else {
+            console.log('req.decoded', req.decoded.user_id);
             customModelsModules.User.findById(req.decoded.user_id)
               .populate({ path: "contactThread" })
               .exec((err, foundUser) => {
+                console.log("founduser", foundUser);
                 if (err) {
                   res.json({
                     success: false,
@@ -43,10 +45,10 @@ router.post("/addContact", Verify, function(req, res) {
                       message: "Current user not found"
                     });
                   } else {
-                    // console.log("foundUser.contactThread.contacts", foundUser.contactThread.contacts);
-                    // console.log("newUser._id", newUser._id.toString());
-                    // console.log("foundUser.contactThread.contacts.includes(newUser._id)", foundUser.contactThread.contacts.indexOf(newUser._id));
-                    if (foundUser.contactThread.contacts.indexOf(newUser._id) + 1) {
+                    console.log("foundUser.contactThread.contacts", foundUser.contactThread.contacts);
+                    console.log("newUser._id", newUser._id.toString());
+                    console.log("foundUser.contactThread.contacts.includes(newUser._id)", foundUser.contactThread.contacts.includes(newUser._id));
+                    if (foundUser.contactThread.contacts && foundUser.contactThread.contacts.includes(newUser._id)) {
                       res.json({
                         success: false,
                         message: "The user exists in your contacts"
@@ -73,6 +75,7 @@ router.post("/addContact", Verify, function(req, res) {
                           });
                         });
                     }
+
                   }
                 }
               });

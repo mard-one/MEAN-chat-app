@@ -17,13 +17,13 @@ export function groupReducer(
 ): GroupState {
   switch (action.type) {
     case fromGroup.LOAD_GROUP: {
-      console.log("load group state", state);
-      console.log("load group payload", action.payload);
-      return { ...state, data: [...action.payload.userData.groups] };
+      // console.log("load group state", state);
+      // console.log("load group payload", action.payload);
+      return { ...state, data: [...action.payload.user.groups] };
     }
     case fromGroup.NEW_GROUP: {
-      console.log("new group state", state);
-      console.log("new group payload", action.payload);
+      // console.log("new group state", state);
+      // console.log("new group payload", action.payload);
       return state;
     }
   }

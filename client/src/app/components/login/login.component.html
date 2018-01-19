@@ -2,6 +2,9 @@
   <div class="form-header">
     <h1>Login to your Account</h1>
   </div>
+  <div *ngIf="messageLogin" class="alert" [ngClass]="{'alert-danger':!messageLogin.success, ' alert-info': messageLogin.success}">
+     {{messageLogin.message}}
+  </div>  
   <div class="form-group">
     <label for="exampleInputUsername1">Username</label>
     <input type="username" name="username" class="form-control" id="exampleInputUsername1" placeholder="Enter username" formControlName="username" >

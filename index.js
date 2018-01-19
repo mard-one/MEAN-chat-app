@@ -5,6 +5,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const S3FS = require('s3fs')
 
 const config = require("./server/config");
 

@@ -22,35 +22,35 @@ export function messageThreadReducer(
 ): MessageThreadState {
   switch (action.type) {
     case fromMessageThread.LOAD_MESSAGE_THREAD: {
-      console.log("load message thread payload", action.payload);
-      console.log("load message thread state", state);
+      // console.log("load message thread payload", action.payload);
+      // console.log("load message thread state", state);
       return {
         ...state,
         loading: false,
         loaded: action.payload.success,
-        data: { messageThread: action.payload.userData.messageThread }
+        data: { messageThread: action.payload.user.messageThread }
       };
     }
     case fromMessageThread.ADD_NEW_MESSAGE_TO_MESSAGE_THREAD: {
-      console.log("add new message to message thread payload", action.payload);
-      console.log("add new message to message thread state", state);
+      // console.log("add new message to message thread payload", action.payload);
+      // console.log("add new message to message thread state", state);
 
       if (state.data.messageThread.length) {
         if (action.payload.group) {
           let foundGroup = state.data.messageThread.filter(
             thread => action.payload.group._id == thread._id
           );
-          console.log("found group", foundGroup);
+          // console.log("found group", foundGroup);
           if (foundGroup.length) {
             let filteredStateWithoutNewGroup = [
               ...state.data.messageThread.filter(thread => {
                 return action.payload.group._id != thread._id;
               })
             ];
-            console.log(
-              "filtered state without new group",
-              filteredStateWithoutNewGroup
-            );
+            // console.log(
+            //   "filtered state without new group",
+            //   filteredStateWithoutNewGroup
+            // );
             return {
               ...state,
               loading: false,
@@ -80,17 +80,17 @@ export function messageThreadReducer(
           let foundMessageThread = state.data.messageThread.filter(
             thread => action.payload.messageThread._id == thread._id
           );
-          console.log("found message thread", foundMessageThread);
+          // console.log("found message thread", foundMessageThread);
           if (foundMessageThread.length) {
             let filteredStateWithoutNewMessageThread = [
               ...state.data.messageThread.filter(thread => {
                 return action.payload.messageThread._id != thread._id;
               })
             ];
-            console.log(
-              "filtered state without new message thread",
-              filteredStateWithoutNewMessageThread
-            );
+            // console.log(
+            //   "filtered state without new message thread",
+            //   filteredStateWithoutNewMessageThread
+            // );
             return {
               ...state,
               loading: false,
@@ -127,11 +127,11 @@ export function messageThreadReducer(
       }
     }
     case fromMessageThread.COUNT_UNREAD_MESSAGE_IN_MESSAGE_THREAD: {
-      console.log(
-        "count unread message in message thread payload",
-        action.payload
-      );
-      console.log("count unread message in message thread state", state);
+      // console.log(
+      //   "count unread message in message thread payload",
+      //   action.payload
+      // );
+      // console.log("count unread message in message thread state", state);
       if (state.data.messageThread.length) {
         let messageThreadWithNumberOfUnreadMessages = state.data.messageThread.map(
           element => {
@@ -139,7 +139,7 @@ export function messageThreadReducer(
             if (element.creator) {
               element.messages.map(innerElement => {
                 // console.log("inner element", innerElement);
-                if (!innerElement.isRead && innerElement.sender != action.payload.userData._id) {
+                if (!innerElement.isRead && innerElement.sender != action.payload.user._id) {
                   return numUnread++;
                 } else {
                   return numUnread;
@@ -151,19 +151,19 @@ export function messageThreadReducer(
                 // console.log("inner element", innerElement);
                 if (
                   !innerElement.isRead &&
-                  innerElement.reciever == action.payload.userData._id
+                  innerElement.reciever == action.payload.user._id
                 ) {
                   return numUnread++;
                 } else {
                   return numUnread;
                 }
               });
-              console.log("number of unread messages", numUnread);
+              // console.log("number of unread messages", numUnread);
             }
             return { ...element, unreadMessages: numUnread };
           }
         );
-        console.log("number", messageThreadWithNumberOfUnreadMessages);
+        // console.log("number", messageThreadWithNumberOfUnreadMessages);
         return {
           ...state,
           loaded: true,
@@ -174,11 +174,11 @@ export function messageThreadReducer(
       }
     }
     case fromMessageThread.ADD_UNREAD_MESSAGE_TO_MESSAGE_THREAD: {
-      console.log(
-        "add unread message to message thread payload",
-        action.payload
-      );
-      console.log("add unread message to message thread state", state);
+      // console.log(
+      //   "add unread message to message thread payload",
+      //   action.payload
+      // );
+      // console.log("add unread message to message thread state", state);
       if (action.payload.group) {
         if (state.data.messageThread) {
           let foundGroup = state.data.messageThread.filter(thread => {
@@ -187,17 +187,17 @@ export function messageThreadReducer(
             // console.log("element._id == action.payload.messageThread._id", element._id == action.payload.messageThread._id);
             return thread._id == action.payload.group._id;
           });
-          console.log("found group", foundGroup);
+          // console.log("found group", foundGroup);
           if (foundGroup.length) {
             let filteredStateWithoutNewGroup = [
               ...state.data.messageThread.filter(thread => {
                 return action.payload.group._id != thread._id;
               })
             ];
-            console.log(
-              "filteredStateWithoutNewGroupThread",
-              filteredStateWithoutNewGroup
-            );
+            // console.log(
+            //   "filteredStateWithoutNewGroupThread",
+            //   filteredStateWithoutNewGroup
+            // );
             let groupWithNumberOfUnreadMessages = foundGroup.map(thread => {
               // console.log("thread", thread);
               let numUnread = 0;
@@ -218,13 +218,13 @@ export function messageThreadReducer(
                   return numUnread;
                 }
               });
-              console.log("number of unread messages", numUnread);
+              // console.log("number of unread messages", numUnread);
               return { ...thread, unreadMessages: numUnread };
             });
-            console.log(
-              "groupWithNumberOfUnreadMessages",
-              groupWithNumberOfUnreadMessages
-            );
+            // console.log(
+            //   "groupWithNumberOfUnreadMessages",
+            //   groupWithNumberOfUnreadMessages
+            // );
 
             return {
               ...state,
@@ -250,17 +250,17 @@ export function messageThreadReducer(
             // console.log("element._id == action.payload.messageThread._id", element._id == action.payload.messageThread._id);
             return thread._id == action.payload.messageThread._id;
           });
-          console.log("found message thread", foundMessageThread);
+          // console.log("found message thread", foundMessageThread);
           if (foundMessageThread.length) {
             let filteredStateWithoutNewMessageThread = [
               ...state.data.messageThread.filter(thread => {
                 return action.payload.messageThread._id != thread._id;
               })
             ];
-            console.log(
-              "filteredStateWithoutNewMessageThread",
-              filteredStateWithoutNewMessageThread
-            );
+            // console.log(
+            //   "filteredStateWithoutNewMessageThread",
+            //   filteredStateWithoutNewMessageThread
+            // );
             let messageThreadWithNumberOfUnreadMessages = foundMessageThread.map(
               thread => {
                 // console.log("thread", thread);
@@ -277,16 +277,16 @@ export function messageThreadReducer(
                     return numUnread;
                   }
                 });
-                console.log("number of unread messages", numUnread);
+                // console.log("number of unread messages", numUnread);
                 return { ...thread, unreadMessages: numUnread };
               }
             );
-            console.log(
-              "messageThreadWithNumberOfUnreadMessages",
-              messageThreadWithNumberOfUnreadMessages
-            );
+            // console.log(
+            //   "messageThreadWithNumberOfUnreadMessages",
+            //   messageThreadWithNumberOfUnreadMessages
+            // );
             if (foundMessageThread[0].creator) {
-              console.log("group thread");
+              // console.log("group thread");
               let slightlyChangedGroupMessageThread = {
                 ...messageThreadWithNumberOfUnreadMessages[0],
                 chatBetween: [
@@ -298,10 +298,10 @@ export function messageThreadReducer(
                   }
                 ]
               };
-              console.log(
-                "slightlyChangedGroupMessageThread",
-                slightlyChangedGroupMessageThread
-              );
+              // console.log(
+              //   "slightlyChangedGroupMessageThread",
+              //   slightlyChangedGroupMessageThread
+              // );
               return {
                 ...state,
                 loaded: true,
@@ -333,14 +333,14 @@ export function messageThreadReducer(
       }
     }
     case fromMessageThread.REMOVE_UNREAD_MESSAGE_FROM_MESSAGE_THREAD: {
-      console.log(
-        "remove unread message from message thread payload",
-        action.payload
-      );
-      console.log(
-        "remove unread message from message thread state",
-        state.data.messageThread
-      );
+      // console.log(
+      //   "remove unread message from message thread payload",
+      //   action.payload
+      // );
+      // console.log(
+      //   "remove unread message from message thread state",
+      //   state.data.messageThread
+      // );
       if (action.payload.group) {
         if (action.payload.group.unreadMessages) {
           let filteredState = state.data.messageThread.map(thread => {
@@ -352,7 +352,7 @@ export function messageThreadReducer(
               return thread;
             }
           });
-          console.log("filteredState", filteredState);
+          // console.log("filteredState", filteredState);
 
           return { ...state, data: { messageThread: [...filteredState] } };
         } else {
@@ -369,7 +369,7 @@ export function messageThreadReducer(
               return thread;
             }
           });
-          console.log("filteredState", filteredState);
+          // console.log("filteredState", filteredState);
 
           return { ...state, data: { messageThread: [...filteredState] } };
         } else {
@@ -378,15 +378,15 @@ export function messageThreadReducer(
       }
     }
     case fromMessageThread.ADD_NEW_GROUP_TO_MESSAGE_THREAD: {
-      console.log("add new group to message thread payload", action.payload);
-      console.log("add new group to message thread state", state);
-      if (action.payload.userData) {
+      // console.log("add new group to message thread payload", action.payload);
+      // console.log("add new group to message thread state", state);
+      if (action.payload.user) {
         return {
           ...state,
           data: {
             messageThread: [
               ...state.data.messageThread,
-              ...action.payload.userData.groups
+              ...action.payload.user.groups
             ]
           }
         };

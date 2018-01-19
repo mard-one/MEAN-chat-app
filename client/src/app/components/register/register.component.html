@@ -2,14 +2,33 @@
   <div class="form-header">
     <h1>Register new Account</h1>
   </div>
+  <div *ngIf="messageRegister" class="alert" [ngClass]="{'alert-danger':!messageRegister.success, ' alert-info': messageRegister.success}">
+    {{messageRegister.message}}
+  </div>
   <div class="form-group">
     <label for="exampleInputUsername1">Username</label>
     <input type="username" name="username" class="form-control" id="exampleInputUsername1" placeholder="Enter username" formControlName="username" >
-    <small id="usernameHelp" class="form-text text-muted">We'll never share your username with anyone else.</small>
+    <small *ngIf="formRegister.controls.username.errors?.required && formRegister.controls.username.dirty"  class="text-danger">
+      This field is required
+    </small>
+    <small *ngIf="formRegister.controls.username.errors?.minlength || formRegister.controls.username.errors?.maxlength && formRegister.controls.username.dirty" class="text-danger">
+      Username must be at least 3 characters but no more than 20
+    </small>
+    <small *ngIf="formRegister.controls.username.errors?.validateUsername && formRegister.controls.username.dirty"
+      class="text-danger">
+      Username must not contain special characters but ., -, _, $, @, *, !
+    </small>
   </div>
   <div class="form-group">
     <label for="exampleInputPassword1">Password</label>
     <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" formControlName='password'>
+    <small *ngIf="formRegister.controls.password.errors?.required && formRegister.controls.password.dirty" class="text-danger">
+      This field is required
+    </small>
+    <small *ngIf="formRegister.controls.password.errors?.minlength || formRegister.controls.password.errors?.maxlength && formRegister.controls.password.dirty"
+      class="text-danger">
+      Username must be at least 5 characters but no more than 25
+    </small>
   </div>
   <div class="form-footer">
     <button type="submit" class="btn btn-primary" [disabled]="blocked">Submit</button>

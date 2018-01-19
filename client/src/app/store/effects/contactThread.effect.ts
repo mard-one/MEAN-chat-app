@@ -15,19 +15,6 @@ export class ContactThreadEffects {
     private contactService: fromService.ContactService
   ) {}
 
-  // @Effect({ dispatch: true })
-  // loadContactThread$ = this.actions$
-  //   .ofType(contactThreadActions.LOAD_CONTACT_THREAD)
-  //   .pipe(
-  //     switchMap((action: any) => {
-  //       return this.contactService
-  //         .getAllContacts()
-  //         .pipe(
-  //           map(user => new contactThreadActions.LoadContactThreadReady(user))
-  //         );
-  //     })
-  //   );
-
   @Effect({ dispatch: true })
   addContactToContactThread$ = this.actions$
     .ofType(contactThreadActions.ADD_CONTACT_TO_CONTACT_THREAD)
@@ -38,7 +25,7 @@ export class ContactThreadEffects {
           .pipe(
             map(
               user => {
-                console.log("add contact to contact thread effect", user)
+                // console.log("add contact to contact thread effect", user)
                 return new contactThreadActions.AddContactToContactThreadReady(user);
               }
             )

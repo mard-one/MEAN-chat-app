@@ -21,8 +21,8 @@ export function messageReducer(
 ): MessageState {
   switch (action.type) {
     case fromMessage.CHOOSE_MESSAGE_FROM_MESSAGE_THREAD: {
-      console.log("choose message payload", action.payload);
-      console.log("choose message state", state);
+      // console.log("choose message payload", action.payload);
+      // console.log("choose message state", state);
 
       if (action.payload) {
         if (action.payload.creator) {
@@ -40,8 +40,8 @@ export function messageReducer(
       }
     }
     case fromMessage.ADD_NEW_MESSAGE_TO_MESSAGES: {
-      console.log("Add new message to messages payload", action.payload);
-      console.log("Add new message to messages state", state);
+      // console.log("Add new message to messages payload", action.payload);
+      // console.log("Add new message to messages state", state);
       
       if (state.data.length) {
         if (action.payload.group) {

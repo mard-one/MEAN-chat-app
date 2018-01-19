@@ -2,9 +2,9 @@
   <div class="row align-items-start no-gutters">
     <div id="left-column">
 
-      <nav id="navbar-left" class="navbar navbar-dark bg-dark">
-        <a data-toggle="modal" data-target="#profileModal">Profile</a>
-        <a data-toggle="modal" data-target="#createGroupModal">Create group</a>
+      <nav id="navbar-left" class="navbar bg-dark">
+        <a class="nav-item left-menu-item" data-toggle="modal" data-target="#profileModal">Profile</a>
+        <a class="nav-item left-menu-item hide-on-md" data-toggle="modal" data-target="#createGroupModal">Create group</a>
       </nav>
       <div class="modal fade" id="createGroupModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -28,14 +28,19 @@
                   </div>
                   <div id="group-info">
                     <div class="form-group">
-                      <label for="groupName">Name of group *</label>
-                      <input type="text" name="groupName" id="groupName" formControlName="groupName" class="form-control" placeholder="Enter name..."
+                      <label class="form-control-label" for="groupName">Name of group *</label>
+                      <input type="text" name="groupName" id="groupName" formControlName="groupName" class="form-control form-control-success" placeholder="Enter name..."
                         autofocus>
+                      <small class="text-danger" *ngIf="formCreateGroup.controls.groupName.errors?.required && formCreateGroup.controls.groupName.dirty">
+                        This field is required
+                      </small>
+                      <small class="text-danger" *ngIf="formCreateGroup.controls.groupName.errors?.minlength || formCreateGroup.controls.groupName.errors?.maxlength && formRegister.controls.username.dirty">
+                        Groupname must be at least 3 characters but no more than 30
+                      </small>
                     </div>
                     <div class="form-group">
                       <label for="groupInfo">Info</label>
                       <textarea form="#formCreateGroup" class="form-control" id="groupInfo" rows="3" formControlName="groupInfo"></textarea>
-                      <!-- <input type="text" name="groupInfo" id="groupInfo" formControlName="groupInfo" class="form-control" placeholder="Enter info..."> -->
                     </div>
                   </div>
                   <div id="group-members">
@@ -56,7 +61,6 @@
                         <div id="user-in-member">
                           <div id="user-member-image">
                             <img src='./assets/images/{{member.avatar}}'>
-                            <!-- <img *ngIf="contact.avatar.length" src='./assets/images/{{contact.avatar}}'> -->
                           </div>
                           <div class="wrapper">
                             <div id="username-member">{{member.username}}</div>
@@ -153,8 +157,8 @@
                 <div class="wrap">
                   <div class="main-group">
                     <label for="exampleFile">Choose images to upload (JPG, JPEG, PNG)</label>
-                    <input type="file" (change)="avatarModalChange($event)" accept=".jpg, .jpeg, .png" class="form-control-file" id="profileAvatar" aria-describedby="fileHelp" name="profileAvatar"
-                      formControlName="avatar">
+                    <input type="file" (change)="avatarModalChange($event)" accept=".jpg, .jpeg, .png" class="form-control-file" id="profileAvatar"
+                      aria-describedby="fileHelp" name="profileAvatar" formControlName="avatar">
                   </div>
                   <div id="chosen-image-result">
                     <ng-container *ngIf="(currentUser?.user && currentUser?.user.avatar)">
@@ -195,7 +199,6 @@
             <ng-container *ngIf="!thread.creator">
               <ng-container *ngFor="let user of thread.chatBetween">
                 <div id="user-image" *ngIf="user._id != currentUser.user._id">
-                  <!-- <img *ngIf="user.avatar.length == 0" src='./assets/images/Asset3.svg'> -->
                   <img src='./assets/images/{{user.avatar}}'>
                 </div>
                 <div class="wrapper" *ngIf="user._id != currentUser.user._id">
@@ -221,6 +224,9 @@
           </ng-container>
         </div>
       </div>
+      <nav id="navbar-left-bottom" class="navbar bg-dark">
+        <a class="nav-item left-menu-item" data-toggle="modal" data-target="#createGroupModal">Create group</a>
+      </nav>
     </div>
     <div id="central-column">
 
@@ -243,9 +249,12 @@
             <form [formGroup]="formEditGroup" (submit)="formGroupInfoSubmitted($event, chosenGroup?.group)">
               <div class="modal-body">
                 <div id="chosenUser-info">
-                  <div id="chosenUser-image" *ngIf="chosenUser?.user || chosenGroup?.group">
+                  <div id="chosenUser-image" *ngIf="chosenGroup?.group">
                     <img [attr.src]="(editGroupAvatar?.url)?(editGroupAvatar?.url): './assets/images/'+ 'defaultGroup.svg'">
-                    <input type="file" (change)="chosenGroupModalInputChange($event)" name="editGroupForm" id="editGroupForm" formControlName="editGroupForm" >
+                    <input type="file" (change)="chosenGroupModalInputChange($event)" name="editGroupForm" id="editGroupForm" formControlName="editGroupForm">
+                  </div>
+                  <div id="chosenUser-image" *ngIf="chosenUser?.user">
+                    <img src="./assets/images/{{chosenUser.user?.avatar}}">
                   </div>
 
                   <div id="chosenUser-name-avatar">
@@ -254,6 +263,7 @@
                       <h3 id="groupInfoName">
                         {{chosenUser?.user && chosenUser.user?.username || chosenGroup?.group && chosenGroup.group?.name }}
                       </h3>
+
                       <label *ngIf="chosenGroup?.group" for="groupInfoDescription">Description</label>
                       <h5 *ngIf="chosenGroup?.group" id="groupInfoDescription">
                         {{chosenGroup?.group && chosenGroup.group?.description}}
@@ -280,8 +290,8 @@
                 <h5>
                   {{formEditGroupMessage}}
                 </h5>
-                <button type="submit" class="btn btn-primary">Save</button>
-                <button type="button" class="btn btn-info" (click)="addMemberToExistingGroup()">Add user</button>
+                <button type="submit" *ngIf="chosenGroup?.group" class="btn btn-primary">Save</button>
+                <button type="button" *ngIf="chosenGroup?.group" class="btn btn-info" (click)="addMemberToExistingGroup()">Add user</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </form>
@@ -297,7 +307,6 @@
                 <span id="chosenUser-modal-close" aria-hidden="true">&times;</span>
               </button>
             </div>
-            <!-- <form []> -->
             <div class="modal-body">
               <div id="choose-group-members" *ngIf="chosenGroup?.group">
                 <div id="user-in-contact" [ngStyle]="{'background-color': isChosen(contact)? '#96DAE5': 'white'}" *ngFor='let contact of currentUser?.user.contactThread && currentUser.user.contactThread?.contacts | orderBy:order'
@@ -315,11 +324,9 @@
               <button type="button" class="btn btn-primary" (click)="chooseMemberToExistingGroupChoose(chosenGroup?.group)">Choose</button>
               <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="chooseMemberToExistingGroupBack()">Back</button>
             </div>
-            <!-- </form> -->
           </div>
         </div>
       </div>
-      <!-- (chosenUser.messageThread.creator && (message.reciever != currentUser.user._id)) || -->
       <div id="chat-box" *ngIf="((messages$ | async) && (chosenUser?.user || chosenGroup?.group))">
         <ng-container *ngFor="let message of (messages$ | async)">
           <div *ngIf=" (message.sender != currentUser?.user._id )" class="message" id="friend-message">
@@ -358,23 +365,19 @@
           </div>
         </form>
       </div>
-      <div id="hint" *ngIf="!((messages$ | async) && chosenUser?.user)">
-        <h4 *ngIf="currentUser.user?.loaded">Please, select user to begin chatting</h4>
-        <div id="token-expired" *ngIf="!currentUser.user?.loaded">
-          {{currentUser.user?.message}}
-        </div>
+      <div id="hint" *ngIf="!((messages$ | async) && chosenUser?.user || chosenGroup?.group)">
+        <h4 *ngIf="currentUser?.loaded">Please, select user to begin chatting</h4>
+      </div>
+      <div id="token-expired" *ngIf="!currentUser.user?.loaded">
+        {{currentUser.user?.message}}
       </div>
 
     </div>
     <div id="right-column">
 
       <nav id="navbar-right" class="navbar navbar-dark bg-dark">
-        <div id="add-contacts">
-          <a data-toggle="modal" data-target="#contactModal">Add contacts</a>
-        </div>
-        <div id="logout">
-          <a (click)="logout()">Log out</a>
-        </div>
+        <a class="nav-item left-menu-item hide-on-md" data-toggle="modal" data-target="#contactModal">Add contacts</a>
+        <a class="nav-item left-menu-item" (click)="logout()">Log out</a>   
       </nav>
       <div class="modal" id="contactModal" tabindex="-1" role="dialog" aria-labelledby="contactModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -411,6 +414,7 @@
           </div>
         </div>
       </div>
+
       <div id="contact-body">
         <ng-container *ngIf="(contactThread$ | async)">
           <div id="user-in-contact" *ngFor='let contact of (contactThread$ | async).contacts | orderBy:order' (click)="chooseUserFromContactThread(contact)">
@@ -429,6 +433,10 @@
           </div>
         </ng-container>
       </div>
+
+      <nav id="navbar-right-bottom" class="navbar  bg-dark">
+        <a class="nav-item left-menu-item" data-toggle="modal" data-target="#contactModal">Add contacts</a>
+      </nav>
 
     </div>
   </div>

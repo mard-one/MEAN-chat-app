@@ -22,13 +22,13 @@ export function userReducer(
 ): UserState {
   switch (action.type) {
     case fromUser.LOAD_CURRENT_USER: {
-      console.log("load current user state", state);
+      // console.log("load current user state", state);
       return {...state, loading: true}
     }
     case fromUser.LOAD_CURRENT_USER_READY: {
       console.log("load current user ready payload", action.payload);
       console.log("load current user ready state", state);
-      return {...state, loaded: action.payload.success, loading: false, data: action.payload.userData, message: action.payload.message}
+      return {...state, loaded: action.payload.success, loading: false, data: action.payload.user, message: action.payload.message}
     }
   }
   return state;

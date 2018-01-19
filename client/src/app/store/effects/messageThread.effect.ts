@@ -13,20 +13,6 @@ export class MessageThreadEffects {
     private actions$: Actions,
     private threadService: fromService.ThreadService
   ) {}
-
-  // @Effect({ dispatch: true })
-  // loadMessageThread$ = this.actions$
-  //   .ofType(messageThreadActions.LOAD_MESSAGE_THREAD)
-  //   .pipe(
-  //     switchMap((action: any) => {
-  //       // console.log(action.payload)
-  //       return this.threadService
-  //         .getAllMessageThread()
-  //         .pipe(
-  //           map(user => new messageThreadActions.LoadMessageThreadSuccess(user))
-  //         );
-  //     })
-  //   );
   @Effect({ dispatch: true })
   loadMessageThreadSuccess$ = this.actions$
     .ofType(messageThreadActions.LOAD_MESSAGE_THREAD)

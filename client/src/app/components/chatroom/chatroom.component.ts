@@ -1,5 +1,9 @@
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, FormControl } from "@angular/forms";
+import {
+  FormBuilder,
+  FormGroup,
+  Validators
+} from "@angular/forms";
 import { Router } from "@angular/router";
 import * as io from "socket.io-client";
 
@@ -93,7 +97,14 @@ export class ChatroomComponent implements OnInit {
       this.formContact = this.formBuilder.group({ username: "" });
       this.formAvatar = this.formBuilder.group({ avatar: "" });
       this.formCreateGroup = this.formBuilder.group({
-        groupName: "",
+        groupName: [
+          "",
+          Validators.compose([
+            Validators.required,
+            Validators.minLength(3),
+            Validators.maxLength(30)
+          ])
+        ],
         groupInfo: "",
         groupAvatar: "",
         groupMember: ""
@@ -110,32 +121,9 @@ export class ChatroomComponent implements OnInit {
     this.messageThread$ = this.store.select(fromStoreSelector.getMessageThread);
     this.contactThread$ = this.store.select(fromStoreSelector.getContactThread);
     this.messages$ = this.store.select(fromStoreSelector.getMessage);
-    // this.groups$ = this.store.select(fromStoreSelector.getGroup);
-    this.store.select(fromStoreSelector.getUserState).subscribe(user => {
-      this.currentUser = {
-        user: user.data,
-        loaded: user.loaded,
-        loading: user.loading,
-        message: user.message
-      };
-      console.log("user", user);
-    });
-    this.store
-      .select(fromStoreSelector.getMessageThread)
-      .subscribe(messageThread => {
-        console.log("message thread", messageThread);
-      });
-    this.store
-      .select(fromStoreSelector.getContactThread)
-      .subscribe(contactThread => {
-        console.log("contact thread", contactThread);
-      });
-    this.store.select(fromStoreSelector.getMessage).subscribe(messages => {
-      console.log("messages", messages);
-    });
-    this.store.select(fromStoreSelector.getGroup).subscribe(groups => {
-      console.log("groups", groups);
-    });
+    this.store.select(fromStoreSelector.getUserState).subscribe(user=>{
+      this.currentUser = { user: user.data, loaded: user.loaded, loading: user.loading, message: user.message };
+    })
 
     // ------------------------ Socket.io -------------------------------
 
@@ -148,7 +136,7 @@ export class ChatroomComponent implements OnInit {
     });
 
     this.socket.on("successfully recieved from message thread", data => {
-      console.log("socket message", data);
+      // console.log("socket message", data);
       this.store.dispatch(
         new fromStoreActions.AddNewMessageToMessages({
           message: data.messageSent,
@@ -157,7 +145,7 @@ export class ChatroomComponent implements OnInit {
       );
     });
     this.socket.on("successfully sent from message thread", data => {
-      console.log("socket message", data);
+      // console.log("socket message", data);
       this.store.dispatch(
         new fromStoreActions.AddNewMessageToMessages({
           message: data.messageSent,
@@ -173,7 +161,7 @@ export class ChatroomComponent implements OnInit {
       );
     });
     this.socket.on("successfully recieved from group", data => {
-      console.log("socket message", data);
+      // console.log("socket message", data);
       this.store.dispatch(
         new fromStoreActions.AddNewMessageToMessages({
           message: data.messageSent,
@@ -182,7 +170,7 @@ export class ChatroomComponent implements OnInit {
       );
     });
     this.socket.on("successfully sent from group", data => {
-      console.log("socket message", data);
+      // console.log("socket message", data);
       this.store.dispatch(
         new fromStoreActions.AddNewMessageToMessages({
           message: data.messageSent,
@@ -198,16 +186,16 @@ export class ChatroomComponent implements OnInit {
       );
     });
     this.socket.on("new group success", data => {
-      console.log("socket io recieved group", data);
+      // console.log("socket io recieved group", data);
       this.store.dispatch(new fromStoreActions.NewGroup(data.group));
     });
     this.socket.on("exception", data => {
-      console.log(data);
+      // console.log(data);
     });
   }
   // ------------------- Files ---------------------
   handleAvatarFileSelect = function(evt, callback) {
-    console.log("evt inside", evt);
+    // console.log("evt inside", evt);
     var files = evt.target.files;
     for (var i = 0, f; (f = files[i]); i++) {
       if (!f.type.match("image.*")) {
@@ -223,7 +211,7 @@ export class ChatroomComponent implements OnInit {
   };
   chosenGroupModalInputChange(event) {
     var that = this;
-    console.log("event", event);
+    // console.log("event", event);
     this.handleAvatarFileSelect(event, function(result) {
       that.editGroupAvatar = {
         type: "userAvatar",
@@ -235,7 +223,7 @@ export class ChatroomComponent implements OnInit {
   }
   avatarModalChange(event) {
     var that = this;
-    console.log("event", event);
+    // console.log("event", event);
     this.handleAvatarFileSelect(event, function(result) {
       that.chosenProfileAvatar = {
         type: "userAvatar",
@@ -247,7 +235,7 @@ export class ChatroomComponent implements OnInit {
   }
   createGroupModalChange(event) {
     var that = this;
-    console.log("event", event);
+    // console.log("event", event);
     this.handleAvatarFileSelect(event, function(result) {
       that.chosenGroupAvatar = {
         type: "userAvatar",
@@ -259,11 +247,12 @@ export class ChatroomComponent implements OnInit {
   }
 
   chooseUserFromMessageThread(user) {
-    if (user.creator && user.members) {
+    // console.log("user", user);
+    if (user.creator && user.members.length) {
       this.chosenUser = null;
-      console.log("group thead user", user);
+      // console.log("group thead user", user);
       this.chosenGroup = { group: user, currentUser: this.currentUser.user };
-      console.log("group thead chosen group", this.chosenGroup);
+      // console.log("group thead chosen group", this.chosenGroup);
       this.store.dispatch(
         new fromStoreActions.ChooseMessageFromMessageThread(
           this.chosenGroup.group
@@ -281,12 +270,12 @@ export class ChatroomComponent implements OnInit {
           return userInChatBetween._id != this.currentUser.user._id;
         }
       );
-      console.log("message thead user", user);
+      // console.log("message thead user", user);
       this.chosenUser = {
         user: chosenUserFromMessageThread[0],
         messageThread: user
       };
-      console.log("message thead chosen user", this.chosenUser);
+      // console.log("message thead chosen user", this.chosenUser);
       this.store.dispatch(
         new fromStoreActions.ChooseMessageFromMessageThread(
           this.chosenUser.messageThread
@@ -301,6 +290,7 @@ export class ChatroomComponent implements OnInit {
     }
   }
   chooseUserFromContactThread(user) {
+    // console.log("user", user);
     this.chosenGroup = null;
     if (user.messageThread.length > 0) {
       let ourMessageThread = user.messageThread.filter(thread => {
@@ -311,17 +301,17 @@ export class ChatroomComponent implements OnInit {
           .includes(true);
       });
       if (ourMessageThread) {
-        console.log("ourMessageThread", ourMessageThread);
-        console.log("contact user", user);
+        // console.log("ourMessageThread", ourMessageThread);
+        // console.log("contact user", user);
         this.chosenUser = { user: user, messageThread: ourMessageThread[0] };
-        console.log("contact chosen user", this.chosenUser);
+        // console.log("contact chosen user", this.chosenUser);
         this.store.dispatch(
           new fromStoreActions.ChooseMessageFromMessageThread(
             this.chosenUser.messageThread
           )
         );
       } else {
-        console.log("you do not have shared message thread with this user");
+        // console.log("you do not have shared message thread with this user");
       }
     } else {
       this.chosenUser = { user: user, messageThread: undefined };
@@ -360,7 +350,7 @@ export class ChatroomComponent implements OnInit {
       this.store
         .select(fromStoreSelector.getContactThreadState)
         .subscribe(state => {
-          console.log("contact thread state", state);
+          // console.log("contact thread state", state);
           if (state.loading) {
             this.disableForm();
           } else {
@@ -446,13 +436,13 @@ export class ChatroomComponent implements OnInit {
   }
   clearAvatarPageAndBackToProfile() {
     if (this.chosenProfileAvatar.submitted) {
-      console.log("chosen avatar1", this.chosenProfileAvatar);
+      // console.log("chosen avatar1", this.chosenProfileAvatar);
       this.formAvatar.reset();
       this.statusProfileAvatar = null;
       $("#avatarModal").modal("hide");
       $("#profileModal").modal("show");
     } else {
-      console.log("chosen avatar2", this.chosenProfileAvatar);
+      // console.log("chosen avatar2", this.chosenProfileAvatar);
       this.formAvatar.reset();
       this.chosenProfileAvatar = null;
       this.statusProfileAvatar = null;
@@ -485,19 +475,19 @@ export class ChatroomComponent implements OnInit {
       };
       if (!hasContact(contact)) {
         this.chosenMembersOfGroup.push(contact);
-        console.log("new contact", this.chosenMembersOfGroup);
+        // console.log("new contact", this.chosenMembersOfGroup);
         return true;
       } else {
         this.chosenMembersOfGroup.splice(
           this.chosenMembersOfGroup.indexOf(contact),
           1
         );
-        console.log("delete", this.chosenMembersOfGroup);
+        // console.log("delete", this.chosenMembersOfGroup);
         return false;
       }
     } else {
       this.chosenMembersOfGroup.push(contact);
-      console.log("first contact", this.chosenMembersOfGroup);
+      // console.log("first contact", this.chosenMembersOfGroup);
       return true;
     }
   }
@@ -598,7 +588,7 @@ export class ChatroomComponent implements OnInit {
     $("#userToGroup").modal("show");
   }
   chooseMemberToExistingGroup(chosenMember) {
-    console.log("chosen member", chosenMember);
+    // console.log("chosen member", chosenMember);
     let hasMember = this.chosenMembersOfExistingGroup
       .map(member => {
         return member._id == chosenMember._id;
@@ -609,73 +599,73 @@ export class ChatroomComponent implements OnInit {
         this.chosenMembersOfExistingGroup.indexOf(chosenMember),
         1
       );
-      console.log(
-        "chosen members of existing group",
-        this.chosenMembersOfExistingGroup
-      );
+      // console.log(
+        // "chosen members of existing group",
+        // this.chosenMembersOfExistingGroup
+      // );
     } else {
       this.chosenMembersOfExistingGroup.push(chosenMember);
-      console.log(
-        "chosen members of existing group",
-        this.chosenMembersOfExistingGroup
-      );
+      // console.log(
+        // "chosen members of existing group",
+        // this.chosenMembersOfExistingGroup
+      // );
     }
   }
   chooseMemberToExistingGroupChoose(currentGroup) {
-    console.log("current group", currentGroup);
-    console.log(
-      "chosen members of existing group",
-      this.chosenMembersOfExistingGroup
-    );
+    // console.log("current group", currentGroup);
+    // console.log(
+      // "chosen members of existing group",
+      // this.chosenMembersOfExistingGroup
+    // );
     let memberToAdd = this.chosenMembersOfExistingGroup.filter(member => {
-      console.log("member", member);
+      // console.log("member", member);
       let toAdd = !currentGroup.members
         .map(memberOfGroup => {
-          console.log("member of group", memberOfGroup);
-          console.log(
-            "member._id != memberOfGroup._id",
-            member._id != memberOfGroup._id
-          );
+          // console.log("member of group", memberOfGroup);
+          // console.log(
+            // "member._id != memberOfGroup._id",
+            // member._id != memberOfGroup._id
+          // );
           return member._id != memberOfGroup._id;
         })
         .includes(false);
-      console.log("toAdd", toAdd);
+      // console.log("toAdd", toAdd);
       return toAdd;
     });
-    console.log("memberToAdd", memberToAdd);
+    // console.log("memberToAdd", memberToAdd);
     if (memberToAdd.length) {
       currentGroup.members.push(...memberToAdd);
       this.chosenMembersOfExistingGroup = [...memberToAdd];
     } else {
-      console.log("memberToAdd", memberToAdd);
+      // console.log("memberToAdd", memberToAdd);
       this.chosenMembersOfExistingGroup = [...memberToAdd];
-      console.log(
-        "chosenMembersOfExistingGroup after",
-        this.chosenMembersOfExistingGroup
-      );
+      // console.log(
+      // "chosenMembersOfExistingGroup after",
+      // this.chosenMembersOfExistingGroup
+      // );
     }
 
     $("#userToGroup").modal("hide");
     $("#chosenUserModal").modal("show");
   }
   formGroupInfoSubmitted(event, currentGroup) {
-    console.log("event", event);
-    console.log("currentGroup", currentGroup);
+    // console.log("event", event);
+    // console.log("currentGroup", currentGroup);
     let formEditAvatar = event.target[0].files[0];
     let formEditMembers = this.chosenMembersOfExistingGroup;
-    console.log("formEditAvatar", formEditAvatar);
-    console.log("formEditMembers", formEditMembers);
+    // console.log("formEditAvatar", formEditAvatar);
+    // console.log("formEditMembers", formEditMembers);
     if (formEditAvatar || formEditMembers.length) {
       if (formEditAvatar) {
-        console.log("formEditAvatar", formEditAvatar);
-        console.log("formEditMembers", formEditMembers);
+        // console.log("formEditAvatar", formEditAvatar);
+        // console.log("formEditMembers", formEditMembers);
         let formEditGroup = {
           avatar: formEditAvatar,
           members: formEditMembers,
           currentGroupId: currentGroup._id
         };
         this.groupService.editGroup(formEditGroup).subscribe(data => {
-          console.log("data", data);
+          // console.log("data", data);
           this.formEditGroupMessage = data.message;
           if (data.success) {
             this.socket.emit("new group", {
@@ -693,7 +683,7 @@ export class ChatroomComponent implements OnInit {
           currentGroupId: currentGroup._id
         };
         this.groupService.editGroup(formEditGroup).subscribe(data => {
-          console.log("data", data);
+          // console.log("data", data);
           this.formEditGroupMessage = data.message;
           if (data.success) {
             this.socket.emit("new group", {
@@ -713,8 +703,12 @@ export class ChatroomComponent implements OnInit {
   chooseMemberToExistingGroupBack() {
     this.chosenMembersOfExistingGroup = [];
   }
-  logout(){
-    localStorage.clear()
+  createGroupModalBack() {
+    this.chosenGroupAvatar = null;
+    this.formCreateGroup.reset();
+  }
+  logout() {
+    localStorage.clear();
     setTimeout(() => {
       this.router.navigate(["/login"]);
     });

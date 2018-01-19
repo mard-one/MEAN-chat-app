@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';
 export class LoginComponent implements OnInit{
 
   formLogin: FormGroup;
+  messageLogin
 
   constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router) {
     this.createForm()
@@ -30,11 +31,12 @@ export class LoginComponent implements OnInit{
       password: this.formLogin.get('password').value
     }
     this.authService.login(user).subscribe(data=>{
+      this.messageLogin = data;
       if(data.success){
         this.authService.storeUserData(data.token, data.user)
         setTimeout(()=>{
           this.router.navigate(['/chatroom'])
-        })
+        }, 1000)
       }
     })
     return false

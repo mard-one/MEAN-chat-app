@@ -11,7 +11,7 @@ export class UserService {
   constructor(private http: Http, private authService: AuthService) {}
 
   currentUser() {
-    console.log("current user");
+    // console.log("current user");
     this.authService.createAuthenticationHeader();
     return this.http
       .get(this.domain + "/user/currentUser", this.authService.options)

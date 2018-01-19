@@ -51,7 +51,7 @@ router.get("/currentUser", Verify, (req, res) => {
       res.json({
         success: true,
         message: "Hello " + user.username,
-        userData: user
+        user: user
       });
     });
 });
@@ -106,10 +106,10 @@ router.post("/userExist", Verify, (req, res) => {
           if (!foundUser) {
             res.json({ success: false, message: "User not exists" });
           } else {
-            console.log("currentUser._id", currentUser._id);
-            console.log("foundUser._id", foundUser._id);
+            // console.log("currentUser._id", currentUser._id);
+            // console.log("foundUser._id", foundUser._id);
             if (currentUser._id.toString() == foundUser._id.toString()) {
-              console.log("add yourself");
+              // console.log("add yourself");
               res.json({
                 success: false,
                 message:

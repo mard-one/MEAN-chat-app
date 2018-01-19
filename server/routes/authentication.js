@@ -10,7 +10,8 @@ router.post("/register", function(req, res) {
   var user = new customModelsModules.User({
     _id: new mongoose.Types.ObjectId(),
     username: req.body.username,
-    password: req.body.password
+    password: req.body.password,
+    groups: ["5a5f27b6972f2c370ce61a46"]
   });
 
   user.save(function(err, newUser) {
@@ -25,9 +26,11 @@ router.post("/register", function(req, res) {
       if (err) throw err;
       customModelsModules.User.findOneAndUpdate({ username: newUser.username }, { contactThread: newContactThread._id }).exec(
         () => {
-          res.json({
-            success: true,
-            message: "User registered"
+          customModelsModules.Group.findByIdAndUpdate(
+            newUser.groups,
+            {$addToSet:{members: newUser._id} }
+          ).exec(() => {
+            res.json({ success: true, message: "User registered" });
           });
         }
       );
@@ -37,10 +40,10 @@ router.post("/register", function(req, res) {
 
 router.post("/login", function(req, res) {
   if (!req.body.username) {
-    res.json({ success: false, message: "username not provided" });
+    res.json({ success: false, message: "Username not provided" });
   } else {
     if (!req.body.password) {
-      res.json({ success: false, message: "password not provided" });
+      res.json({ success: false, message: "Password not provided" });
     } else {
       customModelsModules.User.findOne(
         { username: req.body.username.toLowerCase() },
@@ -49,13 +52,16 @@ router.post("/login", function(req, res) {
             res.json({ success: false, message: err });
           } else {
             if (!user) {
-              res.json({ success: false, message: "Username not found" });
+              res.json({ success: false, message: "Username or password is invalid" });
             } else {
               const validPassword = user.comparePassword(
                 req.body.password
               );
               if (!validPassword) {
-                res.json({ success: false, message: "Password invalid" });
+                res.json({
+                  success: false,
+                  message: "Username or password is invalid"
+                });
               } else {
                 const token = jwt.sign(
                   { user_id: user._id },

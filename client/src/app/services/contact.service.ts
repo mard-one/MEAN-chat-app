@@ -13,7 +13,7 @@ export class ContactService {
 
   addContact(username){
     this.authService.createAuthenticationHeader()
-    console.log("username", username)
+    // console.log("username", username)
     return this.http.post(this.domain + "/contact/addContact", username, this.authService.options ).map(res=>res.json())
   }
   getAllContacts(){

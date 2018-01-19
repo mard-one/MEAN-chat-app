@@ -20,7 +20,7 @@ module.exports = function sendMessage(socket, io, currentUser) {
         let senderId = user.data.user_id;
         let recieverId = data.reciever._id;
         let messageSend = data.message;
-        console.log("data.reciever.creator", data.reciever.creator);
+        // console.log("data.reciever.creator", data.reciever.creator);
         if (data.reciever.creator) {
           var message = new customModelsModules.Message({
             _id: new mongoose.Types.ObjectId(),
@@ -42,7 +42,7 @@ module.exports = function sendMessage(socket, io, currentUser) {
               { new: true }
             ).populate([{path: "messages"}, {path: 'members'}, {path: 'admins'}, {path: 'creator'}])
             .exec((err, updatedGroup) => {
-              console.log("updatedGroup", updatedGroup);
+              // console.log("updatedGroup", updatedGroup);
               updatedGroup.members.forEach(member => {
                 if(member._id == senderId){
                   io
@@ -61,7 +61,7 @@ module.exports = function sendMessage(socket, io, currentUser) {
                       group: updatedGroup
                     });
                 }
-                console.log("member._id", member._id);
+                // console.log("member._id", member._id);
                 
               });
             });
@@ -209,10 +209,10 @@ module.exports = function sendMessage(socket, io, currentUser) {
                         });
                       } else {
                         // console.log("rooms", socket.rooms);
-                        console.log(
-                          "foundMessageThread",
-                          foundMessageThread._id
-                        );
+                        // console.log(
+                          // "foundMessageThread",
+                          // foundMessageThread._id
+                        // );
                         io.to(recieverId).emit("successfully sent from message thread", {
                           message: "Message was sent",
                           messageSent: message,

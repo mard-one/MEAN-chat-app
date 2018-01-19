@@ -32,14 +32,16 @@ router.post("/newGroup", Verify, upload.single("groupAvatar"), function(
       description: req.body.description
     });
     group.save(function(err, newGroup) {
-      console.log("newGroup.members", newGroup.members);
-      console.log("membersId", membersId);
+      // console.log("newGroup.members", newGroup.members);
+      // console.log("membersId", membersId);
       customModelsModules.User.update(
         { _id: { $in: newGroup.members } },
         { $addToSet: { groups: newGroup._id } },
         { multi: true }
       ).exec((err, addedGroupUser) => {
-        console.log("Group added to user", addedGroupUser);
+        customModelsModules.Group.findById(newGroup._id)
+        .populate({path: "members", select: "-password -contactThread"})
+        // console.log("Group added to user", addedGroupUser);
         res.json({
           success: true,
           message: "Group was created and added to Users",
@@ -59,14 +61,14 @@ router.post("/newGroup", Verify, upload.single("groupAvatar"), function(
       description: req.body.description
     });
     group.save(function(err, newGroup) {
-      console.log("newGroup.members", newGroup.members);
-      console.log("membersId", membersId);
+      // console.log("newGroup.members", newGroup.members);
+      // console.log("membersId", membersId);
       customModelsModules.User.update(
         { _id: { $in: newGroup.members } },
         { $addToSet: { groups: newGroup._id } },
         { multi: true }
       ).exec((err, addedGroupUser) => {
-        console.log("Group added to user", addedGroupUser);
+        // console.log("Group added to user", addedGroupUser);
         res.json({
           success: true,
           message: "Group was created and added to Users",
@@ -80,15 +82,15 @@ router.post("/editGroup", Verify, upload.single("editGroupForm"), function(
   req,
   res
 ) {
-  console.log("req.body", req.body);
-  console.log("req.file", req.file);
+  // console.log("req.body", req.body);
+  // console.log("req.file", req.file);
   if (req.file) {
     var membersId = JSON.parse(req.body.members).map(member=>member._id)
     var groupId = JSON.parse(req.body.currentGroupId);
-    console.log("membersId", membersId);
+    // console.log("membersId", membersId);
     customModelsModules.Group.findByIdAndUpdate(groupId, { $addToSet: { members: {$each: membersId} }, $set: { avatar: req.file.filename } }).exec(
       (err, editedGroup) => {
-        console.log("editedGroup", editedGroup);
+        // console.log("editedGroup", editedGroup);
         customModelsModules.User.update({ _id: membersId }, { $addToSet: { groups: editedGroup._id } }, { multi: true }).exec((err, user)=>{
           res.json({
             success: true,
@@ -99,11 +101,11 @@ router.post("/editGroup", Verify, upload.single("editGroupForm"), function(
       }
     );
   } else {
-    console.log("membersId", membersId);
+    // console.log("membersId", membersId);
     var membersId = req.body.members.map(member => member._id);
     customModelsModules.Group.findByIdAndUpdate(req.body.currentGroupId, { $addToSet: { members: {$each: membersId} } }).exec(
       (err, editedGroup) => {
-        console.log("editedGroup", editedGroup);
+        // console.log("editedGroup", editedGroup);
         customModelsModules.User.update({ _id: membersId }, { $addToSet: { groups: editedGroup._id } }, { multi: true }).exec(
           (err, user) => {
             res.json({

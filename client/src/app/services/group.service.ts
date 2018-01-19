@@ -11,7 +11,7 @@ export class GroupService {
   constructor(private http: Http, private authService: AuthService) {}
 
   newGroup(groupFormData) {
-    console.log("groupFormData", groupFormData);
+    // console.log("groupFormData", groupFormData);
 
     if (groupFormData.avatar) {
       this.authService.createFileHeader();
@@ -40,10 +40,10 @@ export class GroupService {
     }
   }
   editGroup(groupFormData) {
-    console.log("groupFormData", groupFormData);
+    // console.log("groupFormData", groupFormData);
 
     if (groupFormData.avatar) {
-      console.log('form with data');
+      // console.log('form with data');
       this.authService.createFileHeader();
       let formData = new FormData();
       formData.append("editGroupForm", groupFormData.avatar);
@@ -57,7 +57,7 @@ export class GroupService {
       )
       .map(res => res.json());
     } else {
-      console.log('form without data');
+      // console.log('form without data');
       this.authService.createAuthenticationHeader();
       return this.http
         .post(

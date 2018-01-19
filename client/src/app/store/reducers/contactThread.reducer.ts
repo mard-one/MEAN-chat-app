@@ -23,13 +23,13 @@ export function contactThreadReducer(
 ): ContactThreadState {
   switch (action.type) {
     case fromContactThread.LOAD_CONTACT_THREAD: {
-      console.log("load contact thread payload", action.payload);
-      console.log("load contact thread state", state);
+      // console.log("load contact thread payload", action.payload);
+      // console.log("load contact thread state", state);
       return {
         ...state,
         loading: false,
         loaded: action.payload.success,
-        data: action.payload.userData.contactThread
+        data: action.payload.user.contactThread
       };
     }
     // case fromContactThread.LOAD_CONTACT_THREAD_READY: {
@@ -47,10 +47,10 @@ export function contactThreadReducer(
       return { ...state, loading: true };
     }
     case fromContactThread.ADD_CONTACT_TO_CONTACT_THREAD_READY: {
-      console.log(
-        "add contact to contact thread ready payload",
-        action.payload
-      );
+      // console.log(
+      //   "add contact to contact thread ready payload",
+      //   action.payload
+      // );
       if (action.payload.success) {
         const contact: User = action.payload.user;
         return {
@@ -70,8 +70,8 @@ export function contactThreadReducer(
       }
     }
     case fromContactThread.ADD_NEW_MESSAGE_TO_CONTACT_THREAD: {
-      console.log("add new message to contact thread payload", action.payload);
-      console.log("add new message tp contact thread state", state);
+      // console.log("add new message to contact thread payload", action.payload);
+      // console.log("add new message tp contact thread state", state);
       if (!action.payload.messageThread.creator) {
         if (state.data.contacts.length) {
           const foundContact = state.data.contacts.filter(thread => {

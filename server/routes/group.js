@@ -2,8 +2,10 @@ const router = require("express").Router();
 const mongoose = require("mongoose");
 const multer = require("multer");
 
-const Verify = require("./middleware/authentication");
 const customModelsModules = require("../models");
+
+const Verify = require("./middleware/authentication");
+const uploadToS3 = require('../controllers/fileUpload');
 
 var Storage = multer.diskStorage({
   destination: function(req, file, callback) {
@@ -25,15 +27,13 @@ router.post("/newGroup", Verify, upload.single("groupAvatar"), function(
     let group = new customModelsModules.Group({
       _id: new mongoose.Types.ObjectId(),
       name: req.body.name,
-      avatar: req.file.filename,
+      avatar: encodeURIComponent(req.file.filename),
       members: membersId,
       admins: req.decoded.user_id,
       creator: req.decoded.user_id,
       description: req.body.description
     });
     group.save(function(err, newGroup) {
-      // console.log("newGroup.members", newGroup.members);
-      // console.log("membersId", membersId);
       customModelsModules.User.update(
         { _id: { $in: newGroup.members } },
         { $addToSet: { groups: newGroup._id } },
@@ -41,11 +41,9 @@ router.post("/newGroup", Verify, upload.single("groupAvatar"), function(
       ).exec((err, addedGroupUser) => {
         customModelsModules.Group.findById(newGroup._id)
         .populate({path: "members", select: "-password -contactThread"})
-        // console.log("Group added to user", addedGroupUser);
-        res.json({
-          success: true,
-          message: "Group was created and added to Users",
-          group: newGroup
+        uploadToS3(req.file, function (data) {
+          data.group = newGroup
+          res.json(data);
         });
       });
     });
@@ -61,14 +59,11 @@ router.post("/newGroup", Verify, upload.single("groupAvatar"), function(
       description: req.body.description
     });
     group.save(function(err, newGroup) {
-      // console.log("newGroup.members", newGroup.members);
-      // console.log("membersId", membersId);
       customModelsModules.User.update(
         { _id: { $in: newGroup.members } },
         { $addToSet: { groups: newGroup._id } },
         { multi: true }
       ).exec((err, addedGroupUser) => {
-        // console.log("Group added to user", addedGroupUser);
         res.json({
           success: true,
           message: "Group was created and added to Users",
@@ -78,25 +73,19 @@ router.post("/newGroup", Verify, upload.single("groupAvatar"), function(
     });
   }
 });
-router.post("/editGroup", Verify, upload.single("editGroupForm"), function(
-  req,
-  res
-) {
-  // console.log("req.body", req.body);
-  // console.log("req.file", req.file);
+router.post("/editGroup", Verify, upload.single("editGroupForm"), function(req,res) {
   if (req.file) {
     var membersId = JSON.parse(req.body.members).map(member=>member._id)
     var groupId = JSON.parse(req.body.currentGroupId);
     // console.log("membersId", membersId);
-    customModelsModules.Group.findByIdAndUpdate(groupId, { $addToSet: { members: {$each: membersId} }, $set: { avatar: req.file.filename } }).exec(
+    customModelsModules.Group.findByIdAndUpdate(groupId, { $addToSet: { members: {$each: membersId} }, $set: { avatar: encodeURIComponent(req.file.filename) } }).exec(
       (err, editedGroup) => {
         // console.log("editedGroup", editedGroup);
         customModelsModules.User.update({ _id: membersId }, { $addToSet: { groups: editedGroup._id } }, { multi: true }).exec((err, user)=>{
-          res.json({
-            success: true,
-            message: "Group edited",
-            group: editedGroup
-          });
+          uploadToS3(req.file, function(data){
+            data.group = editedGroup
+            res.json(data)
+          })
         })
       }
     );

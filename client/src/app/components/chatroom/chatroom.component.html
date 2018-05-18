@@ -20,7 +20,9 @@
                 <div id="group-modal-data">
                   <div id="group-avatar">
                     <div id="group-avatar-placeholder">
-                      <img [attr.src]="(chosenGroupAvatar?.url)?(chosenGroupAvatar?.url): './assets/images/'+ 'defaultGroup.svg'">
+                      <!-- <img src="#"> `${{chosenGroupAvatar?.url}}` -->
+                      <!-- <img [attr.src]='https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + chosenGroupAvatar.url> -->
+                      <img [attr.src]="chosenGroupAvatar?.url ? chosenGroupAvatar?.url : './assets/images/defaultGroup.svg'">
                     </div>
                     <div id="group-avatar-action">
                       <input type="file" (change)="createGroupModalChange($event)" name="groupAvatar" id="groupAvatar" formControlName="groupAvatar">
@@ -29,8 +31,8 @@
                   <div id="group-info">
                     <div class="form-group">
                       <label class="form-control-label" for="groupName">Name of group *</label>
-                      <input type="text" name="groupName" id="groupName" formControlName="groupName" class="form-control form-control-success" placeholder="Enter name..."
-                        autofocus>
+                      <input type="text" name="groupName" id="groupName" formControlName="groupName" class="form-control form-control-success"
+                        placeholder="Enter name..." autofocus>
                       <small class="text-danger" *ngIf="formCreateGroup.controls.groupName.errors?.required && formCreateGroup.controls.groupName.dirty">
                         This field is required
                       </small>
@@ -60,7 +62,7 @@
                       <div id="member-from-contact" *ngFor="let member of chosenMembersOfGroup">
                         <div id="user-in-member">
                           <div id="user-member-image">
-                            <img src='./assets/images/{{member.avatar}}'>
+                            <img [attr.src]="member?.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + member?.avatar : './assets/images/defaultUser.svg'">
                           </div>
                           <div class="wrapper">
                             <div id="username-member">{{member.username}}</div>
@@ -96,8 +98,8 @@
               <div id="user-in-contact" [ngClass]="{'chosenContactToMemberOfGroup': isChosen(contact) }" *ngFor='let contact of (contactThread$ | async)?.contacts | orderBy:order'
                 (click)="chosenContactToMembers(contact)">
                 <div id="user-contact-image">
-                  <img *ngIf="contact.avatar.length == 0" src='./assets/images/Asset5.svg'>
-                  <img *ngIf="contact.avatar.length" src='./assets/images/{{contact.avatar}}'>
+                  <img [attr.src]="contact?.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + contact?.avatar : './assets/images/'+ 'defaultUser.svg'">
+                  <!-- <img *ngIf="contact.avatar.length" src='./assets/images/{{contact.avatar}}'> -->
                 </div>
                 <div class="wrapper">
                   <div id="username-contact">{{contact.username}}</div>
@@ -124,7 +126,7 @@
               <div id="profile-info">
                 <div id="profile-image" *ngIf="currentUser.user">
                   <ng-container *ngIf="(currentUser?.user && currentUser?.user.avatar)">
-                    <img [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
+                    <img [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : currentUser?.user.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + currentUser?.user.avatar : './assets/images/defaultUser.svg'"
                       [ngStyle]="{'object-fit': (chosenProfileAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
                   </ng-container>
                 </div>
@@ -162,7 +164,7 @@
                   </div>
                   <div id="chosen-image-result">
                     <ng-container *ngIf="(currentUser?.user && currentUser?.user.avatar)">
-                      <img [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
+                      <img [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : currentUser?.user.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + currentUser?.user.avatar : './assets/images/defaultUser.svg'"
                         [ngStyle]="{'object-fit': (chosenProfileAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
                     </ng-container>
                   </div>
@@ -179,7 +181,7 @@
               </div>
             </form>
             <div style="width: 100%; height: 1px; border: 0.1px solid #E9ECEF; border-bottom: 0;"></div>
-            <div id="avatar-examples">
+            <!-- <div id="avatar-examples">
               <div id="avatar-example-header">
                 <h4>Or choose from examples</h4>
               </div>
@@ -188,7 +190,7 @@
                   <img src="./assets/images/{{image}}">
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -199,7 +201,7 @@
             <ng-container *ngIf="!thread.creator">
               <ng-container *ngFor="let user of thread.chatBetween">
                 <div id="user-image" *ngIf="user._id != currentUser.user._id">
-                  <img src='./assets/images/{{user.avatar}}'>
+                  <img [attr.src]="user?.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + user?.avatar : './assets/images/defaultUser.svg'">
                 </div>
                 <div class="wrapper" *ngIf="user._id != currentUser.user._id">
                   <div id="message-thread-username">{{user.username}}</div>
@@ -209,7 +211,7 @@
             </ng-container>
             <ng-container *ngIf="thread.creator">
               <div id="user-image">
-                <img src='./assets/images/{{thread.avatar}}'>
+                <img [attr.src]="thread?.avatar !== 'defaultGroup.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + thread?.avatar : './assets/images/defaultGroup.svg'">
               </div>
               <div class="wrapper">
                 <div id="message-thread-username">{{thread.name}}</div>
@@ -250,11 +252,11 @@
               <div class="modal-body">
                 <div id="chosenUser-info">
                   <div id="chosenUser-image" *ngIf="chosenGroup?.group">
-                    <img [attr.src]="(editGroupAvatar?.url)?(editGroupAvatar?.url): './assets/images/'+ 'defaultGroup.svg'">
+                    <img [attr.src]="(editGroupAvatar?.url)?(editGroupAvatar?.url): chosenGroup?.group.avatar !== 'defaultGroup.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + chosenGroup?.group.avatar : './assets/images/defaultGroup.svg'">
                     <input type="file" (change)="chosenGroupModalInputChange($event)" name="editGroupForm" id="editGroupForm" formControlName="editGroupForm">
                   </div>
                   <div id="chosenUser-image" *ngIf="chosenUser?.user">
-                    <img src="./assets/images/{{chosenUser.user?.avatar}}">
+                    <img [attr.src]="chosenUser?.user.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + chosenUser?.user.avatar : './assets/images/defaultUser.svg'">
                   </div>
 
                   <div id="chosenUser-name-avatar">
@@ -277,7 +279,7 @@
                   <div id="group-members" *ngIf="chosenGroup?.group">
                     <div id="user-in-contact" *ngFor='let member of chosenGroup?.group.members | orderBy:order'>
                       <div id="user-contact-image">
-                        <img src='./assets/images/{{member.avatar}}'>
+                        <img [attr.src]="member.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + member.avatar : './assets/images/defaultUser.svg'">
                       </div>
                       <div class="wrapper">
                         <div id="username-contact">{{member.username}}</div>
@@ -312,7 +314,7 @@
                 <div id="user-in-contact" [ngStyle]="{'background-color': isChosen(contact)? '#96DAE5': 'white'}" *ngFor='let contact of currentUser?.user.contactThread && currentUser.user.contactThread?.contacts | orderBy:order'
                   (click)="chooseMemberToExistingGroup(contact)">
                   <div id="user-contact-image">
-                    <img src='./assets/images/{{contact.avatar}}'>
+                    <img [attr.src]="contact?.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + contact?.avatar : './assets/images/defaultUser.svg'">
                   </div>
                   <div class="wrapper">
                     <div id="username-contact">{{contact.username}}</div>
@@ -329,10 +331,12 @@
       </div>
       <div id="chat-box" *ngIf="((messages$ | async) && (chosenUser?.user || chosenGroup?.group))">
         <ng-container *ngFor="let message of (messages$ | async)">
-          <div *ngIf=" (message.sender != currentUser?.user._id )" class="message" id="friend-message">
+          <div *ngIf=" (message.sender != currentUser.user._id )" class="message" id="friend-message">
             <div class="message-icon">
               <div class="icon-wrap">
-                <img src="./assets/images/{{(chosenUser?.user && chosenUser.user?.avatar) || (chosenGroup?.group && chosenGroup.group?.avatar)}}"
+                <img *ngIf='(chosenUser?.user && chosenUser.user?.avatar)' [attr.src]="chosenUser.user.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + chosenUser.user.avatar : './assets/images/defaultUser.svg'"
+                  class="icon">
+                <img *ngIf='(chosenGroup?.group && chosenGroup.group?.avatar)' [attr.src]="chosenGroup.group.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + chosenGroup.group.avatar : './assets/images/defaultUser.svg'"
                   class="icon">
               </div>
             </div>
@@ -348,8 +352,10 @@
             </div>
             <div class="message-icon">
               <div class="icon-wrap">
-                <img [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
+                <img *ngIf='chosenProfileAvatar?.url' [attr.src]="(chosenProfileAvatar?.url) ? (chosenProfileAvatar?.url) : './assets/images/' + (currentUser?.user && currentUser?.user.avatar)"
                   [ngStyle]="{'object-fit': (chosenProfileAvatar?.type) == 'userAvatar'? 'cover':'contain'}" />
+                <img *ngIf='(currentUser?.user && currentUser.user?.avatar)' [attr.src]="(currentUser?.user && currentUser?.user.avatar) !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + (currentUser?.user && currentUser?.user.avatar) : './assets/images/defaultUser.svg'"
+                />
               </div>
             </div>
           </div>
@@ -377,7 +383,7 @@
 
       <nav id="navbar-right" class="navbar navbar-dark bg-dark">
         <a class="nav-item left-menu-item hide-on-md" data-toggle="modal" data-target="#contactModal">Add contacts</a>
-        <a class="nav-item left-menu-item" (click)="logout()">Log out</a>   
+        <a class="nav-item left-menu-item" (click)="logout()">Log out</a>
       </nav>
       <div class="modal" id="contactModal" tabindex="-1" role="dialog" aria-labelledby="contactModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -419,8 +425,7 @@
         <ng-container *ngIf="(contactThread$ | async)">
           <div id="user-in-contact" *ngFor='let contact of (contactThread$ | async).contacts | orderBy:order' (click)="chooseUserFromContactThread(contact)">
             <div id="user-contact-image">
-              <img *ngIf="contact.avatar.length == 0" src='./assets/images/Asset5.svg'>
-              <img *ngIf="contact.avatar.length" src='./assets/images/{{contact.avatar}}'>
+              <img [attr.src]="contact?.avatar !== 'defaultUser.svg' ? 'https://s3.ap-northeast-2.amazonaws.com/mardon-chat-bucket/' + contact?.avatar : './assets/images/defaultUser.svg'">
             </div>
             <div class="wrapper">
               <div id="username-contact">{{contact.username}}</div>

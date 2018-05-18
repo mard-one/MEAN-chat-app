@@ -1,9 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import {
-  FormBuilder,
-  FormGroup,
-  Validators
-} from "@angular/forms";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import * as io from "socket.io-client";
 
@@ -33,24 +29,6 @@ export class ChatroomComponent implements OnInit {
   addContactToContactsMessage: string;
   addContactToContactsStatus: boolean;
   order: string = "username";
-  defaultImages = [
-    "Asset1.svg",
-    "Asset2.svg",
-    "Asset3.svg",
-    "Asset4.svg",
-    "Asset5.svg",
-    "Asset6.svg",
-    "Asset7.svg",
-    "Asset8.svg",
-    "Asset9.svg",
-    "Asset10.svg",
-    "Asset11.svg",
-    "Asset12.svg",
-    "Asset13.svg",
-    "Asset14.svg",
-    "Asset15.svg",
-    "Asset16.svg"
-  ];
   statusProfileAvatar: { success: boolean; message: string };
   chosenProfileAvatar: {
     type: "userAvatar" | "defaultAvatar";
@@ -222,10 +200,9 @@ export class ChatroomComponent implements OnInit {
     // console.log("this.editGroupAvatar", this.chosenProfileAvatar);
   }
   avatarModalChange(event) {
-    var that = this;
     // console.log("event", event);
-    this.handleAvatarFileSelect(event, function(result) {
-      that.chosenProfileAvatar = {
+    this.handleAvatarFileSelect(event, (result) => {
+      this.chosenProfileAvatar = {
         type: "userAvatar",
         url: result,
         submitted: false
@@ -392,41 +369,26 @@ export class ChatroomComponent implements OnInit {
   avatarFormSubmitted(event) {
     this.chosenProfileAvatar = { ...this.chosenProfileAvatar, submitted: true };
     if (
-      this.chosenProfileAvatar &&
-      this.chosenProfileAvatar.type == "userAvatar"
+      this.chosenProfileAvatar
     ) {
       let inputEvent = event.target[0];
       this.userService.changeAvatar(inputEvent).subscribe(data => {
         this.statusProfileAvatar = data;
         if (data.success) {
+          // console.log('data success', data);
           setTimeout(() => {
             this.clearAvatarPageAndBackToProfile();
           }, 1000);
         }
       });
     } else {
-      if (
-        this.chosenProfileAvatar &&
-        this.chosenProfileAvatar.type == "defaultAvatar"
-      ) {
-        this.userService
-          .changeAvatar(this.chosenProfileAvatar)
-          .subscribe(data => {
-            this.statusProfileAvatar = data;
-            if (data.success) {
-              setTimeout(() => {
-                this.clearAvatarPageAndBackToProfile();
-              }, 1000);
-            }
-          });
-      } else {
         this.statusProfileAvatar = {
           success: false,
           message: "Please select a image"
         };
       }
     }
-  }
+  
   chosenProfileAvatarDefault(imageName) {
     this.chosenProfileAvatar = {
       type: "defaultAvatar",

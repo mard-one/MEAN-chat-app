@@ -20,8 +20,9 @@ export class UserService {
   changeAvatar(inputEvent) {
     if (inputEvent && inputEvent.files && inputEvent.files.length) {
       let file = inputEvent.files[0];
+      console.log('file', inputEvent.files[0] );
       let formData = new FormData();
-      formData.append("inputAvatar", file);
+      formData.append('profileAvatar', file);
       this.authService.createFileHeader();
       return this.http
         .post(

@@ -11,7 +11,7 @@ router.post("/register", function(req, res) {
     _id: new mongoose.Types.ObjectId(),
     username: req.body.username,
     password: req.body.password,
-    groups: ["5a5f27b6972f2c370ce61a46"]
+    groups: ["112233445566778899aabbcc"]
   });
 
   user.save(function(err, newUser) {

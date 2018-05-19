@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
-const config = require('../config');
-
 
 module.exports = Verify = (token, secret) => {
     return jwt.verify(token, secret, (err, decoded)=>{

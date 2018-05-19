@@ -1,4 +1,3 @@
-const config = require("../../config");
 const mongoose = require("mongoose");
 
 const Verify = require("./../authentication");

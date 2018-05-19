@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const config = require('../config');
 const multer = require('multer');
 
 const customModelsModules = require('../models');

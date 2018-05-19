@@ -1,4 +1,3 @@
-const config = require("../../config");
 const mongoose = require("mongoose");
 
 const Verify = require("./../authentication");
@@ -12,7 +11,7 @@ module.exports = function sendMessage(socket, io, currentUser) {
         message: "Please choose a user to send message"
       });
     } else {
-      var user = Verify(data.token, config.secret);
+      var user = Verify(data.token, process.env.TOKEN_SECRET);
 
       if (user.type == "exception") {
         socket.emit("exception", user.data);

@@ -1,13 +1,11 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 
-const config = require('../config');
-
-const BUCKET_NAME = config.aws_bucket_name;
-const IAM_USER_KEY = config.aws_access_key_id;
-const IAM_USER_SECRET = config.aws_secret_access_key;
-
-AWS.config = new AWS.Config(config.aws);
+AWS.config = new AWS.Config({
+    accessKeyId: process.env.AWS_ACCESSKEYID,
+    secretAccessKey: process.env.AWS_SECRETACCESSKEY,
+    region: process.env.AWS_REGION
+});
 var s3 = new AWS.S3();
 
 var uploadToS3 = (file, callback) => {

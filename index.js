@@ -5,8 +5,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-
-const config = require("./server/config");
+const dotenv = require('dotenv');
 
 const customModelsModules = require("./server/models")
 const customRoutesModules = require("./server/routes");
@@ -16,12 +15,13 @@ const Verify = require('./server/controllers/authentication')
 const port = process.env.PORT || "8080";
 
 const app = express();
+dotenv.config();
 
-mongoose.connect(config.database, err => {
+mongoose.connect(process.env.DB, err => {
   if (err) {
     console.log("Could NOT connect to database: ", err);
   } else {
-    console.log("Connected to database: " + config.database);
+    console.log("Connected to database: " + process.env.DB);
   }
 });
 
@@ -48,7 +48,7 @@ var io = require("socket.io").listen(server);
 const usersOnline = [];
 
 io.on("connection", socket => {
-  var user = Verify(socket.handshake.query.token, config.secret);
+  var user = Verify(socket.handshake.query.token, process.env.TOKEN_SECRET);
   if(user.type == "success"){
     // Connection(socket, io, user);
     usersOnline.push(user.data.user_id);

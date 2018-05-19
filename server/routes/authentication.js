@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-const config = require("../config");
 
 const customModelsModules = require("../models");
 
@@ -65,9 +64,9 @@ router.post("/login", function(req, res) {
               } else {
                 const token = jwt.sign(
                   { user_id: user._id },
-                  config.secret,
+                  process.env.TOKEN_SECRET,
                   {
-                    expiresIn: "1d"
+                    expiresIn: '1d'
                   }
                 );
                 res.json({
